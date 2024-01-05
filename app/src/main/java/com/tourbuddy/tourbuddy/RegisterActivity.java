@@ -16,7 +16,10 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
+
+import java.util.regex.Pattern;
 
 
 public class RegisterActivity extends AppCompatActivity {
@@ -32,7 +35,7 @@ public class RegisterActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register_page);
+        setContentView(R.layout.activity_register);
 
         alreadyHaveAccount = findViewById(R.id.alreadyHaveAccount);
         inputEmail = findViewById(R.id.inputEmail);
@@ -44,10 +47,13 @@ public class RegisterActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         mUser = mAuth.getCurrentUser();
+
         alreadyHaveAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(RegisterActivity.this, MainActivity.class));
+                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+
             }
         });
 
@@ -66,7 +72,7 @@ public class RegisterActivity extends AppCompatActivity {
         String password = inputPassword.getText().toString();
         String confirmPassword = inputConfirmPassword.getText().toString();
 
-        if(!email.matches(emailPattern)){
+        if (!Pattern.matches(emailPattern, email)) {
             inputEmail.setError(getString(R.string.emailError));
             inputEmail.requestFocus();
         }
@@ -77,7 +83,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         }
         else if(!password.equals(confirmPassword)){
-            inputConfirmPassword.setError(getString(R.string.confrimPasswordError));
+            inputConfirmPassword.setError(getString(R.string.confirmPasswordError));
             inputConfirmPassword.requestFocus();
 
         }
@@ -93,11 +99,16 @@ public class RegisterActivity extends AppCompatActivity {
                     if (task.isSuccessful()) {
                         progressDialog.dismiss();
                         sendUserToNextActivity();
-                        Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT);
+                        Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
                     }
                     else {
                         progressDialog.dismiss();
-                        Toast.makeText(RegisterActivity.this, String.valueOf(task.getException()), Toast.LENGTH_SHORT);
+                        if (task.getException() instanceof FirebaseAuthUserCollisionException) {
+                            inputEmail.setError(getString(R.string.emailError2));
+                            inputEmail.requestFocus();
+                        }
+                        else
+                            Toast.makeText(RegisterActivity.this, String.valueOf(task.getException()), Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -107,7 +118,7 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void sendUserToNextActivity() {
-        Intent intent = new Intent((RegisterActivity.this), HomeActivity.class);
+        Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);

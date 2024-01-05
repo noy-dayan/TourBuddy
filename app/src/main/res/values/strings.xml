@@ -5,12 +5,14 @@
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="forgotPassword">Forgot Password?</string>
-    <string name="createNewAccount">Create new acoount?</string>
+    <string name="createNewAccount">Don\'t have an account? Sign up</string>
     <string name="OrLine">OR</string>
-    <string name="alreadyHaveAnAccount">Already have an account?</string>
-    <string name="confrimPassword">Confirm Password</string>
+    <string name="alreadyHaveAnAccount">Already have an account? Login</string>
+    <string name="confirmPassword">Confirm Password</string>
     <string name="emailError">Invalid email address, Please enter a valid email</string>
     <string name="passwordError">Invalid password, Please enter at least 8 characters</string>
-    <string name="confrimPasswordError">Passwords do not match</string>
+    <string name="confirmPasswordError">Passwords do not match</string>
+    <string name="emailError2">Email already in use</string>
+    <string name="emailOrPasswordError">Invalid email and/or password</string>
 
 </resources>

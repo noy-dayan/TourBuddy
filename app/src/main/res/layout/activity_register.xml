@@ -4,12 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RegisterActivity"
-    android:background="@drawable/bg">
+    tools:context=".RegisterActivity">
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="#8F000000" />
+        android:background="@color/dark_primary" />
 
     <ScrollView
         android:layout_width="match_parent"
@@ -22,35 +21,47 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
+
+            <ImageView
+                android:id="@+id/logoImage"
+                android:layout_width="150dp"
+                android:layout_height="150dp"
+                android:layout_marginTop="32dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.497"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/tourbuddy_logo_transparent" />
+
             <TextView
-                android:id="@+id/textView"
+                android:id="@+id/logoText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="100dp"
-                android:fontFamily="@font/lexend"
-                android:text="@string/register"
-                android:textColor="@color/white"
-                android:textSize="44sp"
+                android:fontFamily="@font/panton_ttf"
+                android:text="@string/app_name"
+                android:textColor="@color/orange_primary"
+                android:textSize="55sp"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.498"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/logoImage"
+                app:layout_constraintVertical_bias="0.0" />
 
             <EditText
                 android:id="@+id/inputEmail"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="24dp"
-                android:layout_marginTop="40dp"
 
+                android:layout_marginTop="32dp"
                 android:layout_marginEnd="24dp"
+                android:autofillHints=""
                 android:background="@drawable/input_bg"
+
                 android:drawableStart="@drawable/baseline_email_24"
                 android:drawablePadding="10dp"
 
                 android:ems="10"
                 android:hint="@string/email"
-
                 android:inputType="textEmailAddress"
                 android:paddingLeft="20dp"
                 android:paddingTop="13dp"
@@ -61,8 +72,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView"
-                android:autofillHints="" />
+                app:layout_constraintTop_toBottomOf="@+id/logoText" />
 
             <EditText
                 android:id="@+id/inputPassword"
@@ -89,19 +99,21 @@
                 app:layout_constraintTop_toBottomOf="@+id/inputEmail"
                 android:autofillHints="" />
 
+
             <EditText
                 android:id="@+id/inputConfirmPassword"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
+
                 android:layout_marginTop="16dp"
 
+                android:autofillHints=""
                 android:background="@drawable/input_bg"
+
                 android:drawableStart="@drawable/baseline_security_24"
                 android:drawablePadding="10dp"
-
                 android:ems="10"
-                android:hint="@string/confrimPassword"
-
+                android:hint="@string/confirmPassword"
                 android:inputType="textPassword"
                 android:paddingLeft="20dp"
                 android:paddingTop="13dp"
@@ -110,9 +122,9 @@
                 android:textColor="@color/white"
                 android:textColorHint="@color/white"
                 app:layout_constraintEnd_toEndOf="@+id/inputPassword"
+                app:layout_constraintHorizontal_bias="0.3"
                 app:layout_constraintStart_toStartOf="@+id/inputPassword"
-                app:layout_constraintTop_toBottomOf="@+id/inputPassword"
-                android:autofillHints="" />
+                app:layout_constraintTop_toBottomOf="@+id/inputPassword" />
 
             <Button
                 android:id="@+id/btnRegister"
@@ -120,11 +132,14 @@
                 android:layout_height="wrap_content"
 
                 android:layout_marginTop="32dp"
+                android:background="@drawable/btn_rounded_corner"
+
                 android:fontFamily="@font/lexend"
                 android:text="@string/register"
-
                 android:textColor="@color/white"
-                app:layout_constraintEnd_toEndOf="@+id/inputConfirmPassword"
+
+                app:layout_constraintEnd_toEndOf="@+id/inputPassword"
+                app:layout_constraintHorizontal_bias="0.7"
                 app:layout_constraintStart_toStartOf="@+id/inputConfirmPassword"
                 app:layout_constraintTop_toBottomOf="@+id/inputConfirmPassword" />
 
@@ -133,9 +148,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
 
-                android:layout_marginTop="180dp"
-                android:layout_marginBottom="36dp"
-
+                android:layout_marginTop="100dp"
+                android:layout_marginBottom="32dp"
                 android:fontFamily="@font/lexend"
                 android:text="@string/alreadyHaveAnAccount"
                 android:textColor="@color/white"

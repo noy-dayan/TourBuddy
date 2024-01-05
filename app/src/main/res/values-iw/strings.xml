@@ -6,11 +6,13 @@
     <string name="email">אימייל</string>
     <string name="password">סיסמה</string>
     <string name="forgotPassword">שכחת את הסיסמה?</string>
-    <string name="createNewAccount">ליצור חשבון חדש?</string>
+    <string name="createNewAccount">אין לך חשבון? הירשם</string>
     <string name="OrLine">או</string>
-    <string name="alreadyHaveAnAccount">כבר יש לך חשבון?</string>
-    <string name="confrimPassword">אשר סיסמה</string>
-    <string name="emailError">"כתובת אימייל לא חוקית, נא הזן כתובת אימייל חוקית "</string>
-    <string name="passwordError">סיסמה לא חוקית, נא הזן לפחות 8 תווים</string>
-    <string name="confrimPasswordError">סיסמאות אינן תואמות</string>
+    <string name="alreadyHaveAnAccount">כבר יש לך חשבון? התחבר</string>
+    <string name="confirmPassword">אשר סיסמה</string>
+    <string name="emailError">"כתובת אימייל לא חוקית, אנא הזן כתובת אימייל חוקית "</string>
+    <string name="passwordError">סיסמה לא חוקית, אנא הזן לפחות 8 תווים</string>
+    <string name="confirmPasswordError">סיסמאות אינן תואמות</string>
+    <string name="emailError2">אימייל כבר בשימוש</string>
+    <string name="emailOrPasswordError">אימייל ו/או סיסמה לא חוקיים</string>
 </resources>
