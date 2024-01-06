@@ -50,7 +50,6 @@ public class RegisterActivity extends AppCompatActivity {
         progressDialog = new ProgressDialog(this);
 
         mAuth = FirebaseAuth.getInstance();
-        mUser = mAuth.getCurrentUser();
 
         alreadyHaveAccount.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,19 +78,13 @@ public class RegisterActivity extends AppCompatActivity {
         if (!Pattern.matches(emailPattern, email)) {
             inputEmail.setError(getString(R.string.emailError));
             inputEmail.requestFocus();
-        }
-
-        else if(password.isEmpty() || password.length()<8){
+        } else if (password.isEmpty() || password.length() < 8) {
             inputPassword.setError(getString(R.string.passwordError));
             inputPassword.requestFocus();
-
-        }
-        else if(!password.equals(confirmPassword)){
+        } else if (!password.equals(confirmPassword)) {
             inputConfirmPassword.setError(getString(R.string.confirmPasswordError));
             inputConfirmPassword.requestFocus();
-
-        }
-        else{
+        } else {
             progressDialog.setMessage("Please Wait While Registration...");
             progressDialog.setTitle("Registration");
             progressDialog.setCanceledOnTouchOutside(false);
@@ -100,49 +93,43 @@ public class RegisterActivity extends AppCompatActivity {
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful() && !mUser.isEmailVerified()) {
-
-                        mUser.sendEmailVerification().addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void unused) {
-                                Log.d("EmailVerification", "Email verification sent successfully");
-                                sendUserToNextActivity(new Intent(RegisterActivity.this, UserVerificationActivity.class));
-                                progressDialog.dismiss();
-
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.e("EmailVerification", "Error while sending email verification", e);
-                                inputEmail.setError("Error while sending email verification");
-                                inputEmail.requestFocus();
-                            }
-                        });
-
-                        //Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
-                    }
-                    else {
+                    if (task.isSuccessful()) {
+                        mUser = mAuth.getCurrentUser();
+                        if (mUser != null && !mUser.isEmailVerified()) {
+                            mUser.sendEmailVerification().addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void unused) {
+                                    Log.d("EmailVerification", "Email verification sent successfully");
+                                    sendUserToNextActivity(new Intent(RegisterActivity.this, UserVerificationActivity.class));
+                                    progressDialog.dismiss();
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.e("EmailVerification", "Error while sending email verification", e);
+                                    inputEmail.setError("Error while sending email verification");
+                                    inputEmail.requestFocus();
+                                }
+                            });
+                        } else {
+                            progressDialog.dismiss();
+                            // Handle the case where the user is already verified or null
+                        }
+                    } else {
                         progressDialog.dismiss();
                         if (task.getException() instanceof FirebaseAuthUserCollisionException) {
                             inputEmail.setError(getString(R.string.emailError2));
                             inputEmail.requestFocus();
-                        }
-                        else{
+                        } else {
                             inputEmail.setError(getString(R.string.emailError));
                             inputEmail.requestFocus();
-                            try {
-                                throw Objects.requireNonNull(task.getException());
-                            } catch (Exception e) {
-                                throw new RuntimeException(e);
-                            }
-
                         }
                     }
                 }
             });
         }
-
     }
+
 
     @Override
     public void onBackPressed() {

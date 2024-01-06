@@ -1,5 +1,6 @@
 package com.tourbuddy.tourbuddy;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -41,6 +42,8 @@ public class UserVerificationActivity extends AppCompatActivity {
 
         swipeRefreshLayout = findViewById(R.id.swipeRefresh);
 
+        resendVerificationTimer();
+
         btnVerify.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -55,8 +58,6 @@ public class UserVerificationActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if (!mUser.isEmailVerified()) {
-                    btnResendVerification.setEnabled(false);
-
                     mUser.sendEmailVerification().addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
@@ -72,21 +73,8 @@ public class UserVerificationActivity extends AppCompatActivity {
                         }
                     });
 
-                    String btnResendVerificationText = String.valueOf(btnResendVerification.getText());
+                    resendVerificationTimer();
 
-                    // Set the countdown timer for 2 minutes
-                    resendVerificationTimer = new CountDownTimer(2 * 60 * 1000, 1000) {
-                        public void onTick(long millisUntilFinished) {
-                            // Update the button text with the remaining time
-                            btnResendVerification.setText(String.format("%s (%d)", btnResendVerificationText, millisUntilFinished / 1000));
-                        }
-
-                        public void onFinish() {
-                            // Enable the button and reset the text
-                            btnResendVerification.setEnabled(true);
-                            btnResendVerification.setText(btnResendVerificationText);
-                        }
-                    }.start();
                 }
             }
         });
@@ -109,7 +97,6 @@ public class UserVerificationActivity extends AppCompatActivity {
             Log.e("UserVerificationActivity", "SwipeRefreshLayout is null");
         }
 
-
     }
 
 
@@ -118,4 +105,25 @@ public class UserVerificationActivity extends AppCompatActivity {
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
+
+    private void resendVerificationTimer(){
+        String btnResendVerificationText = String.valueOf(btnResendVerification.getText());
+        btnResendVerification.setEnabled(false);
+
+        // Set the countdown timer for 2 minutes
+        resendVerificationTimer = new CountDownTimer(2 * 60 * 1000, 1000) {
+            @SuppressLint("DefaultLocale")
+            public void onTick(long millisUntilFinished) {
+                // Update the button text with the remaining time
+                btnResendVerification.setText(String.format("%s (%d)", btnResendVerificationText, millisUntilFinished / 1000));
+            }
+
+            public void onFinish() {
+                // Enable the button and reset the text
+                btnResendVerification.setEnabled(true);
+                btnResendVerification.setText(btnResendVerificationText);
+            }
+        }.start();
+    }
+
 }

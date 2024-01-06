@@ -59,7 +59,6 @@ public class MainActivity extends AppCompatActivity {
         progressDialog = new ProgressDialog(this);
 
         mAuth = FirebaseAuth.getInstance();
-        mUser = mAuth.getCurrentUser();
 
         //GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 //.requestIdToken(getString(R.string.default_web_client_id))
@@ -116,7 +115,9 @@ public class MainActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()){
                         progressDialog.dismiss();
-                        if(mUser.isEmailVerified())
+                        mUser = mAuth.getCurrentUser();
+
+                        if(mUser != null && mUser.isEmailVerified())
                             sendUserToNextActivity(new Intent(MainActivity.this, test.class));
                         else
                             sendUserToNextActivity(new Intent(MainActivity.this, UserVerificationActivity.class));
