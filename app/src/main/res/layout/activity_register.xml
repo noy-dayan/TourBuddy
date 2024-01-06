@@ -58,7 +58,7 @@
                 android:background="@drawable/input_bg"
                 android:fontFamily="@font/lexend"
 
-                android:drawableStart="@drawable/baseline_email_24"
+                android:drawableStart="@drawable/email_icon"
                 android:drawablePadding="10dp"
 
                 android:ems="10"
@@ -82,7 +82,7 @@
                 android:layout_marginTop="16dp"
 
                 android:background="@drawable/input_bg"
-                android:drawableStart="@drawable/baseline_security_24"
+                android:drawableStart="@drawable/security_icon"
                 android:drawablePadding="10dp"
                 android:fontFamily="@font/lexend"
 
@@ -113,7 +113,7 @@
                 android:background="@drawable/input_bg"
                 android:fontFamily="@font/lexend"
 
-                android:drawableStart="@drawable/baseline_security_24"
+                android:drawableStart="@drawable/security_icon"
                 android:drawablePadding="10dp"
                 android:ems="10"
                 android:hint="@string/confirmPassword"
@@ -135,7 +135,7 @@
                 android:layout_height="wrap_content"
 
                 android:layout_marginTop="32dp"
-                android:background="@drawable/btn_rounded_corner_enabled"
+                android:background="@drawable/btn_bg"
 
                 android:fontFamily="@font/lexend"
                 android:text="@string/register"

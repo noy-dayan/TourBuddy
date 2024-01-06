@@ -1,0 +1,21 @@
+<!-- Updated layer-list -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Background shape -->
+    <item>
+        <shape>
+            <corners android:radius="5dp" />
+            <stroke android:color="@color/white" android:width="2dp"/>
+            <padding android:left="20dp" android:right="10dp"/> <!-- Adjust right padding to make space for the arrow -->
+        </shape>
+    </item>
+
+    <!-- Gender icon on the left -->
+    <item android:drawable="@drawable/gender_icon" android:gravity="start|center" />
+
+    <!-- Drop-down arrow on the right -->
+    <item android:drawable="@drawable/baseline_arrow_drop_down_24" android:gravity="end|center"/>
+
+</layer-list>
+
+

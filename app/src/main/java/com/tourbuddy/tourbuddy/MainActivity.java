@@ -15,9 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -43,7 +41,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setAppLocale("en"); // Set the locale to English
+        //setAppLocale("en"); // Set the locale to English
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
         setContentView(R.layout.activity_main);
         //getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
@@ -118,7 +116,7 @@ public class MainActivity extends AppCompatActivity {
                         mUser = mAuth.getCurrentUser();
 
                         if(mUser != null && mUser.isEmailVerified())
-                            sendUserToNextActivity(new Intent(MainActivity.this, test.class));
+                            sendUserToNextActivity(new Intent(MainActivity.this, UserSetupActivity.class));
                         else
                             sendUserToNextActivity(new Intent(MainActivity.this, UserVerificationActivity.class));
                     }

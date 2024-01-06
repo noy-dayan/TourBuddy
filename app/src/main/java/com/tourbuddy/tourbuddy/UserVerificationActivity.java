@@ -48,7 +48,7 @@ public class UserVerificationActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 if(mUser.isEmailVerified())
-                    sendUserToNextActivity(new Intent(UserVerificationActivity.this, test.class));
+                    sendUserToNextActivity(new Intent(UserVerificationActivity.this, UserSetupActivity.class));
                 else
                     btnVerify.setError("Email is not verified");
             }

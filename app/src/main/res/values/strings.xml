@@ -14,5 +14,11 @@
     <string name="confirmPasswordError">Passwords do not match</string>
     <string name="emailError2">Email already in use</string>
     <string name="emailOrPasswordError">Invalid email and/or password</string>
-
+    <string name="user_setup">USER SETUP</string>
+    <string name="username">Username</string>
+    <string name="verify_your_email_address">Verify your email address</string>
+    <string name="verification_instructions">We have sent a verification link to your email.\n\nClick on the link to complete the registration process.\nYou might need to check your spam folder.</string>
+    <string name="verify">Verify</string>
+    <string name="resend_verification">Resend Verification</string>
+    <string name="didnt_receive_the_email">Didn\'t receive the email?</string>
 </resources>

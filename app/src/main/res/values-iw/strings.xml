@@ -15,4 +15,12 @@
     <string name="confirmPasswordError">סיסמאות אינן תואמות</string>
     <string name="emailError2">אימייל כבר בשימוש</string>
     <string name="emailOrPasswordError">אימייל ו/או סיסמה לא חוקיים</string>
+    <string name="user_setup">הגדרת משתמש</string>
+    <string name="username">שם משתמש</string>
+    <string name="verify_your_email_address">אמת את כתובת האימייל שלך</string>
+    <string name="verification_instructions">שלחנו קישור אימות לכתובת האימייל שלך.\n\nלחץ על הקישור כדי להשלים את תהליך ההרשמה.\nייתכן שתצטרך לבדוק את תיקיית הספאם שלך.</string>
+    <string name="verify">אימות</string>
+    <string name="resend_verification">"שליחה חוזרת של האימות "</string>
+    <string name="didnt_receive_the_email">לא קיבלת את האימייל?</string>
+
 </resources>
