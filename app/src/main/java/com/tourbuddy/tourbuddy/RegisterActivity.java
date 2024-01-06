@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,12 +14,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 
@@ -96,10 +100,26 @@ public class RegisterActivity extends AppCompatActivity {
             mAuth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()) {
-                        progressDialog.dismiss();
-                        sendUserToNextActivity();
-                        Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
+                    if (task.isSuccessful() && !mUser.isEmailVerified()) {
+
+                        mUser.sendEmailVerification().addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                Log.d("EmailVerification", "Email verification sent successfully");
+                                sendUserToNextActivity(new Intent(RegisterActivity.this, UserVerificationActivity.class));
+                                progressDialog.dismiss();
+
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.e("EmailVerification", "Error while sending email verification", e);
+                                inputEmail.setError("Error while sending email verification");
+                                inputEmail.requestFocus();
+                            }
+                        });
+
+                        //Toast.makeText(RegisterActivity.this, "Registration Successful", Toast.LENGTH_SHORT).show();
                     }
                     else {
                         progressDialog.dismiss();
@@ -107,18 +127,30 @@ public class RegisterActivity extends AppCompatActivity {
                             inputEmail.setError(getString(R.string.emailError2));
                             inputEmail.requestFocus();
                         }
-                        else
-                            Toast.makeText(RegisterActivity.this, String.valueOf(task.getException()), Toast.LENGTH_SHORT).show();
+                        else{
+                            inputEmail.setError(getString(R.string.emailError));
+                            inputEmail.requestFocus();
+                            try {
+                                throw Objects.requireNonNull(task.getException());
+                            } catch (Exception e) {
+                                throw new RuntimeException(e);
+                            }
+
+                        }
                     }
                 }
             });
         }
 
-
     }
 
-    private void sendUserToNextActivity() {
-        Intent intent = new Intent(RegisterActivity.this, HomeActivity.class);
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        this.overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+    }
+
+    private void sendUserToNextActivity(Intent intent) {
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);

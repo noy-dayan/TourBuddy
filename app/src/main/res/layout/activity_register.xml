@@ -135,7 +135,7 @@
                 android:layout_height="wrap_content"
 
                 android:layout_marginTop="32dp"
-                android:background="@drawable/btn_rounded_corner"
+                android:background="@drawable/btn_rounded_corner_enabled"
 
                 android:fontFamily="@font/lexend"
                 android:text="@string/register"

@@ -11,9 +11,13 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -27,11 +31,15 @@ public class MainActivity extends AppCompatActivity {
     TextView createNewAccount;
     EditText inputEmail, inputPassword;
     Button btnLogin;
+    ImageView btnGoogle, btnFacebook;
+
     String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
     ProgressDialog progressDialog;
 
     FirebaseAuth mAuth;
     FirebaseUser mUser;
+
+    GoogleSignInClient mGoogleSignInClient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -43,13 +51,21 @@ public class MainActivity extends AppCompatActivity {
         createNewAccount = findViewById(R.id.createNewAccount);
         inputEmail = findViewById(R.id.inputEmail);
         inputPassword = findViewById(R.id.inputPassword);
+
         btnLogin = findViewById(R.id.btnLogin);
+        btnGoogle = findViewById(R.id.btnGoogle);
+        btnFacebook = findViewById(R.id.btnFacebook);
 
         progressDialog = new ProgressDialog(this);
 
         mAuth = FirebaseAuth.getInstance();
         mUser = mAuth.getCurrentUser();
 
+        //GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                //.requestIdToken(getString(R.string.default_web_client_id))
+                //.requestEmail().build();
+
+        //mGoogleSignInClient = GoogleSignIn.getClient(this,gso);
         createNewAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -62,14 +78,20 @@ public class MainActivity extends AppCompatActivity {
         btnLogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                PerformLogin();
+                LoginWithEmailAndPassword();
             }
         });
 
+
     }
 
-    private void PerformLogin() {
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        this.overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+    }
+
+    private void LoginWithEmailAndPassword() {
         String email = inputEmail.getText().toString();
         String password = inputPassword.getText().toString();
 
@@ -94,8 +116,10 @@ public class MainActivity extends AppCompatActivity {
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()){
                         progressDialog.dismiss();
-                        sendUserToNextActivity();
-                        Toast.makeText(MainActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
+                        if(mUser.isEmailVerified())
+                            sendUserToNextActivity(new Intent(MainActivity.this, test.class));
+                        else
+                            sendUserToNextActivity(new Intent(MainActivity.this, UserVerificationActivity.class));
                     }
                     else {
                         progressDialog.dismiss();
@@ -111,8 +135,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
     }
-    private void sendUserToNextActivity() {
-        Intent intent = new Intent(MainActivity.this, HomeActivity.class);
+
+    private void sendUserToNextActivity(Intent intent) {
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
