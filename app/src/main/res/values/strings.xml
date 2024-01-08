@@ -21,4 +21,9 @@
     <string name="verify">Verify</string>
     <string name="resend_verification">Resend Verification</string>
     <string name="didnt_receive_the_email">Didn\'t receive the email?</string>
+    <string name="birthDate">Birth Date</string>
+    <string name="age_restirction">• You must be at least 16 years old to use this app.</string>
+    <string name="bio">Bio (Optional)</string>
+    <string name="tour_guide">Tour Guide</string>
+    <string name="tourist">Tourist</string>
 </resources>

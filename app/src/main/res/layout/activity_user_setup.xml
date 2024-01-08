@@ -11,107 +11,229 @@
         android:layout_height="match_parent"
         android:background="@color/dark_primary" />
 
-        <androidx.core.widget.NestedScrollView
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        tools:layout_editor_absoluteX="49dp"
+        tools:layout_editor_absoluteY="-95dp">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:fillViewport="true"
-            tools:layout_editor_absoluteX="16dp"
-            tools:layout_editor_absoluteY="16dp">
-
-            <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
+            android:layout_height="match_parent">
 
 
-                <ImageView
-                    android:id="@+id/logoImage"
-                    android:layout_width="67dp"
-                    android:layout_height="71dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/tourbuddy_logo_transparent" />
+            <ImageView
+                android:id="@+id/logoImage"
+                android:layout_width="67dp"
+                android:layout_height="71dp"
+                android:layout_marginStart="16dp"
+                android:layout_marginTop="16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/tourbuddy_logo_transparent" />
 
-                <TextView
-                    android:id="@+id/textView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:fontFamily="@font/lexend"
-                    android:text="@string/user_setup"
-                    android:textColor="@color/white"
-                    android:textSize="25sp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/logoImage" />
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/lexend"
+                android:text="@string/user_setup"
+                android:textColor="@color/white"
+                android:textSize="25sp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/logoImage" />
 
-                <EditText
-                    android:id="@+id/inputUsername"
+            <ImageView
+                android:id="@+id/profileImage"
+                android:layout_width="110dp"
+                android:layout_height="110dp"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/profile_image_bg"
+                android:src="@drawable/google_logo"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/textView" />
+
+            <EditText
+                android:id="@+id/inputUsername"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="24dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginEnd="24dp"
+                android:autofillHints=""
+                android:background="@drawable/input_bg"
+                android:drawableStart="@drawable/user_icon"
+                android:drawablePadding="10dp"
+                android:ems="10"
+                android:fontFamily="@font/lexend"
+                android:hint="@string/username"
+                android:inputType="textShortMessage"
+                android:paddingLeft="20dp"
+                android:paddingTop="13dp"
+                android:paddingRight="20dp"
+                android:paddingBottom="13dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/profileImage" />
+
+            <Spinner
+                android:id="@+id/spinnerGender"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/gender_spinner_bg"
+                android:drawablePadding="10dp"
+                android:paddingStart="40dp"
+                android:paddingTop="13dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="13dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white"
+                app:layout_constraintEnd_toEndOf="@+id/inputBio"
+                app:layout_constraintStart_toStartOf="@+id/inputBio"
+                app:layout_constraintTop_toBottomOf="@+id/inputBio" />
+
+            <EditText
+                android:id="@+id/inputBirthDate"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:autofillHints=""
+                android:background="@drawable/input_bg"
+                android:cursorVisible="false"
+                android:drawableStart="@drawable/hourglass_icon"
+                android:drawableEnd="@drawable/baseline_arrow_drop_down_24"
+                android:drawablePadding="10dp"
+                android:ems="10"
+                android:focusableInTouchMode="false"
+                android:fontFamily="@font/lexend"
+                android:hint="@string/birthDate"
+                android:inputType="none"
+                android:paddingLeft="20dp"
+                android:paddingTop="13dp"
+                android:paddingRight="20dp"
+                android:paddingBottom="13dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white"
+                app:layout_constraintEnd_toEndOf="@+id/spinnerGender"
+                app:layout_constraintStart_toStartOf="@+id/spinnerGender"
+                app:layout_constraintTop_toBottomOf="@+id/spinnerGender"
+                tools:ignore="TextFields" />
+
+            <TextView
+                android:id="@+id/textView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/lexend"
+                android:text="@string/age_restirction"
+                android:textColor="@color/white"
+                android:textSize="10sp"
+                app:layout_constraintEnd_toEndOf="@+id/inputBirthDate"
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="@+id/inputBirthDate"
+                app:layout_constraintTop_toBottomOf="@+id/inputBirthDate" />
+
+            <EditText
+                android:id="@+id/inputBio"
+                android:layout_width="0dp"
+                android:layout_height="105dp"
+                android:layout_marginTop="16dp"
+                android:autofillHints=""
+                android:background="@drawable/input_bg"
+                android:drawableStart="@drawable/bio_icon"
+                android:drawablePadding="10dp"
+                android:ems="10"
+                android:fontFamily="@font/lexend"
+                android:gravity="left|top"
+                android:hint="@string/bio"
+                android:inputType="textMultiLine"
+                android:maxLength="120"
+                android:maxLines="4"
+                android:paddingLeft="20dp"
+                android:paddingTop="13dp"
+                android:paddingRight="20dp"
+                android:paddingBottom="13dp"
+                android:textColor="@color/white"
+                android:textColorHint="@color/white"
+                app:layout_constraintEnd_toEndOf="@+id/inputUsername"
+                app:layout_constraintStart_toStartOf="@+id/inputUsername"
+                app:layout_constraintTop_toBottomOf="@+id/inputUsername" />
+
+
+            <RadioGroup
+                android:id="@+id/toggleSwitch"
+                android:layout_width="0dp"
+                android:layout_height="30dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/radiogroup_bg_disabled"
+                android:checkedButton="@+id/touristRadioButton"
+                android:orientation="horizontal"
+                app:layout_constraintBottom_toTopOf="@+id/btnDone"
+                app:layout_constraintEnd_toEndOf="@+id/inputBirthDate"
+                app:layout_constraintStart_toStartOf="@+id/inputBirthDate"
+                app:layout_constraintTop_toBottomOf="@+id/inputBirthDate">
+
+                <RadioButton
+                    android:id="@+id/touristRadioButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-
-                    android:layout_marginTop="188dp"
-                    android:layout_marginEnd="24dp"
-                    android:autofillHints=""
-                    android:background="@drawable/input_bg"
-
-                    android:drawableStart="@drawable/user_icon"
-                    android:drawablePadding="10dp"
-
-                    android:ems="10"
+                    android:layout_height="match_parent"
+                    android:layout_marginTop="1dp"
+                    android:layout_marginEnd="1dp"
+                    android:layout_marginBottom="1dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/toggle_widget_bg"
+                    android:button="@null"
                     android:fontFamily="@font/lexend"
-                    android:hint="@string/username"
-                    android:inputType="textShortMessage"
-                    android:paddingLeft="20dp"
-                    android:paddingTop="13dp"
-                    android:paddingRight="20dp"
-                    android:paddingBottom="13dp"
-                    android:textColor="@color/white"
-                    android:textColorHint="@color/white"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/textView" />
+                    android:gravity="center"
+                    android:text="@string/tourist"
+                    android:textColor="@color/white" />
 
-                <Spinner
-                    android:id="@+id/spinnerGender"
+                <RadioButton
+                    android:id="@+id/tourGuideRadioButton"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="24dp"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginEnd="24dp"
-                    android:background="@drawable/gender_spinner_bg"
-                    android:drawablePadding="10dp"
-                    android:paddingStart="40dp"
-                    android:paddingTop="13dp"
-                    android:paddingEnd="20dp"
-                    android:paddingBottom="13dp"
-                    android:textColor="@color/white"
-                    android:textColorHint="@color/white"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/inputUsername" />
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="1dp"
+                    android:layout_marginTop="1dp"
+                    android:layout_marginBottom="1dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/toggle_widget_bg"
+                    android:button="@null"
+                    android:fontFamily="@font/lexend"
+                    android:gravity="center"
+                    android:text="@string/tour_guide"
+                    android:textColor="@color/white" />
 
-                <Button
-                    android:id="@+id/btnContinue"
-                    android:layout_width="80dp"
-                    android:layout_height="80dp"
-                    android:background="@drawable/continue_arrow_icon"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.949"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/inputUsername"
-                    app:layout_constraintVertical_bias="0.937"
-                    android:enabled="false" />
 
-            </androidx.constraintlayout.widget.ConstraintLayout>
+            </RadioGroup>
 
-        </androidx.core.widget.NestedScrollView>
+            <Button
+                android:id="@+id/btnDone"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:background="@drawable/check_box_icon"
+                android:enabled="false"
+                android:layoutDirection="rtl"
+                android:text=""
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.048"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/inputUsername"
+
+                app:layout_constraintVertical_bias="0.94" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

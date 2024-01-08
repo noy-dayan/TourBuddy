@@ -22,5 +22,10 @@
     <string name="verify">אימות</string>
     <string name="resend_verification">"שליחה חוזרת של האימות "</string>
     <string name="didnt_receive_the_email">לא קיבלת את האימייל?</string>
+    <string name="birthDate">תאריך לידה</string>
+    <string name="age_restirction">• עליך להיות בן 16 לפחות כדי להשתמש באפליקציה זו</string>
+    <string name="bio">ביו (אופציונלי)</string>
+    <string name="tour_guide">מדריך טיולים</string>
+    <string name="tourist">תייר</string>
 
 </resources>

@@ -6,7 +6,7 @@
         <shape>
             <corners android:radius="5dp" />
             <stroke android:color="@color/white" android:width="2dp"/>
-            <padding android:left="20dp" android:right="10dp"/> <!-- Adjust right padding to make space for the arrow -->
+            <padding android:left="20dp" android:right="20dp"/> <!-- Adjust right padding to make space for the arrow -->
         </shape>
     </item>
 
