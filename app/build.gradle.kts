@@ -50,10 +50,13 @@ dependencies {
     implementation("com.google.firebase:firebase-auth:22.3.0")
     implementation(platform("com.google.firebase:firebase-bom:32.7.0"))
     implementation("com.google.android.gms:play-services-auth:20.7.0")
-    implementation("com.google.firebase:firebase-firestore:24.10.0")
+    implementation("com.google.firebase:firebase-firestore:24.10.0") // Firestore
+    implementation("com.google.firebase:firebase-storage:20.3.0") // Firebase Storage
+
 
     // Image Picker
     implementation("com.github.dhaval2404:imagepicker:2.1")
+    implementation("com.github.bumptech.glide:glide:4.16.0")
 
 
 

@@ -1,12 +1,17 @@
 package com.tourbuddy.tourbuddy;
 
+import android.app.Activity;
 import android.app.DatePickerDialog;
+import android.content.ContentResolver;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -17,15 +22,23 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.Spinner;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -33,12 +46,15 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function1;
+
 public class UserSetupActivity extends AppCompatActivity {
 
     Spinner spinnerGender;
     Button btnDone;
     EditText inputUsername, inputBirthDate, inputBio;
-    ImageView profileImage;
+    ImageView profilePic;
 
     Calendar calendar;
     DatePickerDialog datePickerDialog;
@@ -48,27 +64,64 @@ public class UserSetupActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
     FirebaseUser mUser;
     FirebaseFirestore db;
+    FirebaseStorage storage;
+    StorageReference storageReference;
 
     RadioGroup toggleRadioGroup;
     String selectedRadioGroupChoice = "Tourist";
 
+    ActivityResultLauncher<Intent> imagePickLauncher;
+    Uri selectedImageUri;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_setup);
 
+        imagePickLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
+                result -> {
+                    if(result.getResultCode() == Activity.RESULT_OK){
+                        Intent data = result.getData();
+                        if(data != null && data.getData() != null) {
+                            selectedImageUri = data.getData();
+                            Glide.with(UserSetupActivity.this)
+                                    .load(selectedImageUri)
+                                    .apply(RequestOptions.circleCropTransform())
+                                    .into(profilePic);
+                        }
+                    }
+
+                }
+                );
+
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
-        btnDone = findViewById(R.id.btnDone);
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
+
+        profilePic = findViewById(R.id.profilePic);
         inputUsername = findViewById(R.id.inputUsername);
         inputBio = findViewById(R.id.inputBio);
         spinnerGender = findViewById(R.id.spinnerGender);
         inputBirthDate = findViewById(R.id.inputBirthDate);
-        profileImage = findViewById(R.id.profileImage);
+        toggleRadioGroup = findViewById(R.id.toggleSwitch);
 
         calendar = Calendar.getInstance();
 
-        toggleRadioGroup = findViewById(R.id.toggleSwitch);
+        btnDone = findViewById(R.id.btnDone);
+
+        profilePic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ImagePicker.with(UserSetupActivity.this).cropSquare().compress(512).maxResultSize(512, 512).
+                        createIntent(new Function1<Intent, Unit>(){
+                            @Override
+                            public Unit invoke(Intent intent){
+                                imagePickLauncher.launch(intent);
+                                return null;
+                            }
+                });
+            }
+        });
 
         // Set a listener for the RadioGroup to handle the selected choice
         toggleRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
@@ -176,6 +229,11 @@ public class UserSetupActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 saveUserDataToFirebase();
+
+                // After saving user data, start the UserProfileActivity
+                Intent userProfileIntent = new Intent(UserSetupActivity.this, UserProfileActivity.class);
+                startActivity(userProfileIntent);
+                finish(); // Optional: Close the current activity if needed
             }
         });
     }
@@ -196,6 +254,8 @@ public class UserSetupActivity extends AppCompatActivity {
             userData.put("gender", gender);
             userData.put("birthDate", birthDate);
             userData.put("type", selectedRadioGroupChoice.trim());
+            if(selectedImageUri != null) uploadImage(selectedImageUri, userId, "profilePic");
+
 
             // Set the document name as the user ID
             DocumentReference userDocumentRef = db.collection("users").document(userId);
@@ -215,5 +275,28 @@ public class UserSetupActivity extends AppCompatActivity {
         }
     }
 
+    private String getFileExtension(Uri uri){
+        ContentResolver cR = getContentResolver();
+        MimeTypeMap mime = MimeTypeMap.getSingleton();
+        return mime.getExtensionFromMimeType(cR.getType(uri));
+    }
+
+    private void uploadImage(Uri imageUri ,String userId, String imageType){
+        StorageReference imageRef = storageReference.child("images/" + userId + "/" + imageType);
+
+        imageRef.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                Log.d("STORAGE","Image added to the user " + userId + "as " + imageType);
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("STORAGE","Error adding image to the user " + userId + "as " + imageType);
+
+            }
+        });
+    }
 
 }

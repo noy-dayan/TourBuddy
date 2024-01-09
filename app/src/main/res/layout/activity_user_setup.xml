@@ -48,16 +48,16 @@
                 app:layout_constraintTop_toBottomOf="@+id/logoImage" />
 
             <ImageView
-                android:id="@+id/profileImage"
+                android:id="@+id/profilePic"
                 android:layout_width="110dp"
                 android:layout_height="110dp"
                 android:layout_marginTop="16dp"
-                android:background="@drawable/profile_image_bg"
-                android:src="@drawable/google_logo"
+                android:background="@drawable/add_image_icon"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView" />
+                app:layout_constraintTop_toBottomOf="@+id/textView"
+                android:backgroundTint="@color/white"/>
 
             <EditText
                 android:id="@+id/inputUsername"
@@ -83,7 +83,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/profileImage" />
+                app:layout_constraintTop_toBottomOf="@+id/profilePic" />
 
             <Spinner
                 android:id="@+id/spinnerGender"
