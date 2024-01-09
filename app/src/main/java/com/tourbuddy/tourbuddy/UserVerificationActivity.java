@@ -17,47 +17,59 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+/**
+ * Activity for user verification, for users to confirm their account.
+ */
 public class UserVerificationActivity extends AppCompatActivity {
 
+    // UI elements
     Button btnVerify, btnResendVerification;
+    SwipeRefreshLayout swipeRefreshLayout;
 
+    // Firebase authentication
     FirebaseAuth mAuth;
     FirebaseUser mUser;
 
-    SwipeRefreshLayout swipeRefreshLayout;
-
+    // Timer for resend verification button
     CountDownTimer resendVerificationTimer;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_verification);
 
+        // Initialize UI elements
         btnVerify = findViewById(R.id.btnVerify);
         btnVerify.setEnabled(false);
-
         btnResendVerification = findViewById(R.id.btnResendVerification);
 
+        // Initialize Firebase authentication
         mAuth = FirebaseAuth.getInstance();
         mUser = mAuth.getCurrentUser();
 
+        // Initialize SwipeRefreshLayout
         swipeRefreshLayout = findViewById(R.id.swipeRefresh);
 
+        // Start the resend verification timer
         resendVerificationTimer();
 
+        // Verify button click listener
         btnVerify.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(mUser.isEmailVerified())
+                if (mUser.isEmailVerified())
                     sendUserToNextActivity(new Intent(UserVerificationActivity.this, UserSetupActivity.class));
                 else
                     btnVerify.setError("Email is not verified");
             }
         });
 
+        // Resend verification button click listener
         btnResendVerification.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (!mUser.isEmailVerified()) {
+                    // Send email verification
                     mUser.sendEmailVerification().addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void unused) {
@@ -69,21 +81,21 @@ public class UserVerificationActivity extends AppCompatActivity {
                             Log.e("EmailVerification", "Error while sending email verification", e);
                             btnResendVerification.setError("Error while sending email verification");
                             btnResendVerification.setEnabled(true);
-
                         }
                     });
 
+                    // Restart the resend verification timer
                     resendVerificationTimer();
-
                 }
             }
         });
 
-
+        // SwipeRefreshLayout refresh listener
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                 @Override
                 public void onRefresh() {
+                    // Reload user data
                     mUser.reload();
 
                     Log.e("refresh", String.valueOf(mUser.isEmailVerified()));
@@ -96,17 +108,17 @@ public class UserVerificationActivity extends AppCompatActivity {
         } else {
             Log.e("UserVerificationActivity", "SwipeRefreshLayout is null");
         }
-
     }
 
-
+    // Move to the next activity and clear the task stack
     private void sendUserToNextActivity(Intent intent) {
         intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
         overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
-    private void resendVerificationTimer(){
+    // Set up and start the resend verification timer
+    private void resendVerificationTimer() {
         String btnResendVerificationText = String.valueOf(btnResendVerification.getText());
         btnResendVerification.setEnabled(false);
 
@@ -125,5 +137,4 @@ public class UserVerificationActivity extends AppCompatActivity {
             }
         }.start();
     }
-
 }

@@ -2,7 +2,6 @@ package com.tourbuddy.tourbuddy;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -10,8 +9,8 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
-import android.webkit.MimeTypeMap;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -49,34 +48,45 @@ import java.util.Map;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 
+/**
+ * Activity for user setup, allowing users to input profile information.
+ */
 public class UserSetupActivity extends AppCompatActivity {
 
+    // Constants
+    private static final short MAX_USERNAME_LENGTH = 16;
+
+    // UI elements
     Spinner spinnerGender;
     Button btnDone;
     EditText inputUsername, inputBirthDate, inputBio;
     ImageView profilePic;
+    RadioGroup toggleRadioGroup;
 
+    // Calendar for birth date selection
     Calendar calendar;
     DatePickerDialog datePickerDialog;
 
-    final short MAX_USERNAME_LENGTH = 16;
-
+    // Firebase
     FirebaseAuth mAuth;
     FirebaseUser mUser;
     FirebaseFirestore db;
     FirebaseStorage storage;
     StorageReference storageReference;
 
-    RadioGroup toggleRadioGroup;
+    // Radio button selection
     String selectedRadioGroupChoice = "Tourist";
 
+    // Image picker
     ActivityResultLauncher<Intent> imagePickLauncher;
     Uri selectedImageUri;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_setup);
 
+        // Initialize image picker launcher
         imagePickLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
                     if(result.getResultCode() == Activity.RESULT_OK){
@@ -89,15 +99,15 @@ public class UserSetupActivity extends AppCompatActivity {
                                     .into(profilePic);
                         }
                     }
+                });
 
-                }
-                );
-
+        // Initialize Firebase instances
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
 
+        // Initialize UI elements
         profilePic = findViewById(R.id.profilePic);
         inputUsername = findViewById(R.id.inputUsername);
         inputBio = findViewById(R.id.inputBio);
@@ -105,10 +115,12 @@ public class UserSetupActivity extends AppCompatActivity {
         inputBirthDate = findViewById(R.id.inputBirthDate);
         toggleRadioGroup = findViewById(R.id.toggleSwitch);
 
+        // Initialize calendar for birth date selection
         calendar = Calendar.getInstance();
 
         btnDone = findViewById(R.id.btnDone);
 
+        // Profile picture click listener
         profilePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -119,22 +131,31 @@ public class UserSetupActivity extends AppCompatActivity {
                                 imagePickLauncher.launch(intent);
                                 return null;
                             }
-                });
+                        });
             }
         });
 
-        // Set a listener for the RadioGroup to handle the selected choice
+        // Input bio key listener to handle multi-line input
+        inputBio.setOnKeyListener(new View.OnKeyListener() {
+            @Override
+            public boolean onKey(View v, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_ENTER  && event.getAction() == KeyEvent.ACTION_DOWN)
+                    return ((EditText) v).getLineCount() >= ((EditText) v).getMaxLines();
+                return false;
+            }
+        });
+
+        // RadioGroup listener to handle selected choice
         toggleRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                // Find which RadioButton is selected
                 RadioButton selectedRadioButton = findViewById(checkedId);
                 if (selectedRadioButton != null)
-                    // Get the text of the selected RadioButton
                     selectedRadioGroupChoice = selectedRadioButton.getText().toString();
             }
         });
 
+        // Date picker dialog setup
         DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
             @Override
             public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
@@ -155,7 +176,6 @@ public class UserSetupActivity extends AppCompatActivity {
                 String format = "dd/MM/yyyy";
                 SimpleDateFormat sdf = new SimpleDateFormat(format, Locale.US);
                 inputBirthDate.setText(sdf.format(calendar.getTime()));
-
             }
         };
 
@@ -164,6 +184,7 @@ public class UserSetupActivity extends AppCompatActivity {
                 date, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH));
 
+        // Set date picker limits
         Calendar maxDateCalendar = Calendar.getInstance();
         maxDateCalendar.add(Calendar.YEAR, -16);
         datePickerDialog.getDatePicker().setMaxDate(maxDateCalendar.getTimeInMillis());
@@ -172,6 +193,7 @@ public class UserSetupActivity extends AppCompatActivity {
         minDateCalendar.add(Calendar.YEAR, -100);
         datePickerDialog.getDatePicker().setMinDate(minDateCalendar.getTimeInMillis());
 
+        // InputBirthDate click listener to show date picker
         inputBirthDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -179,6 +201,7 @@ public class UserSetupActivity extends AppCompatActivity {
             }
         });
 
+        // Gender spinner setup
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 this,
                 R.array.gender_options,
@@ -204,8 +227,10 @@ public class UserSetupActivity extends AppCompatActivity {
             }
         });
 
+        // Username input length filter
         inputUsername.setFilters(new InputFilter[]{new InputFilter.LengthFilter(MAX_USERNAME_LENGTH)});
 
+        // Username text watcher for enabling/disabling the done button
         inputUsername.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
@@ -225,19 +250,23 @@ public class UserSetupActivity extends AppCompatActivity {
             }
         });
 
+        // Done button click listener
         btnDone.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 saveUserDataToFirebase();
 
-                // After saving user data, start the UserProfileActivity
-                Intent userProfileIntent = new Intent(UserSetupActivity.this, UserProfileActivity.class);
+                // After saving user data, start the UserHomeActivity
+                Intent userProfileIntent = new Intent(UserSetupActivity.this, UserHomeActivity.class);
                 startActivity(userProfileIntent);
                 finish(); // Optional: Close the current activity if needed
             }
         });
     }
 
+    /**
+     * Save user data to Firebase Firestore.
+     */
     private void saveUserDataToFirebase() {
         mUser = mAuth.getCurrentUser();
         if (mUser != null) {
@@ -255,7 +284,6 @@ public class UserSetupActivity extends AppCompatActivity {
             userData.put("birthDate", birthDate);
             userData.put("type", selectedRadioGroupChoice.trim());
             if(selectedImageUri != null) uploadImage(selectedImageUri, userId, "profilePic");
-
 
             // Set the document name as the user ID
             DocumentReference userDocumentRef = db.collection("users").document(userId);
@@ -275,12 +303,9 @@ public class UserSetupActivity extends AppCompatActivity {
         }
     }
 
-    private String getFileExtension(Uri uri){
-        ContentResolver cR = getContentResolver();
-        MimeTypeMap mime = MimeTypeMap.getSingleton();
-        return mime.getExtensionFromMimeType(cR.getType(uri));
-    }
-
+    /**
+     * Upload the user profile image to Firebase Storage.
+     */
     private void uploadImage(Uri imageUri ,String userId, String imageType){
         StorageReference imageRef = storageReference.child("images/" + userId + "/" + imageType);
 
@@ -288,15 +313,12 @@ public class UserSetupActivity extends AppCompatActivity {
             @Override
             public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                 Log.d("STORAGE","Image added to the user " + userId + "as " + imageType);
-
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
                 Log.e("STORAGE","Error adding image to the user " + userId + "as " + imageType);
-
             }
         });
     }
-
 }

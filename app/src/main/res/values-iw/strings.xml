@@ -27,5 +27,7 @@
     <string name="bio">ביו (אופציונלי)</string>
     <string name="tour_guide">מדריך טיולים</string>
     <string name="tourist">תייר</string>
+    <string name="gender">מגדר</string>
+    <string name="account_type">סוג משתמש</string>
 
 </resources>

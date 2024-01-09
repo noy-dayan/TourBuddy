@@ -14,7 +14,7 @@
         android:theme="@style/Theme.TourBuddy"
         tools:targetApi="31">
         <activity
-            android:name=".UserProfileActivity"
+            android:name=".UserHomeActivity"
             android:exported="false" />
         <activity
             android:name=".UserSetupActivity"
