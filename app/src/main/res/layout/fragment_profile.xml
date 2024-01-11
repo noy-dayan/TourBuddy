@@ -12,6 +12,24 @@
         android:layout_height="match_parent"
         android:background="@color/dark_primary" />
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/topRelativeLayout">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_centerInParent="true"
+            android:fontFamily="@font/lexend"
+            android:gravity="center"
+            android:text="@string/profile"
+            android:textColor="@color/white"
+            android:textSize="22sp" />
+
+
+    </RelativeLayout>
+
     <!-- Loading overlay -->
     <RelativeLayout
         android:id="@+id/loadingOverlay"
@@ -59,31 +77,19 @@
                 android:layout_height="match_parent"
                 android:visibility="visible">
 
-                <!-- Logo Image -->
-                <ImageView
-                    android:id="@+id/logoImage"
-                    android:layout_width="67dp"
-                    android:layout_height="71dp"
-                    android:layout_marginStart="16dp"
-                    android:layout_marginTop="16dp"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.0"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:srcCompat="@drawable/tourbuddy_logo_transparent" />
 
                 <TextView
                     android:id="@+id/type"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="64dp"
                     android:fontFamily="@font/lexend"
                     android:text="@string/account_type"
                     android:textColor="@color/white"
                     android:textSize="40sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/logoImage" />
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <!-- Username Text -->
                 <TextView

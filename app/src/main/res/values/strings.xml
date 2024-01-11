@@ -26,7 +26,12 @@
     <string name="bio">Bio (Optional)</string>
     <string name="tour_guide">Tour Guide</string>
     <string name="tourist">Tourist</string>
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
     <string name="gender">Gender</string>
     <string name="account_type">Account Type</string>
+    <string name="profile">Profile</string>
+    <string name="settings">Settings</string>
+    <string name="language">Language</string>
+    <string name="about">About</string>
+    <string name="edit_profile">Edit Profile</string>
 </resources>
