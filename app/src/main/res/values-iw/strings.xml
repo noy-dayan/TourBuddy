@@ -29,5 +29,10 @@
     <string name="tourist">תייר</string>
     <string name="gender">מגדר</string>
     <string name="account_type">סוג משתמש</string>
+    <string name="profile">פרופיל</string>
+    <string name="settings">הגדרות</string>
+    <string name="language">שפה</string>
+    <string name="about">אודות</string>
+    <string name="edit_profile">עריכת פרופיל</string>
 
 </resources>

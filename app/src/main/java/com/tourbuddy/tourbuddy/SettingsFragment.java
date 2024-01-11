@@ -1,64 +1,314 @@
 package com.tourbuddy.tourbuddy;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.Spinner;
+import android.widget.TextView;
 
-/**
- * A simple {@link Fragment} subclass.
- * Use the {@link SettingsFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+
 public class SettingsFragment extends Fragment {
 
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String PREFS_NAME = "SettingsPrefs";
+    SharedPreferences prefs;
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    ImageView profilePic;
+    TextView username;
+    Button btnEditProfile;
 
-    public SettingsFragment() {
-        // Required empty public constructor
-    }
+    String language;
+    String[] languageCodes = {"en", "he"}; /* Add more language codes as needed */
+    Spinner languageSpinner;
 
-    /**
-     * Use this factory method to create a new instance of
-     * this fragment using the provided parameters.
-     *
-     * @param param1 Parameter 1.
-     * @param param2 Parameter 2.
-     * @return A new instance of fragment SettingsFragment.
-     */
-    // TODO: Rename and change types and number of parameters
-    public static SettingsFragment newInstance(String param1, String param2) {
-        SettingsFragment fragment = new SettingsFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
-    }
+    FirebaseAuth mAuth;
+    FirebaseUser mUser;
+    FirebaseFirestore db;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
-    }
+    StorageReference storageReference;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_settings, container, false);
+        View view = inflater.inflate(R.layout.fragment_settings, container, false);
+        showLoading(true);
+
+        mAuth = FirebaseAuth.getInstance();
+        mUser = mAuth.getCurrentUser();
+
+        db = FirebaseFirestore.getInstance();
+        FirebaseStorage storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
+
+        profilePic = view.findViewById(R.id.profilePic);
+        username = view.findViewById(R.id.username);
+        btnEditProfile = view.findViewById(R.id.btnEditProfile);
+
+        // Attempt to load data from cache
+        if (loadDataFromCache(view))
+            // Data loaded from cache, no need to fetch from the server
+            showLoading(false);
+        else
+            // Data not found in cache, fetch from the server
+            loadDataFromFirebase(view);
+
+        // Set a click listener for the "Edit Profile" button
+        btnEditProfile.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate to the EditProfileFragment when the button is clicked
+                switchFragment(new EditProfileFragment());
+            }
+        });
+
+        return view;
+    }
+
+    private void setAppLocale(String languageCode) {
+        Locale locale = new Locale(languageCode);
+        Locale.setDefault(locale);
+
+        Configuration configuration = new Configuration();
+        configuration.locale = locale;
+
+        getResources().updateConfiguration(configuration, getResources().getDisplayMetrics());
+    }
+
+    private void loadDataFromFirebase(View view) {
+        mUser = mAuth.getCurrentUser();
+        if (mUser != null) {
+            String userId = mUser.getUid();
+
+            // Reference to the Firestore document
+            DocumentReference userDocumentRef = db.collection("users").document(userId);
+
+            // Retrieve data from Firestore
+            userDocumentRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    if (isAdded() && documentSnapshot.exists()) {
+                        // Check if the profilePic field exists in the Firestore document
+                        if (documentSnapshot.contains("username"))
+                            username.setText(documentSnapshot.getString("username"));
+                        if (documentSnapshot.contains("language")) {
+                            language = documentSnapshot.getString("language");
+
+                            // Populate the spinner after loading the language
+                            setupLanguageSpinner(view);
+
+
+                        }
+                    }
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.e("DATABASE", "Error getting document", e);
+                }
+            });
+
+            // Load the image into the ImageView using Glide
+            storageReference.child("images/" + mUser.getUid() + "/profilePic").getDownloadUrl()
+                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            // Got the download URL for 'users/me/profile.png'
+                            Glide.with(view)
+                                    .load(uri)
+                                    .apply(RequestOptions.circleCropTransform())
+                                    .into(profilePic);
+                            showLoading(false);
+                            saveDataToCache(
+                                    username.getText().toString(),
+                                    uri.toString() // Save profile picture URL
+                            );
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            // Handle failure to load image
+                        }
+                    });
+        }
+    }
+
+    private boolean loadDataFromCache(View view) {
+        prefs = view.getContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+
+        // Check if data exists in cache
+        if (prefs.contains("username") && prefs.contains("profilePicUrl") && prefs.contains("language")) {
+
+            // Load data from cache
+            username.setText(prefs.getString("username", ""));
+            language = prefs.getString("language", "");
+            // Load profile picture from cache (if available)
+            Uri profilePicUrl = Uri.parse(prefs.getString("profilePicUrl", ""));
+            if (profilePicUrl != null) {
+                Glide.with(view)
+                        .load(profilePicUrl)
+                        .apply(RequestOptions.circleCropTransform())
+                        .into(profilePic);
+            }
+            setupLanguageSpinner(view);
+            return true; // Data loaded from cache
+        }
+
+        return false; // Data not found in cache
+    }
+
+    private void saveDataToCache(String username, String profilePicUrl) {
+        if(isAdded()) {
+            prefs = requireActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor = prefs.edit();
+
+            // Save data to cache
+            editor.putString("username", username);
+            editor.putString("language", language);
+
+            // Save profile picture URL to cache
+            editor.putString("profilePicUrl", profilePicUrl);
+
+            editor.apply();
+        }
+    }
+
+    private void setupLanguageSpinner(View view) {
+        // Populate the spinner with image resources
+        languageSpinner = view.findViewById(R.id.languageSpinner);
+        Integer[] languageImages = {
+                R.drawable.english_icon,
+                R.drawable.hebrew_icon,
+                // Add more image resources as needed
+        };
+
+        SpinnerImageAdapter spinnerImageAdapter = new SpinnerImageAdapter(requireContext(), R.layout.spinner_language_layout, languageImages);
+        spinnerImageAdapter.setDropDownViewResource(R.layout.spinner_language_dropdown_layout);
+        languageSpinner.setAdapter(spinnerImageAdapter);
+
+        // Find the index of the loaded language code in the languageCodes array
+        int initialSelectionPosition = Arrays.asList(languageCodes).indexOf(language);
+
+        // Set the initial selection for the spinner
+        languageSpinner.setSelection(initialSelectionPosition);
+
+        // Set a listener to handle spinner item selection
+        languageSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                // Get the selected language code (assuming languageCodes array corresponds to the images)
+                String selectedLanguageCode = languageCodes[position];
+
+                // Set the app language based on the selected item
+                setAppLocale(selectedLanguageCode);
+                updateLanguageToCache(selectedLanguageCode);
+                updateLanguageToFirebase(selectedLanguageCode);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parentView) {
+                // Do nothing
+            }
+        });
+    }
+
+    private void updateLanguageToFirebase(String languageCode) {
+        mUser = mAuth.getCurrentUser();
+        if (mUser != null) {
+            String userId = mUser.getUid();
+
+            Map<String, Object> userData = new HashMap<>();
+            userData.put("language", languageCode);
+
+            // Set the document name as the user ID
+            DocumentReference userDocumentRef = db.collection("users").document(userId);
+
+            // Retrieve the current language from Firestore
+            userDocumentRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    if (isAdded() && documentSnapshot.exists() && documentSnapshot.contains("language")) {
+                        String currentLanguage = documentSnapshot.getString("language");
+
+                        // Check if the language has actually changed
+                        if (!languageCode.equals(currentLanguage)) {
+                            // Update the data in the Firestore document without replacing it
+                            userDocumentRef.update(userData).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
+                                    Log.d("DATABASE", "Language updated for user ID: " + userId);
+
+                                    // Refresh the fragment only if the language has changed
+                                    switchFragment(new SettingsFragment());
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.w("DATABASE", "Error updating language", e);
+                                }
+                            });
+                        }
+                    }
+                }
+            });
+        }
+    }
+
+    private void updateLanguageToCache(String languageCode) {
+        prefs = requireActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        // Save language code to cache
+        editor.putString("language", languageCode);
+        editor.apply();
+    }
+
+    private void switchFragment(Fragment fragment) {
+        if(isAdded())
+        // Replace the current fragment with the new one
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.frameLayout, fragment)
+                    .commit();
+    }
+
+    // Method to show/hide the loading screen
+    private void showLoading(boolean show) {
+        View view = getView();  // Get the view
+
+        if (view != null) {
+            View loadingOverlay = view.findViewById(R.id.loadingOverlay);
+
+            if (show)
+                loadingOverlay.setVisibility(View.VISIBLE);
+            else
+                loadingOverlay.setVisibility(View.GONE);
+
+        }
     }
 }

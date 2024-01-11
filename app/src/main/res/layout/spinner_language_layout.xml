@@ -1,0 +1,10 @@
+<!-- res/layout/spinner_item_layout.xml -->
+<ImageView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/languageIcon"
+    android:layout_width="40dp"
+    android:layout_height="40dp"
+    android:padding="2dp"
+    android:gravity="center_horizontal|center_vertical"
+    android:singleLine="true"
+    />

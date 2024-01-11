@@ -205,10 +205,10 @@ public class UserSetupActivity extends AppCompatActivity {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 this,
                 R.array.gender_options,
-                R.layout.custom_spinner
+                R.layout.spinner_gender_layout
         );
 
-        adapter.setDropDownViewResource(R.layout.custom_spinner_dropdown_item);
+        adapter.setDropDownViewResource(R.layout.spinner_gender_dropown_layout);
 
         spinnerGender.setAdapter(adapter);
 
@@ -278,6 +278,7 @@ public class UserSetupActivity extends AppCompatActivity {
 
             // Create a map to store user data
             Map<String, Object> userData = new HashMap<>();
+            userData.put("language", "en");
             userData.put("username", username);
             if(!bio.isEmpty()) userData.put("bio", bio);
             userData.put("gender", gender);

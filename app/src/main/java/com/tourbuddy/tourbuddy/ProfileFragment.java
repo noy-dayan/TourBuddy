@@ -1,11 +1,15 @@
 package com.tourbuddy.tourbuddy;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -25,21 +29,28 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.util.Locale;
+
 public class ProfileFragment extends Fragment {
 
-    private ImageView profilePic;
-    private TextView username, bio, birthDate, gender, type;
+    private static final String PREFS_NAME = "ProfilePrefs";
+    SharedPreferences prefs;
 
-    private FirebaseAuth mAuth;
-    private FirebaseUser mUser;
-    private FirebaseFirestore db;
-    private StorageReference storageReference;
+    ImageView profilePic;
+    TextView username, bio, birthDate, gender, type;
 
-    private SwipeRefreshLayout swipeRefreshLayout;
+    FirebaseAuth mAuth;
+    FirebaseUser mUser;
+    FirebaseFirestore db;
+    StorageReference storageReference;
+
+    SwipeRefreshLayout swipeRefreshLayout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
+        prefs = view.getContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+
         showLoading(true);
         swipeRefreshLayout = view.findViewById(R.id.swipeRefresh);
 
@@ -56,11 +67,19 @@ public class ProfileFragment extends Fragment {
         birthDate = view.findViewById(R.id.birthDate);
         gender = view.findViewById(R.id.gender);
         type = view.findViewById(R.id.type);
-        loadProfileData(view);
+
+        // Attempt to load data from cache
+        if (loadDataFromCache(view))
+            // Data loaded from cache, no need to fetch from the server
+            showLoading(false);
+        else
+            // Data not found in cache, fetch from the server
+            loadDataFromFirebase(view);
+
 
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setOnRefreshListener(() -> {
-                loadProfileData(view);
+                loadDataFromFirebase(view);
                 swipeRefreshLayout.setRefreshing(false);
             });
         } else {
@@ -70,7 +89,7 @@ public class ProfileFragment extends Fragment {
         return view;
     }
 
-    private void loadProfileData(View view) {
+    private void loadDataFromFirebase(View view) {
         mUser = mAuth.getCurrentUser();
         if (mUser != null) {
             String userId = mUser.getUid();
@@ -82,7 +101,7 @@ public class ProfileFragment extends Fragment {
             userDocumentRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    if (documentSnapshot.exists()) {
+                    if (isAdded() && documentSnapshot.exists()) {
                         // Check if the profilePic field exists in the Firestore document
                         if (documentSnapshot.contains("username"))
                             username.setText(documentSnapshot.getString("username"));
@@ -116,7 +135,14 @@ public class ProfileFragment extends Fragment {
                                     .apply(RequestOptions.circleCropTransform())
                                     .into(profilePic);
                             showLoading(false);
-
+                            saveDataToCache(
+                                    username.getText().toString(),
+                                    bio.getText().toString(),
+                                    birthDate.getText().toString(),
+                                    gender.getText().toString(),
+                                    type.getText().toString(),
+                                    uri.toString() // Save profile picture URL
+                            );
                         }
 
                     }).addOnFailureListener(new OnFailureListener() {
@@ -126,6 +152,52 @@ public class ProfileFragment extends Fragment {
                         }
                     });
 
+
+        }
+    }
+
+    private boolean loadDataFromCache(View view) {
+        // Check if data exists in cache
+        if (prefs.contains("username") && prefs.contains("bio") && prefs.contains("birthDate")
+                && prefs.contains("gender") && prefs.contains("type") && prefs.contains("profilePicUrl")) {
+
+            // Load data from cache
+            username.setText(prefs.getString("username", ""));
+            bio.setText(prefs.getString("bio", ""));
+            birthDate.setText(prefs.getString("birthDate", ""));
+            gender.setText(prefs.getString("gender", ""));
+            type.setText(prefs.getString("type", ""));
+
+            // Load profile picture from cache (if available)
+            String profilePicUrl = prefs.getString("profilePicUrl", "");
+            if (!profilePicUrl.isEmpty()) {
+                Glide.with(view)
+                        .load(profilePicUrl)
+                        .apply(RequestOptions.circleCropTransform())
+                        .into(profilePic);
+            }
+
+            return true; // Data loaded from cache
+        }
+
+        return false; // Data not found in cache
+    }
+
+    private void saveDataToCache(String username, String bio, String birthDate, String gender, String type, String profilePicUrl) {
+        if (isAdded()) {
+            SharedPreferences.Editor editor = prefs.edit();
+
+            // Save data to cache
+            editor.putString("username", username);
+            editor.putString("bio", bio);
+            editor.putString("birthDate", birthDate);
+            editor.putString("gender", gender);
+            editor.putString("type", type);
+
+            // Save profile picture URL to cache
+            editor.putString("profilePicUrl", profilePicUrl);
+
+            editor.apply();
         }
     }
 
