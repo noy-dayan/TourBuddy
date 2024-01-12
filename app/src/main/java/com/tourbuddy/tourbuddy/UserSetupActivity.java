@@ -280,7 +280,7 @@ public class UserSetupActivity extends AppCompatActivity {
             Map<String, Object> userData = new HashMap<>();
             userData.put("language", "en");
             userData.put("username", username);
-            if(!bio.isEmpty()) userData.put("bio", bio);
+            if(!bio.isEmpty()) userData.put("bio", bio); else userData.put("bio", "");
             userData.put("gender", gender);
             userData.put("birthDate", birthDate);
             userData.put("type", selectedRadioGroupChoice.trim());
