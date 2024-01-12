@@ -246,7 +246,7 @@ public class SettingsFragment extends Fragment {
                 // Set the app language based on the selected item
                 setAppLocale(selectedLanguageCode);
                 updateLanguageToFirebase(selectedLanguageCode);
-                dataCache.clearCache();
+                //dataCache.clearCache();
             }
 
             @Override
