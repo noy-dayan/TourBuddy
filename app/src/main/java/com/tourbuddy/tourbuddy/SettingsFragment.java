@@ -37,8 +37,8 @@ import java.util.Map;
 
 public class SettingsFragment extends Fragment {
 
-    private static final String PREFS_NAME = "SettingsPrefs";
-    SharedPreferences prefs;
+    DataCache dataCache;
+
 
     ImageView profilePic;
     TextView username;
@@ -55,10 +55,10 @@ public class SettingsFragment extends Fragment {
     StorageReference storageReference;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_settings, container, false);
         showLoading(true);
+        dataCache = DataCache.getInstance();
 
         mAuth = FirebaseAuth.getInstance();
         mUser = mAuth.getCurrentUser();
@@ -122,7 +122,27 @@ public class SettingsFragment extends Fragment {
 
                             // Populate the spinner after loading the language
                             setupLanguageSpinner(view);
-
+                            // Load the image into the ImageView using Glide
+                            storageReference.child("images/" + mUser.getUid() + "/profilePic").getDownloadUrl()
+                                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                        @Override
+                                        public void onSuccess(Uri uri) {
+                                            // Got the download URL for 'users/me/profile.png'
+                                            Glide.with(view)
+                                                    .load(uri)
+                                                    .apply(RequestOptions.circleCropTransform())
+                                                    .into(profilePic);
+                                            showLoading(false);
+                                            saveDataToCache(uri); // Save profile picture URL);
+                                        }
+                                    }).addOnFailureListener(new OnFailureListener() {
+                                        @Override
+                                        public void onFailure(@NonNull Exception exception) {
+                                            // Handle failure to load image
+                                            showLoading(false);
+                                            saveDataToCache(null); // Save profile picture URL);
+                                        }
+                                    });
 
                         }
                     }
@@ -134,34 +154,12 @@ public class SettingsFragment extends Fragment {
                 }
             });
 
-            // Load the image into the ImageView using Glide
-            storageReference.child("images/" + mUser.getUid() + "/profilePic").getDownloadUrl()
-                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            // Got the download URL for 'users/me/profile.png'
-                            Glide.with(view)
-                                    .load(uri)
-                                    .apply(RequestOptions.circleCropTransform())
-                                    .into(profilePic);
-                            showLoading(false);
-                            saveDataToCache(
-                                    username.getText().toString(),
-                                    uri.toString() // Save profile picture URL
-                            );
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception exception) {
-                            // Handle failure to load image
-                        }
-                    });
+
         }
     }
 
+    /*
     private boolean loadDataFromCache(View view) {
-        prefs = view.getContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-
         // Check if data exists in cache
         if (prefs.contains("username") && prefs.contains("profilePicUrl") && prefs.contains("language")) {
 
@@ -182,20 +180,40 @@ public class SettingsFragment extends Fragment {
 
         return false; // Data not found in cache
     }
+*/
 
-    private void saveDataToCache(String username, String profilePicUrl) {
-        if(isAdded()) {
-            prefs = requireActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-            SharedPreferences.Editor editor = prefs.edit();
+    private boolean loadDataFromCache(View view) {
+        // Check if data exists in memory cache
+        if (dataCache.get("username") != null  && dataCache.get("language") != null) {
 
-            // Save data to cache
-            editor.putString("username", username);
-            editor.putString("language", language);
+            // Load data from memory cache
+            username.setText((String) dataCache.get("username"));
+            language = ((String) dataCache.get("language"));
+            if (dataCache.get("profilePicUrl") != null){
+                // Load profile picture from memory cache (if available)
+                String profilePicUrl = (String) dataCache.get("profilePicUrl");
+                if (profilePicUrl != null && !profilePicUrl.isEmpty()) {
+                    Glide.with(view)
+                            .load(Uri.parse(profilePicUrl))
+                            .apply(RequestOptions.circleCropTransform())
+                            .into(profilePic);
+                }
+            }
 
-            // Save profile picture URL to cache
-            editor.putString("profilePicUrl", profilePicUrl);
+            setupLanguageSpinner(view);
+            return true; // Data loaded from memory cache
+        }
 
-            editor.apply();
+        return false; // Data not found in memory cache
+    }
+
+    private void saveDataToCache(Uri profilePicUri) {
+        if (isAdded()) {
+            // Save data to memory cache
+            dataCache.put("username", username.getText().toString());
+            dataCache.put("language", language);
+            if(profilePicUri != null)
+                dataCache.put("profilePicUrl", profilePicUri.toString());
         }
     }
 
@@ -227,8 +245,8 @@ public class SettingsFragment extends Fragment {
 
                 // Set the app language based on the selected item
                 setAppLocale(selectedLanguageCode);
-                updateLanguageToCache(selectedLanguageCode);
                 updateLanguageToFirebase(selectedLanguageCode);
+                dataCache.clearCache();
             }
 
             @Override
@@ -264,6 +282,7 @@ public class SettingsFragment extends Fragment {
                                 public void onSuccess(Void aVoid) {
                                     Log.d("DATABASE", "Language updated for user ID: " + userId);
 
+                                    updateLanguageToCache(languageCode);
                                     // Refresh the fragment only if the language has changed
                                     switchFragment(new SettingsFragment());
                                 }
@@ -281,17 +300,15 @@ public class SettingsFragment extends Fragment {
     }
 
     private void updateLanguageToCache(String languageCode) {
-        prefs = requireActivity().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = prefs.edit();
-
-        // Save language code to cache
-        editor.putString("language", languageCode);
-        editor.apply();
+        if (isAdded()) {
+            // Save data to memory cache
+            dataCache.put("language", languageCode);
+        }
     }
 
     private void switchFragment(Fragment fragment) {
         if(isAdded())
-        // Replace the current fragment with the new one
+            // Replace the current fragment with the new one
             requireActivity().getSupportFragmentManager().beginTransaction()
                     .replace(R.id.frameLayout, fragment)
                     .commit();
@@ -312,3 +329,4 @@ public class SettingsFragment extends Fragment {
         }
     }
 }
+

@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/dark_primary"
-    tools:context=".EditProfileFragment">
+    tools:context=".EditProfileFragment"
+   >
 
 
     <RelativeLayout
+        android:id="@+id/topRelativeLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/topRelativeLayout">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/btnBack"
@@ -32,4 +36,160 @@
 
     </RelativeLayout>
 
-</FrameLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layoutDirection="locale">
+
+
+        <ImageView
+            android:id="@+id/profilePic"
+            android:layout_width="110dp"
+            android:layout_height="110dp"
+            android:layout_marginTop="64dp"
+            android:background="@drawable/add_image_icon"
+            android:backgroundTint="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.498"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <EditText
+            android:id="@+id/inputUsername"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="24dp"
+            android:autofillHints=""
+            android:background="@drawable/input_bg"
+            android:drawableStart="@drawable/user_icon"
+            android:drawablePadding="10dp"
+            android:ems="10"
+            android:fontFamily="@font/lexend"
+            android:hint="@string/username"
+            android:inputType="textShortMessage"
+            android:paddingLeft="20dp"
+            android:paddingTop="13dp"
+            android:paddingRight="20dp"
+            android:paddingBottom="13dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/profilePic" />
+
+        <Spinner
+            android:id="@+id/spinnerGender"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/gender_spinner_bg"
+            android:drawablePadding="10dp"
+            android:paddingStart="40dp"
+            android:paddingTop="13dp"
+            android:paddingEnd="20dp"
+            android:paddingBottom="13dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            app:layout_constraintEnd_toEndOf="@+id/inputBio"
+            app:layout_constraintStart_toStartOf="@+id/inputBio"
+            app:layout_constraintTop_toBottomOf="@+id/inputBio" />
+
+        <EditText
+            android:id="@+id/inputBirthDate"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:autofillHints=""
+            android:background="@drawable/input_bg"
+            android:cursorVisible="false"
+            android:drawableStart="@drawable/hourglass_icon"
+            android:drawableEnd="@drawable/baseline_arrow_drop_down_24"
+            android:drawablePadding="10dp"
+            android:ems="10"
+            android:focusableInTouchMode="false"
+            android:fontFamily="@font/lexend"
+            android:hint="@string/birthDate"
+            android:inputType="none"
+            android:paddingLeft="20dp"
+            android:paddingTop="13dp"
+            android:paddingRight="20dp"
+            android:paddingBottom="13dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            app:layout_constraintEnd_toEndOf="@+id/spinnerGender"
+            app:layout_constraintStart_toStartOf="@+id/spinnerGender"
+            app:layout_constraintTop_toBottomOf="@+id/spinnerGender"
+            tools:ignore="TextFields" />
+
+
+        <EditText
+            android:id="@+id/inputBio"
+            android:layout_width="0dp"
+            android:layout_height="105dp"
+            android:layout_marginTop="16dp"
+            android:autofillHints=""
+            android:background="@drawable/input_bg"
+            android:drawablePadding="10dp"
+            android:ems="10"
+            android:fontFamily="@font/lexend"
+            android:gravity="start|top"
+            android:hint="@string/bio"
+            android:inputType="textMultiLine"
+            android:maxLength="120"
+            android:maxLines="5"
+            android:paddingLeft="20dp"
+            android:paddingTop="13dp"
+            android:paddingRight="20dp"
+            android:paddingBottom="13dp"
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            app:layout_constraintEnd_toEndOf="@+id/inputUsername"
+            app:layout_constraintStart_toStartOf="@+id/inputUsername"
+            app:layout_constraintTop_toBottomOf="@+id/inputUsername" />
+
+
+        <Button
+            android:id="@+id/btnDone"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/check_box_icon"
+            android:enabled="false"
+            android:layoutDirection="rtl"
+            android:text=""
+
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.04"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.94" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <!-- Loading overlay -->
+    <RelativeLayout
+        android:id="@+id/loadingOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/background_dark"
+        android:visibility="gone"
+        android:backgroundTint="@color/dark_primary">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:indeterminateTint="@color/orange_primary" />
+
+    </RelativeLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
