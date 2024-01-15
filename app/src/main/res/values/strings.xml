@@ -34,4 +34,11 @@
     <string name="language">Language</string>
     <string name="about">About</string>
     <string name="edit_profile">Edit Profile</string>
+    <string name="apply">Apply</string>
+    <string name="confirmDiscardChanges">Confirm Discard Changes</string>
+    <string name="confirmDiscardChangesMessage">Are you sure you want to discard changes?\n</string>
+    <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirmChanges">Confrim Changes</string>
+    <string name="confirmChangesMessage">Are you sure you want to apply changes?</string>
 </resources>

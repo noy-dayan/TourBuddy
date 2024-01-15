@@ -1,4 +1,4 @@
-package com.tourbuddy.tourbuddy;
+package com.tourbuddy.tourbuddy.activities;
 
 import android.app.Activity;
 import android.app.DatePickerDialog;
@@ -34,15 +34,13 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-import android.view.View;
+import com.tourbuddy.tourbuddy.R;
 
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Locale;
@@ -50,17 +48,11 @@ import java.util.Map;
 
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
-import android.view.LayoutInflater;
-import android.view.ViewGroup;
 
-import androidx.fragment.app.Fragment;
-
-
-public class EditProfileFragment extends Fragment {
-
-    DataCache dataCache;
-
-    ImageView btnBack;
+/**
+ * Activity for user setup, allowing users to input profile information.
+ */
+public class UserSetupActivity extends AppCompatActivity {
 
     // Constants
     private static final short MAX_USERNAME_LENGTH = 16;
@@ -83,47 +75,18 @@ public class EditProfileFragment extends Fragment {
     FirebaseStorage storage;
     StorageReference storageReference;
 
+    // Radio button selection
+    String selectedRadioGroupChoice = "Tourist";
+
     // Image picker
     ActivityResultLauncher<Intent> imagePickLauncher;
     Uri selectedImageUri;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_edit_profile, container, false);
-        showLoading(true);
-        dataCache = DataCache.getInstance();
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_user_setup);
 
-        btnBack = view.findViewById(R.id.btnBack);
-        // Initialize Firebase instances
-        mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
-        storage = FirebaseStorage.getInstance();
-        storageReference = storage.getReference();
-
-        // Initialize UI elements
-        profilePic = view.findViewById(R.id.profilePic);
-        inputUsername = view.findViewById(R.id.inputUsername);
-        inputBio = view.findViewById(R.id.inputBio);
-        spinnerGender = view.findViewById(R.id.spinnerGender);
-        inputBirthDate = view.findViewById(R.id.inputBirthDate);
-
-        // Initialize calendar for birth date selection
-        calendar = Calendar.getInstance();
-
-        btnDone = view.findViewById(R.id.btnDone);
-
-
-        // Set a click listener for the "Edit Profile" button
-        btnBack.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Navigate to the EditProfileFragment when the button is clicked
-                switchFragment(new SettingsFragment());
-            }
-        });
-
-        loadDataFromFirebase(view);
         // Initialize image picker launcher
         imagePickLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -131,7 +94,7 @@ public class EditProfileFragment extends Fragment {
                         Intent data = result.getData();
                         if(data != null && data.getData() != null) {
                             selectedImageUri = data.getData();
-                            Glide.with(EditProfileFragment.this)
+                            Glide.with(UserSetupActivity.this)
                                     .load(selectedImageUri)
                                     .apply(RequestOptions.circleCropTransform())
                                     .into(profilePic);
@@ -139,13 +102,30 @@ public class EditProfileFragment extends Fragment {
                     }
                 });
 
+        // Initialize Firebase instances
+        mAuth = FirebaseAuth.getInstance();
+        db = FirebaseFirestore.getInstance();
+        storage = FirebaseStorage.getInstance();
+        storageReference = storage.getReference();
 
+        // Initialize UI elements
+        profilePic = findViewById(R.id.profilePic);
+        inputUsername = findViewById(R.id.inputUsername);
+        inputBio = findViewById(R.id.inputBio);
+        spinnerGender = findViewById(R.id.spinnerGender);
+        inputBirthDate = findViewById(R.id.inputBirthDate);
+        toggleRadioGroup = findViewById(R.id.toggleSwitch);
+
+        // Initialize calendar for birth date selection
+        calendar = Calendar.getInstance();
+
+        btnDone = findViewById(R.id.btnDone);
 
         // Profile picture click listener
         profilePic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ImagePicker.with(EditProfileFragment.this).cropSquare().compress(512).maxResultSize(512, 512).
+                ImagePicker.with(UserSetupActivity.this).cropSquare().compress(512).maxResultSize(512, 512).
                         createIntent(new Function1<Intent, Unit>(){
                             @Override
                             public Unit invoke(Intent intent){
@@ -166,6 +146,15 @@ public class EditProfileFragment extends Fragment {
             }
         });
 
+        // RadioGroup listener to handle selected choice
+        toggleRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                RadioButton selectedRadioButton = findViewById(checkedId);
+                if (selectedRadioButton != null)
+                    selectedRadioGroupChoice = selectedRadioButton.getText().toString();
+            }
+        });
 
         // Date picker dialog setup
         DatePickerDialog.OnDateSetListener date = new DatePickerDialog.OnDateSetListener() {
@@ -191,7 +180,7 @@ public class EditProfileFragment extends Fragment {
             }
         };
 
-        datePickerDialog = new DatePickerDialog(getContext(),
+        datePickerDialog = new DatePickerDialog(UserSetupActivity.this,
                 android.R.style.Theme_Holo_Dialog_NoActionBar_MinWidth,
                 date, calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH));
@@ -215,7 +204,7 @@ public class EditProfileFragment extends Fragment {
 
         // Gender spinner setup
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                getContext(),
+                this,
                 R.array.gender_options,
                 R.layout.spinner_gender_layout
         );
@@ -268,11 +257,12 @@ public class EditProfileFragment extends Fragment {
             public void onClick(View v) {
                 saveUserDataToFirebase();
 
-
+                // After saving user data, start the UserHomeActivity
+                Intent userProfileIntent = new Intent(UserSetupActivity.this, UserHomeActivity.class);
+                startActivity(userProfileIntent);
+                finish(); // Optional: Close the current activity if needed
             }
         });
-        return view;
-
     }
 
     /**
@@ -283,31 +273,25 @@ public class EditProfileFragment extends Fragment {
         if (mUser != null) {
             String userId = mUser.getUid();
             String username = inputUsername.getText().toString().trim();
-            String gender;
-            if (spinnerGender.getSelectedItemPosition() == 1)
-                gender = "Male";
-            else if (spinnerGender.getSelectedItemPosition() == 1)
-                gender = "Female";
-            else
-                gender = "Other";
-
+            String gender = getResources().getStringArray(R.array.gender_options)[spinnerGender.getSelectedItemPosition()];
             String birthDate = inputBirthDate.getText().toString().trim();
             String bio = inputBio.getText().toString().trim();
 
             // Create a map to store user data
             Map<String, Object> userData = new HashMap<>();
+            userData.put("language", "en");
             userData.put("username", username);
             if(!bio.isEmpty()) userData.put("bio", bio); else userData.put("bio", "");
-
             userData.put("gender", gender);
             userData.put("birthDate", birthDate);
+            userData.put("type", selectedRadioGroupChoice.trim());
             if(selectedImageUri != null) uploadImage(selectedImageUri, userId, "profilePic");
 
             // Set the document name as the user ID
             DocumentReference userDocumentRef = db.collection("users").document(userId);
 
             // Set the data to the Firestore document
-            userDocumentRef.update(userData).addOnSuccessListener(new OnSuccessListener<Void>() {
+            userDocumentRef.set(userData).addOnSuccessListener(new OnSuccessListener<Void>() {
                 @Override
                 public void onSuccess(Void aVoid) {
                     Log.d("DATABASE","DocumentSnapshot added with ID: " + userId);
@@ -324,7 +308,7 @@ public class EditProfileFragment extends Fragment {
     /**
      * Upload the user profile image to Firebase Storage.
      */
-    private void uploadImage(Uri imageUri , String userId, String imageType){
+    private void uploadImage(Uri imageUri ,String userId, String imageType){
         StorageReference imageRef = storageReference.child("images/" + userId + "/" + imageType);
 
         imageRef.putFile(imageUri).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
@@ -338,99 +322,5 @@ public class EditProfileFragment extends Fragment {
                 Log.e("STORAGE","Error adding image to the user " + userId + "as " + imageType);
             }
         });
-    }
-
-    private void switchFragment(Fragment fragment) {
-        if(isAdded())
-            // Replace the current fragment with the new one
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.frameLayout, fragment)
-                    .commit();
-    }
-
-
-    private void loadDataFromFirebase(View view) {
-        mUser = mAuth.getCurrentUser();
-        if (mUser != null) {
-            String userId = mUser.getUid();
-
-            // Reference to the Firestore document
-            DocumentReference userDocumentRef = db.collection("users").document(userId);
-
-            // Retrieve data from Firestore
-            userDocumentRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    if (isAdded() && documentSnapshot.exists()) {
-                        // Check if the profilePic field exists in the Firestore document
-                        if (documentSnapshot.contains("username"))
-                            inputUsername.setText(documentSnapshot.getString("username"));
-                        if (documentSnapshot.contains("bio"))
-                            inputBio.setText(documentSnapshot.getString("bio"));
-                        if (documentSnapshot.contains("birthDate"))
-                            inputBirthDate.setText(documentSnapshot.getString("birthDate"));
-                        String gender = documentSnapshot.getString("gender");
-
-                        if (gender != null) {
-                            if(gender.equals("Male"))
-                                spinnerGender.setSelection(1);
-                            else if (gender.equals("Female"))
-                                spinnerGender.setSelection(2);
-                            else
-                                spinnerGender.setSelection(3);
-                        }
-
-                        // Load the image into the ImageView using Glide
-                        storageReference.child("images/" + mUser.getUid() + "/profilePic").getDownloadUrl()
-                                .addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                    @Override
-                                    public void onSuccess(Uri uri) {
-                                        // Got the download URL for 'users/me/profile.png'
-                                        Glide.with(view)
-                                                .load(uri)
-                                                .apply(RequestOptions.circleCropTransform())
-                                                .into(profilePic);
-                                        showLoading(false);
-                                        dataCache.clearCache();
-
-                                    }
-
-                                }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception exception) {
-                                        showLoading(false);
-                                        dataCache.clearCache();
-                                    }
-                                });
-
-                    }
-
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Log.e("DATABASE", "Error getting document", e);
-                }
-            });
-
-
-
-
-        }
-    }
-
-    // Method to show/hide the loading screen
-    private void showLoading(boolean show) {
-        View view = getView();  // Get the view
-
-        if (view != null) {
-            View loadingOverlay = view.findViewById(R.id.loadingOverlay);
-
-            if (show) {
-                loadingOverlay.setVisibility(View.VISIBLE);
-            } else {
-                loadingOverlay.setVisibility(View.GONE);
-            }
-        }
     }
 }

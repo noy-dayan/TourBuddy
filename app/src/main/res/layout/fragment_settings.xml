@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/dark_primary"
-    tools:context=".SettingsFragment">
+    tools:context=".fragments.SettingsFragment">
 
 
 
@@ -161,9 +161,11 @@
         android:backgroundTint="@color/dark_primary">
 
         <ProgressBar
+            android:id="@+id/progressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
+            android:visibility="gone"
             android:indeterminateTint="@color/orange_primary" />
 
     </RelativeLayout>

@@ -5,37 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/dark_primary"
-    tools:context=".EditProfileFragment"
+    tools:context=".fragments.EditProfileFragment"
    >
-
-
-    <RelativeLayout
-        android:id="@+id/topRelativeLayout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-        <ImageView
-            android:id="@+id/btnBack"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            android:padding="14dp"
-            android:src="@drawable/arrow_back_icon" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:fontFamily="@font/lexend"
-            android:text="@string/edit_profile"
-            android:textColor="@color/white"
-            android:textSize="22sp" />
-
-
-    </RelativeLayout>
-
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraintLayout"
@@ -161,16 +132,18 @@
             android:id="@+id/btnDone"
             android:layout_width="50dp"
             android:layout_height="50dp"
+            android:layout_marginBottom="70dp"
             android:background="@drawable/check_box_icon"
             android:enabled="false"
+
+
             android:layoutDirection="rtl"
             android:text=""
-
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.04"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/inputBirthDate"
             app:layout_constraintVertical_bias="0.94" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
@@ -185,10 +158,40 @@
         android:backgroundTint="@color/dark_primary">
 
         <ProgressBar
+            android:id="@+id/progressBar"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerInParent="true"
-            android:indeterminateTint="@color/orange_primary" />
+            android:indeterminateTint="@color/orange_primary"
+            android:visibility="gone" />
+
+    </RelativeLayout>
+
+
+    <RelativeLayout
+        android:id="@+id/topRelativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:padding="14dp"
+            android:src="@drawable/arrow_back_icon" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:fontFamily="@font/lexend"
+            android:text="@string/edit_profile"
+            android:textColor="@color/white"
+            android:textSize="22sp" />
+
 
     </RelativeLayout>
 
