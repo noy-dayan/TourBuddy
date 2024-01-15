@@ -34,5 +34,12 @@
     <string name="language">שפה</string>
     <string name="about">אודות</string>
     <string name="edit_profile">עריכת פרופיל</string>
+    <string name="apply">החל שינויים</string>
+    <string name="confirmDiscardChanges">אישור מחיקת שינויים</string>
+    <string name="confirmDiscardChangesMessage">האם אתה בטוח שברצונך למחוק שינויים?</string>
+    <string name="confirm">אישור</string>
+    <string name="cancel">ביטול</string>
+    <string name="confirmChanges">אישור שינויים</string>
+    <string name="confirmChangesMessage">האם אתה בטוח שברצונך להחיל שינויים?</string>
 
 </resources>

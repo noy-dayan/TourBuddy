@@ -1,17 +1,13 @@
-package com.tourbuddy.tourbuddy;
+package com.tourbuddy.tourbuddy.activities;
 
 import android.content.res.Configuration;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -20,13 +16,21 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.storage.FirebaseStorage;
+import com.tourbuddy.tourbuddy.R;
 import com.tourbuddy.tourbuddy.databinding.ActivityUserHomeBinding;
+import com.tourbuddy.tourbuddy.fragments.ChatFragment;
+import com.tourbuddy.tourbuddy.fragments.ProfileFragment;
+import com.tourbuddy.tourbuddy.fragments.SearchFragment;
+import com.tourbuddy.tourbuddy.fragments.SettingsFragment;
+import com.tourbuddy.tourbuddy.utils.DataCache;
 
 import java.util.Locale;
 
 public class UserHomeActivity extends AppCompatActivity {
-    private ActivityUserHomeBinding binding;
+    DataCache dataCache;
+
+    ActivityUserHomeBinding binding;
+
     FirebaseAuth mAuth;
     FirebaseUser mUser;
     FirebaseFirestore db;
@@ -36,6 +40,9 @@ public class UserHomeActivity extends AppCompatActivity {
         mAuth = FirebaseAuth.getInstance();
         mUser = mAuth.getCurrentUser();
         db = FirebaseFirestore.getInstance();
+
+        dataCache = DataCache.getInstance();
+        dataCache.clearCache();
 
         // Load the language from Firestore and set the app locale
         loadLanguageData();

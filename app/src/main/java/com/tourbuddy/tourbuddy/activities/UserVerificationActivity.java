@@ -1,4 +1,4 @@
-package com.tourbuddy.tourbuddy;
+package com.tourbuddy.tourbuddy.activities;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -16,6 +16,7 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.tourbuddy.tourbuddy.R;
 
 /**
  * Activity for user verification, for users to confirm their account.

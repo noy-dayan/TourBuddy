@@ -1,4 +1,4 @@
-package com.tourbuddy.tourbuddy;
+package com.tourbuddy.tourbuddy.activities;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -20,6 +20,7 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
+import com.tourbuddy.tourbuddy.R;
 
 import java.util.regex.Pattern;
 

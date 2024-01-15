@@ -1,4 +1,4 @@
-package com.tourbuddy.tourbuddy;
+package com.tourbuddy.tourbuddy.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
