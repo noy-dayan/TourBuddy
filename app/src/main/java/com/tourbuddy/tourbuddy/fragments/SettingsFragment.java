@@ -3,6 +3,7 @@ package com.tourbuddy.tourbuddy.fragments;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
+import android.text.Layout;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,7 +30,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.tourbuddy.tourbuddy.R;
-import com.tourbuddy.tourbuddy.adapters.SpinnerImageAdapter;
+import com.tourbuddy.tourbuddy.adapters.LanguageSpinnerAdapter;
 import com.tourbuddy.tourbuddy.utils.DataCache;
 
 import java.util.Arrays;
@@ -56,6 +57,7 @@ public class SettingsFragment extends Fragment {
     TextView username;
     Button btnEditProfile;
     Spinner languageSpinner;
+    View btnAbout;
 
     // Language variables
     String language;
@@ -84,6 +86,7 @@ public class SettingsFragment extends Fragment {
         profilePic = view.findViewById(R.id.profilePic);
         username = view.findViewById(R.id.username);
         btnEditProfile = view.findViewById(R.id.btnEditProfile);
+        btnAbout = view.findViewById(R.id.btnAbout);
 
         // Initialize loading overlay
         loadingOverlay = view.findViewById(R.id.loadingOverlay);
@@ -102,6 +105,14 @@ public class SettingsFragment extends Fragment {
             public void onClick(View v) {
                 // Navigate to the EditProfileFragment when the button is clicked
                 switchFragment(new EditProfileFragment());
+            }
+        });
+
+        // Set click listener for the "About" button
+        btnAbout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switchFragment(new AboutFragment());
             }
         });
 
@@ -224,9 +235,10 @@ public class SettingsFragment extends Fragment {
                 // Add more image resources as needed
         };
 
-        SpinnerImageAdapter spinnerImageAdapter = new SpinnerImageAdapter(requireContext(), R.layout.spinner_language_layout, languageImages);
-        spinnerImageAdapter.setDropDownViewResource(R.layout.spinner_language_dropdown_layout);
-        languageSpinner.setAdapter(spinnerImageAdapter);
+        String[] languageArray = getResources().getStringArray(R.array.languages);
+        LanguageSpinnerAdapter languageSpinnerAdapter = new LanguageSpinnerAdapter(requireContext(), R.layout.spinner_language_layout, languageImages, languageArray);
+        languageSpinnerAdapter.setDropDownViewResource(R.layout.spinner_language_dropdown_layout);
+        languageSpinner.setAdapter(languageSpinnerAdapter);
 
         // Find the index of the loaded language code in the languageCodes array
         int initialSelectionPosition = Arrays.asList(languageCodes).indexOf(language);

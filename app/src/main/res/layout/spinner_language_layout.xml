@@ -1,4 +1,4 @@
-<!-- res/layout/spinner_item_layout.xml -->
+<!-- res/layout/spinner_language_layout.xml -->
 <ImageView
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/languageIcon"

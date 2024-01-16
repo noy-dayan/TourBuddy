@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="gender_options">
+    <string-array name="genders">
         <item>Gender</item>
         <item>Male</item>
         <item>Female</item>
         <item>Other</item>
+    </string-array>
+
+    <string-array name="languages">
+        <item>English (UK)</item>
+        <item>עברית</item>
     </string-array>
 
 </resources>

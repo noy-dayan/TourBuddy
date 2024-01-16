@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/dark_primary"
+    tools:context=".fragments.AboutFragment"
+    >
+
+
+    <ImageView
+        android:id="@+id/logoImage"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/topRelativeLayout"
+        app:srcCompat="@drawable/tourbuddy_logo_transparent" />
+
+    <TextView
+        android:id="@+id/logoText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:fontFamily="@font/panton_ttf"
+        android:text="@string/app_name"
+        android:textColor="@color/orange_primary"
+        android:textSize="37sp"
+        app:layout_constraintEnd_toEndOf="@+id/logoImage"
+        app:layout_constraintStart_toStartOf="@+id/logoImage"
+        app:layout_constraintTop_toBottomOf="@+id/logoImage" />
+
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@drawable/round_back_bg"
+        app:layout_constraintBottom_toBottomOf="@+id/scrollView2"
+        app:layout_constraintEnd_toEndOf="@+id/scrollView2"
+        app:layout_constraintStart_toStartOf="@+id/scrollView2"
+        app:layout_constraintTop_toTopOf="@+id/scrollView2" />
+
+    <ScrollView
+        android:id="@+id/scrollView2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="80dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/logoText">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+
+            android:fontFamily="@font/lexend"
+            android:gravity="start"
+            android:padding="16dp"
+
+            android:text="TourBuddy is a user-friendly mobile application designed for tourists and tour guides, fostering seamless interactions and personalized travel experiences. \n\nWith features such as intuitive tour booking, transparent review systems, and efficient tour availability management, TourBuddy connects explorers with local experts worldwide. \n\nExplore the world with ease, create unforgettable memories, and make your travel adventures truly unique with TourBuddy.\n"
+            android:textColor="@color/white"
+            android:textSize="18sp" />
+
+    </ScrollView>
+
+    <RelativeLayout
+        android:id="@+id/topRelativeLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:padding="14dp"
+            android:src="@drawable/arrow_back_icon" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:fontFamily="@font/lexend"
+            android:text="@string/about"
+            android:textColor="@color/white"
+            android:textSize="22sp" />
+
+
+    </RelativeLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

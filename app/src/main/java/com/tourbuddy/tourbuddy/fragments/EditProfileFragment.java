@@ -281,7 +281,7 @@ public class EditProfileFragment extends Fragment {
         // Gender spinner setup
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 getContext(),
-                R.array.gender_options,
+                R.array.genders,
                 R.layout.spinner_gender_layout
         );
 

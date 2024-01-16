@@ -205,7 +205,7 @@ public class UserSetupActivity extends AppCompatActivity {
         // Gender spinner setup
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 this,
-                R.array.gender_options,
+                R.array.genders,
                 R.layout.spinner_gender_layout
         );
 
@@ -273,7 +273,7 @@ public class UserSetupActivity extends AppCompatActivity {
         if (mUser != null) {
             String userId = mUser.getUid();
             String username = inputUsername.getText().toString().trim();
-            String gender = getResources().getStringArray(R.array.gender_options)[spinnerGender.getSelectedItemPosition()];
+            String gender = getResources().getStringArray(R.array.genders)[spinnerGender.getSelectedItemPosition()];
             String birthDate = inputBirthDate.getText().toString().trim();
             String bio = inputBio.getText().toString().trim();
 

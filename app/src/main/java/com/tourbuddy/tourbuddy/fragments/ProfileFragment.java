@@ -129,7 +129,7 @@ public class ProfileFragment extends Fragment {
                             birthDate.setText(documentSnapshot.getString("birthDate"));
 
                         if (documentSnapshot.contains("gender")) {
-                            String[] genderOptions = requireContext().getResources().getStringArray(R.array.gender_options);
+                            String[] genderOptions = requireContext().getResources().getStringArray(R.array.genders);
                             if (Objects.equals(documentSnapshot.getString("gender"), "Male"))
                                 gender.setText(genderOptions[1]);
                             else if (Objects.equals(documentSnapshot.getString("gender"), "Female"))
