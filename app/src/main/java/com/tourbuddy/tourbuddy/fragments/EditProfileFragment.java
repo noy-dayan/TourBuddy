@@ -65,7 +65,7 @@ public class EditProfileFragment extends Fragment {
     DataCache dataCache;
 
     // Constants
-    static final short MAX_USERNAME_LENGTH = 16;
+    static final short MAX_USERNAME_LENGTH = 12;
     boolean isChanged; // Flag to track changes
     String originalUsername, originalBio, originalGender, originalBirthDate; // Original user data for comparison
 
@@ -219,7 +219,9 @@ public class EditProfileFragment extends Fragment {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (originalUsername != null) {
-                    boolean isUsernameValid = !editable.toString().trim().isEmpty() && editable.toString().trim().length() <= 16;
+                    boolean isUsernameValid = !editable.toString().trim().isEmpty()
+                            && editable.toString().trim().length() <= MAX_USERNAME_LENGTH
+                            && editable.toString().trim().matches("^(?=.*[a-zA-Z0-9])[a-zA-Z0-9 ]+$");
                     boolean isGenderSelected = spinnerGender.getSelectedItemPosition() > 0;
                     boolean isBirthDateSelected = !inputBirthDate.getText().toString().isEmpty();
 
@@ -261,7 +263,9 @@ public class EditProfileFragment extends Fragment {
             @Override
             public void afterTextChanged(Editable editable) {
                 if (originalBio != null) {
-                    boolean isUsernameValid = !inputUsername.toString().isEmpty() && inputUsername.length() <= 16;
+                    boolean isUsernameValid = !inputUsername.toString().isEmpty()
+                            && inputUsername.length() <= MAX_USERNAME_LENGTH
+                            && inputUsername.getText().toString().matches("^(?=.*[a-zA-Z0-9])[a-zA-Z0-9 ]+$");
                     boolean isGenderSelected = spinnerGender.getSelectedItemPosition() > 0;
                     boolean isBirthDateSelected = !inputBirthDate.getText().toString().isEmpty();
                     if (!Objects.equals(originalBio, inputBio.getText().toString()))
@@ -282,17 +286,19 @@ public class EditProfileFragment extends Fragment {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 getContext(),
                 R.array.genders,
-                R.layout.spinner_gender_layout
+                R.layout.spinner_custom_layout
         );
 
-        adapter.setDropDownViewResource(R.layout.spinner_gender_dropown_layout);
+        adapter.setDropDownViewResource(R.layout.spinner_custom_dropdown_layout);
 
         spinnerGender.setAdapter(adapter);
 
         spinnerGender.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                boolean isUsernameValid = !inputUsername.getText().toString().isEmpty() && inputUsername.length() <= 16;
+                boolean isUsernameValid = !inputUsername.getText().toString().isEmpty()
+                        && inputUsername.length() <= MAX_USERNAME_LENGTH
+                        && inputUsername.getText().toString().matches("^(?=.*[a-zA-Z0-9])[a-zA-Z0-9 ]+$");
                 boolean isGenderSelected = position > 0;
                 boolean isBirthDateSelected = !inputBirthDate.getText().toString().isEmpty();
 
@@ -323,7 +329,9 @@ public class EditProfileFragment extends Fragment {
 
                 updateCalendar();
 
-                boolean isUsernameValid = !inputUsername.getText().toString().isEmpty() && inputUsername.length() <= 16;
+                boolean isUsernameValid = !inputUsername.getText().toString().isEmpty()
+                        && inputUsername.length() <= MAX_USERNAME_LENGTH
+                        && inputUsername.getText().toString().matches("^(?=.*[a-zA-Z0-9])[a-zA-Z0-9 ]+$");
                 boolean isGenderSelected = spinnerGender.getSelectedItemPosition() > 0;
                 boolean isBirthDateSelected = !inputBirthDate.getText().toString().isEmpty();
 
@@ -532,8 +540,8 @@ public class EditProfileFragment extends Fragment {
     private void saveDataToCache(Uri profilePicUri) {
         if (isAdded()) {
             // Save data to memory cache
-            dataCache.put("username", inputUsername.getText().toString());
-            dataCache.put("bio", inputBio.getText().toString());
+            dataCache.put("username", inputUsername.getText().toString().trim());
+            dataCache.put("bio", inputBio.getText().toString().trim());
             dataCache.put("birthDate", inputBirthDate.getText().toString());
             dataCache.put("gender", spinnerGender.getSelectedItem().toString());
             if (profilePicUri != null)

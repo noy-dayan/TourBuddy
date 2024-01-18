@@ -1,10 +1,287 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string-array name="genders">
         <item>מגדר</item>
         <item>זכר</item>
         <item>נקבה</item>
         <item>אחר</item>
+    </string-array>
+
+    <string-array name="languages">
+        <item>English (UK)</item>
+        <item>עברית</item>
+    </string-array>
+
+
+    <string-array name="genders_filter">
+        <item>הכל</item>
+        <item>זכר</item>
+        <item>נקבה</item>
+        <item>אחר</item>
+    </string-array>
+
+    <string-array name="types_filter">
+        <item>הכל</item>
+        <item>תייר</item>
+        <item>מדריך טיולים</item>
+    </string-array>
+
+    <string-array name="countries_filter" tools:ignore="InconsistentArrays">
+        <item>הכל</item>
+        <item>אוגנדה (UG)</item>
+        <item>אוזבקיסטן (UZ)</item>
+        <item>אוסטריה (AT)</item>
+        <item>אוסטרליה (AU)</item>
+        <item>אוקראינה (UA)</item>
+        <item>אורוגוואי (UY)</item>
+        <item>אזרבייג\'ן (AZ)</item>
+        <item>אי חג המולד (CX)</item>
+        <item>איחוד האמירויות הערביות (AE)</item>
+        <item>איטליה (IT)</item>
+        <item>איי אולנד (AX)</item>
+        <item>איי בהאמה (BS)</item>
+        <item>איי הבתולה הבריטיים (VG)</item>
+        <item>איי הבתולה של ארצות הברית (VI)</item>
+        <item>איי הרד ומקדונלד (HM)</item>
+        <item>איי ווליס ופוטונה (WF)</item>
+        <item>איי טרקס וקייקוס (TC)</item>
+        <item>איי מריאנה הצפוניים (MP)</item>
+        <item>איי מרשל (MH)</item>
+        <item>איי סיישל (SC)</item>
+        <item>איי פארו (FO)</item>
+        <item>איי פוקלנד (FK)</item>
+        <item>איי פיטקרן (PN)</item>
+        <item>איי קוק (CK)</item>
+        <item>איי קוקוס (קילינג) (CC)</item>
+        <item>איי קיימן (KY)</item>
+        <item>איי שלמה (SB)</item>
+        <item>אינדונזיה (ID)</item>
+        <item>איסלנד (IS)</item>
+        <item>איראן (IR)</item>
+        <item>אירלנד (IE)</item>
+        <item>אל סלבדור (SV)</item>
+        <item>אלבניה (AL)</item>
+        <item>אלג\'יריה (DZ)</item>
+        <item>אנגווילה (AI)</item>
+        <item>אנגולה (AO)</item>
+        <item>אנדורה (AD)</item>
+        <item>אנטארקטיקה (AQ)</item>
+        <item>אנטיגואה וברבודה (AG)</item>
+        <item>אסוואטיני (SZ)</item>
+        <item>אסטוניה (EE)</item>
+        <item>אפגניסטן (AF)</item>
+        <item>אקוודור (EC)</item>
+        <item>ארגנטינה (AR)</item>
+        <item>ארובה (AW)</item>
+        <item>אריתריאה (ER)</item>
+        <item>ארמניה (AM)</item>
+        <item>ארצות הברית (US)</item>
+        <item>אתיופיה (ET)</item>
+        <item>בהוטן (BT)</item>
+        <item>בולגריה (BG)</item>
+        <item>בוליביה (BO)</item>
+        <item>בוסניה והרצגובינה (BA)</item>
+        <item>בוצוואנה (BW)</item>
+        <item>בורונדי (BI)</item>
+        <item>בורקינה פאסו (BF)</item>
+        <item>בחריין (BH)</item>
+        <item>בלארוס (BY)</item>
+        <item>בלגיה (BE)</item>
+        <item>בליז (BZ)</item>
+        <item>בנגלדש (BD)</item>
+        <item>בנין (BJ)</item>
+        <item>ברבדוס (BB)</item>
+        <item>ברוניי (BN)</item>
+        <item>ברזיל (BR)</item>
+        <item>בריטניה (GB)</item>
+        <item>ברמודה (BM)</item>
+        <item>ג\'ורג\'יה הדרומית ואיי סנדוויץ\' הדרומיים (GS)</item>
+        <item>ג\'יבוטי (DJ)</item>
+        <item>ג\'מייקה (JM)</item>
+        <item>ג\'רזי (JE)</item>
+        <item>גאורגיה (GE)</item>
+        <item>גאנה (GH)</item>
+        <item>גבון (GA)</item>
+        <item>גואטמלה (GT)</item>
+        <item>גואם (GU)</item>
+        <item>גואדלופ (GP)</item>
+        <item>גיאנה (GY)</item>
+        <item>גיאנה הצרפתית (GF)</item>
+        <item>גיברלטר (GI)</item>
+        <item>גינאה (GN)</item>
+        <item>גינאה המשוונית (GQ)</item>
+        <item>גינאה-ביסאו (GW)</item>
+        <item>גמביה (GM)</item>
+        <item>גרינלנד (GL)</item>
+        <item>גרמניה (DE)</item>
+        <item>גרנדה (GD)</item>
+        <item>גרנזי (GG)</item>
+        <item>דומיניקה (DM)</item>
+        <item>דנמרק (DK)</item>
+        <item>דרום אפריקה (ZA)</item>
+        <item>דרום סודן (SS)</item>
+        <item>האי בובה (BV)</item>
+        <item>האי מאן (IM)</item>
+        <item>האי נורפוק (NF)</item>
+        <item>האיטי (HT)</item>
+        <item>האיים המלדיביים (MV)</item>
+        <item>האיים המרוחקים הקטנים של ארה"ב (UM)</item>
+        <item>האיים הקריביים ההולנדיים (BQ)</item>
+        <item>הודו (IN)</item>
+        <item>הוותיקן (VA)</item>
+        <item>הולנד (NL)</item>
+        <item>הונג קונג (אזור מנהלי מיוחד של סין) (HK)</item>
+        <item>הונגריה (HU)</item>
+        <item>הונדורס (HN)</item>
+        <item>הטריטוריה הבריטית באוקיינוס ההודי (IO)</item>
+        <item>הטריטוריות הדרומיות של צרפת (TF)</item>
+        <item>הפיליפינים (PH)</item>
+        <item>הרפובליקה הדומיניקנית (DO)</item>
+        <item>הרפובליקה המרכז-אפריקאית (CF)</item>
+        <item>השטחים הפלסטיניים (PS)</item>
+        <item>וייטנאם (VN)</item>
+        <item>ונואטו (VU)</item>
+        <item>ונצואלה (VE)</item>
+        <item>זימבבואה (ZW)</item>
+        <item>זמביה (ZM)</item>
+        <item>חוף השנהב (CI)</item>
+        <item>טג\'יקיסטן (TJ)</item>
+        <item>טובאלו (TV)</item>
+        <item>טוגו (TG)</item>
+        <item>טונגה (TO)</item>
+        <item>טוקלאו (TK)</item>
+        <item>טורקיה (TR)</item>
+        <item>טורקמניסטן (TM)</item>
+        <item>טייוואן (TW)</item>
+        <item>טימור-לסטה (TL)</item>
+        <item>טנזניה (TZ)</item>
+        <item>טרינידד וטובגו (TT)</item>
+        <item>יוון (GR)</item>
+        <item>יפן (JP)</item>
+        <item>ירדן (JO)</item>
+        <item>ישראל (IL)</item>
+        <item>כווית (KW)</item>
+        <item>כף ורדה (CV)</item>
+        <item>לאוס (LA)</item>
+        <item>לבנון (LB)</item>
+        <item>לוב (LY)</item>
+        <item>לוקסמבורג (LU)</item>
+        <item>לטביה (LV)</item>
+        <item>ליבריה (LR)</item>
+        <item>ליטא (LT)</item>
+        <item>ליכטנשטיין (LI)</item>
+        <item>לסוטו (LS)</item>
+        <item>מאוריטניה (MR)</item>
+        <item>מאוריציוס (MU)</item>
+        <item>מאיוט (YT)</item>
+        <item>מאלי (ML)</item>
+        <item>מדגסקר (MG)</item>
+        <item>מוזמביק (MZ)</item>
+        <item>מולדובה (MD)</item>
+        <item>מונגוליה (MN)</item>
+        <item>מונטנגרו (ME)</item>
+        <item>מונסראט (MS)</item>
+        <item>מונקו (MC)</item>
+        <item>מונגוליה (MN)</item>
+        <item>מונסראט (MS)</item>
+        <item>מוריטניה (MR)</item>
+        <item>מורישיוס (MU)</item>
+        <item>מיוט (YT)</item>
+        <item>מיאנמר (בורמה) (MM)</item>
+        <item>מיקרונזיה (FM)</item>
+        <item>מלאווי (MW)</item>
+        <item>מלזיה (MY)</item>
+        <item>מלטה (MT)</item>
+        <item>מצרים (EG)</item>
+        <item>מקאו (אזור מנהלי מיוחד של סין) (MO)</item>
+        <item>מקדוניה הצפונית (MK)</item>
+        <item>מקסיקו (MX)</item>
+        <item>מרוקו (MA)</item>
+        <item>מרטיניק (MQ)</item>
+        <item>נאורו (NR)</item>
+        <item>נורווגיה (NO)</item>
+        <item>ניגריה (NG)</item>
+        <item>ניו זילנד (NZ)</item>
+        <item>ניווה (NU)</item>
+        <item>ניז׳ר (NE)</item>
+        <item>ניקרגואה (NI)</item>
+        <item>נמיביה (NA)</item>
+        <item>נפאל (NP)</item>
+        <item>סאו טומה ופרינסיפה (ST)</item>
+        <item>סבאלברד ויאן מאיין (SJ)</item>
+        <item>סהרה המערבית (EH)</item>
+        <item>סודן (SD)</item>
+        <item>סומליה (SO)</item>
+        <item>סוריה (SY)</item>
+        <item>סורינאם (SR)</item>
+        <item>סיירה לאונה (SL)</item>
+        <item>סין (CN)</item>
+        <item>סינגפור (SG)</item>
+        <item>סלובניה (SI)</item>
+        <item>סלובקיה (SK)</item>
+        <item>סמואה (WS)</item>
+        <item>סמואה האמריקנית (AS)</item>
+        <item>סן מרטן (MF)</item>
+        <item>סן מרינו (SM)</item>
+        <item>סנגל (SN)</item>
+        <item>סנט ברתולומיאו (BL)</item>
+        <item>סנט הלנה (SH)</item>
+        <item>סנט וינסנט והגרנדינים (VC)</item>
+        <item>סנט לוסיה (LC)</item>
+        <item>סנט מארטן (SX)</item>
+        <item>סנט פייר ומיקלון (PM)</item>
+        <item>סנט קיטס ונוויס (KN)</item>
+        <item>ספרד (ES)</item>
+        <item>סרביה (RS)</item>
+        <item>סרי לנקה (LK)</item>
+        <item>עומאן (OM)</item>
+        <item>עיראק (IQ)</item>
+        <item>ערב הסעודית (SA)</item>
+        <item>פוארטו ריקו (PR)</item>
+        <item>פולין (PL)</item>
+        <item>פולינזיה הצרפתית (PF)</item>
+        <item>פורטוגל (PT)</item>
+        <item>פיג׳י (FJ)</item>
+        <item>פינלנד (FI)</item>
+        <item>פלאו (PW)</item>
+        <item>פנמה (PA)</item>
+        <item>פפואה גינאה החדשה (PG)</item>
+        <item>פקיסטן (PK)</item>
+        <item>פרגוואי (PY)</item>
+        <item>פרו (PE)</item>
+        <item>צ׳אד (TD)</item>
+        <item>צ׳ילה (CL)</item>
+        <item>צ׳כיה (CZ)</item>
+        <item>צרפת (FR)</item>
+        <item>קובה (CU)</item>
+        <item>קולומביה (CO)</item>
+        <item>קומורו (KM)</item>
+        <item>קונגו - ברזאויל (CG)</item>
+        <item>קונגו - קינשאסה (CD)</item>
+        <item>קוסטה ריקה (CR)</item>
+        <item>קוראסאו (CW)</item>
+        <item>קוריאה הדרומית (KR)</item>
+        <item>קוריאה הצפונית (KP)</item>
+        <item>קזחסטן (KZ)</item>
+        <item>קטאר (QA)</item>
+        <item>קירגיזסטן (KG)</item>
+        <item>קיריבאטי (KI)</item>
+        <item>קלדוניה החדשה (NC)</item>
+        <item>קמבודיה (KH)</item>
+        <item>קמרון (CM)</item>
+        <item>קנדה (CA)</item>
+        <item>קניה (KE)</item>
+        <item>קפריסין (CY)</item>
+        <item>קרואטיה (HR)</item>
+        <item>ראוניון (RE)</item>
+        <item>רואנדה (RW)</item>
+        <item>רומניה (RO)</item>
+        <item>רוסיה (RU)</item>
+        <item>שוודיה (SE)</item>
+        <item>שווייץ (CH)</item>
+        <item>תאילנד (TH)</item>
+        <item>תוניסיה (TN)</item>
+        <item>תימון (YE)</item>
     </string-array>
 
 </resources>

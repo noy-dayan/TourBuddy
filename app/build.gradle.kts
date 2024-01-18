@@ -67,6 +67,10 @@ dependencies {
     //
     implementation("com.google.code.gson:gson:2.8.9")
 
+    // SearchView
+    implementation("androidx.appcompat:appcompat:1.6.1")
+
+
 
 
 }

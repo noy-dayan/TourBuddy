@@ -19,7 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.tourbuddy.tourbuddy.R;
 import com.tourbuddy.tourbuddy.databinding.ActivityUserHomeBinding;
 import com.tourbuddy.tourbuddy.fragments.ChatFragment;
-import com.tourbuddy.tourbuddy.fragments.ProfileFragment;
+import com.tourbuddy.tourbuddy.fragments.ThisProfileFragment;
 import com.tourbuddy.tourbuddy.fragments.SearchFragment;
 import com.tourbuddy.tourbuddy.fragments.SettingsFragment;
 import com.tourbuddy.tourbuddy.utils.DataCache;
@@ -102,7 +102,7 @@ public class UserHomeActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         // Set the default fragment when the activity is created
-        replaceFragment(new ProfileFragment());
+        replaceFragment(new ThisProfileFragment());
 
         // Set the listener for BottomNavigationView
         BottomNavigationView bottomNavigationView = binding.bottomNavigationView;
@@ -115,8 +115,8 @@ public class UserHomeActivity extends AppCompatActivity {
                 replaceFragment(new SearchFragment());
             else if (item.getItemId() == R.id.chat && !(getSupportFragmentManager().findFragmentById(R.id.frameLayout) instanceof ChatFragment))
                 replaceFragment(new ChatFragment());
-            else if (item.getItemId() == R.id.profile && !(getSupportFragmentManager().findFragmentById(R.id.frameLayout) instanceof ProfileFragment))
-                replaceFragment(new ProfileFragment());
+            else if (item.getItemId() == R.id.profile && !(getSupportFragmentManager().findFragmentById(R.id.frameLayout) instanceof ThisProfileFragment))
+                replaceFragment(new ThisProfileFragment());
             else if (item.getItemId() == R.id.settings && !(getSupportFragmentManager().findFragmentById(R.id.frameLayout) instanceof SettingsFragment))
                 replaceFragment(new SettingsFragment());
 

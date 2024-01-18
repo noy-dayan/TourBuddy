@@ -55,7 +55,7 @@ import kotlin.jvm.functions.Function1;
 public class UserSetupActivity extends AppCompatActivity {
 
     // Constants
-    private static final short MAX_USERNAME_LENGTH = 16;
+    private static final short MAX_USERNAME_LENGTH = 12;
 
     // UI elements
     Spinner spinnerGender;
@@ -166,7 +166,9 @@ public class UserSetupActivity extends AppCompatActivity {
 
                 updateCalendar();
 
-                boolean isUsernameValid = !inputUsername.getText().toString().isEmpty() && inputUsername.length() <= 16;
+                boolean isUsernameValid = !inputUsername.getText().toString().isEmpty()
+                        && inputUsername.length() <= MAX_USERNAME_LENGTH
+                        && inputUsername.getText().toString().matches("^(?=.*[a-zA-Z0-9])[a-zA-Z0-9 ]+$");
                 boolean isGenderSelected = spinnerGender.getSelectedItemPosition() > 0;
                 boolean isBirthDateSelected = !inputBirthDate.getText().toString().isEmpty();
 
@@ -206,17 +208,19 @@ public class UserSetupActivity extends AppCompatActivity {
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
                 this,
                 R.array.genders,
-                R.layout.spinner_gender_layout
+                R.layout.spinner_custom_layout
         );
 
-        adapter.setDropDownViewResource(R.layout.spinner_gender_dropown_layout);
+        adapter.setDropDownViewResource(R.layout.spinner_custom_dropdown_layout);
 
         spinnerGender.setAdapter(adapter);
 
         spinnerGender.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                boolean isUsernameValid = !inputUsername.getText().toString().isEmpty() && inputUsername.length() <= 16;
+                boolean isUsernameValid = !inputUsername.getText().toString().isEmpty()
+                        && inputUsername.length() <= MAX_USERNAME_LENGTH
+                        && inputUsername.getText().toString().matches("^(?=.*[a-zA-Z0-9])[a-zA-Z0-9 ]+$");
                 boolean isGenderSelected = position > 0;
                 boolean isBirthDateSelected = !inputBirthDate.getText().toString().isEmpty();
 
@@ -243,7 +247,9 @@ public class UserSetupActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                boolean isUsernameValid = !editable.toString().isEmpty() && editable.length() <= 16;
+                boolean isUsernameValid = !editable.toString().trim().isEmpty()
+                        && editable.toString().trim().length() <= MAX_USERNAME_LENGTH
+                        && editable.toString().trim().matches("^(?=.*[a-zA-Z0-9])[a-zA-Z0-9 ]+$");
                 boolean isGenderSelected = spinnerGender.getSelectedItemPosition() > 0;
                 boolean isBirthDateSelected = !inputBirthDate.getText().toString().isEmpty();
 

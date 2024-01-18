@@ -39,6 +39,12 @@
     <string name="confirmDiscardChangesMessage">Are you sure you want to discard changes?\n</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
-    <string name="confirmChanges">Confrim Changes</string>
+    <string name="confirmChanges">Confirm Changes</string>
     <string name="confirmChangesMessage">Are you sure you want to apply changes?</string>
+    <string name="logout">Logout</string>
+    <string name="confirmLogout">Confirm Logout</string>
+    <string name="confirmLogoutMessage">Are you sure you want to log out of TourBuddy?</string>
+    <string name="search">Search</string>
+    <string name="username_restirction" >• Username must be numbers, spaces or English characters.</string>
+
 </resources>

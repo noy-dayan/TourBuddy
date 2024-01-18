@@ -1,5 +1,8 @@
 package com.tourbuddy.tourbuddy.fragments;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
@@ -30,6 +33,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.tourbuddy.tourbuddy.R;
+import com.tourbuddy.tourbuddy.activities.MainActivity;
 import com.tourbuddy.tourbuddy.adapters.LanguageSpinnerAdapter;
 import com.tourbuddy.tourbuddy.utils.DataCache;
 
@@ -57,7 +61,7 @@ public class SettingsFragment extends Fragment {
     TextView username;
     Button btnEditProfile;
     Spinner languageSpinner;
-    View btnAbout;
+    View btnAbout, btnLogout;;
 
     // Language variables
     String language;
@@ -87,6 +91,7 @@ public class SettingsFragment extends Fragment {
         username = view.findViewById(R.id.username);
         btnEditProfile = view.findViewById(R.id.btnEditProfile);
         btnAbout = view.findViewById(R.id.btnAbout);
+        btnLogout = view.findViewById(R.id.btnLogout);
 
         // Initialize loading overlay
         loadingOverlay = view.findViewById(R.id.loadingOverlay);
@@ -116,8 +121,56 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+        // Set click listener for the "Logout" button
+        btnLogout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Call the logout method when the button is clicked
+                showLogoutDialog();
+            }
+        });
+
         return view;
     }
+
+    /**
+     * Logout the user from the system and navigate to the login activity.
+     */
+    private void logout() {
+        // Use Firebase Auth to sign out the user
+        mAuth.signOut();
+
+        // Navigate to the login activity
+        Intent intent = new Intent(requireContext(), MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(intent);
+        requireActivity().finish(); // Finish the current activity
+    }
+
+    /**
+     * Open "Confirm Logout" dialog.
+     */
+    private void showLogoutDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle(requireContext().getResources().getString(R.string.confirmLogout));
+        builder.setMessage(requireContext().getResources().getString(R.string.confirmLogoutMessage));
+        builder.setPositiveButton(requireContext().getResources().getString(R.string.logout), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                logout();
+            }
+        });
+
+        builder.setNegativeButton(requireContext().getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Do nothing, close the dialog
+            }
+        });
+
+        builder.show();
+    }
+
 
     /**
      * Load user data from Firebase Firestore.

@@ -41,5 +41,10 @@
     <string name="cancel">ביטול</string>
     <string name="confirmChanges">אישור שינויים</string>
     <string name="confirmChangesMessage">האם אתה בטוח שברצונך להחיל שינויים?</string>
+    <string name="logout">התנתקות</string>
+    <string name="confirmLogout">אישור התנתקות</string>
+    <string name="confirmLogoutMessage">האם אתה בטוח שברצונך להתנתק מ-TourBuddy?</string>
+    <string name="search">חיפוש</string>
+    <string name="username_restirction">• שם משתמש יכול להכיל רק מספרים, רווחים ותווים באנגלית.</string>
 
 </resources>
