@@ -27,7 +27,6 @@
     </string-array>
 
     <string-array name="countries_filter" tools:ignore="InconsistentArrays">
-        <item>הכל</item>
         <item>אוגנדה (UG)</item>
         <item>אוזבקיסטן (UZ)</item>
         <item>אוסטריה (AT)</item>

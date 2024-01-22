@@ -28,7 +28,7 @@ import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.tourbuddy.tourbuddy.R;
-import com.tourbuddy.tourbuddy.adapters.UserAdapter;
+import com.tourbuddy.tourbuddy.adapters.UserRecyclerViewAdapter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,7 @@ import java.util.List;
 public class SearchFragment extends Fragment {
 
     RecyclerView recyclerView;
-    UserAdapter userAdapter;
+    UserRecyclerViewAdapter userRecyclerViewAdapter;
 
     // Initialize userList with user data
     List<String> userIdList = new ArrayList<String>();
@@ -231,8 +231,8 @@ public class SearchFragment extends Fragment {
 
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        userAdapter = new UserAdapter(getActivity() ,getContext(), loadingOverlay, progressBar, userIdList, countryFilter, typeFilter, usernameFilter, genderFilter);
-        recyclerView.setAdapter(userAdapter);
+        userRecyclerViewAdapter = new UserRecyclerViewAdapter(getActivity() ,getContext(), loadingOverlay, progressBar, userIdList, countryFilter, typeFilter, usernameFilter, genderFilter);
+        recyclerView.setAdapter(userRecyclerViewAdapter);
         mUser = mAuth.getCurrentUser();
         if (mUser != null) {
             showLoading(true);
@@ -256,9 +256,9 @@ public class SearchFragment extends Fragment {
                                 }
                         }
                         // Notify the adapter that the data has changed
-                        userAdapter.notifyDataSetChanged();
-                        //userAdapter = new UserAdapter(getContext(), userIdList);
-                        //recyclerView.setAdapter(userAdapter);
+                        userRecyclerViewAdapter.notifyDataSetChanged();
+                        //userRecyclerViewAdapter = new UserRecyclerViewAdapter(getContext(), userIdList);
+                        //recyclerView.setAdapter(userRecyclerViewAdapter);
                     }
                 }
             }).addOnFailureListener(new OnFailureListener() {

@@ -240,17 +240,6 @@ public class EditProfileFragment extends Fragment {
      * Bio user input manager.
      */
     private void bioInputManager() {
-        // Input bio key listener to handle multi-line input
-        inputBio.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_DOWN)
-                    return ((EditText) v).getLineCount() >= ((EditText) v).getMaxLines();
-
-                return false;
-            }
-        });
-
         inputBio.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {

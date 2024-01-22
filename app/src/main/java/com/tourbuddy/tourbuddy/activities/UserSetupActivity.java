@@ -136,15 +136,6 @@ public class UserSetupActivity extends AppCompatActivity {
             }
         });
 
-        // Input bio key listener to handle multi-line input
-        inputBio.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_ENTER  && event.getAction() == KeyEvent.ACTION_DOWN)
-                    return ((EditText) v).getLineCount() >= ((EditText) v).getMaxLines();
-                return false;
-            }
-        });
 
         // RadioGroup listener to handle selected choice
         toggleRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {

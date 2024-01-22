@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
@@ -20,14 +22,21 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.tourbuddy.tourbuddy.R;
+import com.tourbuddy.tourbuddy.adapters.TourPackageRecyclerViewAdapter;
+import com.tourbuddy.tourbuddy.adapters.UserRecyclerViewAdapter;
 import com.tourbuddy.tourbuddy.utils.DataCache;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -54,6 +63,12 @@ public class ThisProfileFragment extends Fragment {
     // Loading overlay
     View loadingOverlay;
     ProgressBar progressBar;
+
+    // RecyclerView for Tour Packages
+    RecyclerView recyclerViewTours;
+    TourPackageRecyclerViewAdapter tourPackageRecyclerViewAdapter;
+    List<String> tourPackagesIdList = new ArrayList<>();
+    String userId;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -82,6 +97,12 @@ public class ThisProfileFragment extends Fragment {
         loadingOverlay = view.findViewById(R.id.loadingOverlay);
         progressBar = view.findViewById(R.id.progressBar);
 
+        recyclerViewTours = view.findViewById(R.id.recyclerViewTours);
+
+        mUser = mAuth.getCurrentUser();
+        if (mUser != null)
+            userId = mUser.getUid();
+
         // Attempt to load data from cache
         if (!loadDataFromCache(view)) {
             showLoading(true);
@@ -92,6 +113,7 @@ public class ThisProfileFragment extends Fragment {
         // Set up pull-to-refresh functionality
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setOnRefreshListener(() -> {
+                tourPackagesIdList = new ArrayList<>();
                 loadDataFromFirebase(view);
                 swipeRefreshLayout.setRefreshing(false);
             });
@@ -102,13 +124,20 @@ public class ThisProfileFragment extends Fragment {
         return view;
     }
 
+
     /**
      * Fetch user data from Firebase Firestore.
      */
     private void loadDataFromFirebase(View view) {
+        // Initialize RecyclerView for Tour Packages
+
         mUser = mAuth.getCurrentUser();
         if (mUser != null) {
-            String userId = mUser.getUid();
+            userId = mUser.getUid();
+            tourPackageRecyclerViewAdapter = new TourPackageRecyclerViewAdapter(getActivity(), userId, tourPackagesIdList);
+            recyclerViewTours.setAdapter(tourPackageRecyclerViewAdapter);
+            recyclerViewTours.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+
 
             // Reference to the Firestore document
             DocumentReference userDocumentRef = db.collection("users").document(userId);
@@ -122,9 +151,10 @@ public class ThisProfileFragment extends Fragment {
                         if (documentSnapshot.contains("username"))
                             username.setText(documentSnapshot.getString("username"));
 
-                        if (documentSnapshot.contains("bio"))
+                        if (documentSnapshot.contains("bio")) {
                             bio.setText(documentSnapshot.getString("bio"));
-
+                            bio.setVisibility(View.VISIBLE);
+                        }
                         if (documentSnapshot.contains("birthDate"))
                             birthDate.setText(documentSnapshot.getString("birthDate"));
 
@@ -166,7 +196,36 @@ public class ThisProfileFragment extends Fragment {
                                         saveDataToCache(null); // Save profile picture URL);
                                     }
                                 });
-                    }
+
+                        // Check if the document contains a collection "tourPackages"
+                            Log.d("TAG1", "onSuccess: ");
+
+                            // Get the reference to the "tourPackages" collection
+                            CollectionReference tourPackagesRef = userDocumentRef.collection("tourPackages");
+
+                            // Retrieve documents from the "tourPackages" collection
+                            tourPackagesRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                @Override
+                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                                        Log.d("TAG2", document.getId());
+                                        tourPackagesIdList.add(document.getId());
+
+
+                                    }
+                                    tourPackageRecyclerViewAdapter.notifyDataSetChanged();
+
+
+
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.e("DATABASE", "Error getting tourPackages collection", e);
+                                }
+                            });
+                        }
+
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -189,10 +248,23 @@ public class ThisProfileFragment extends Fragment {
 
             // Load data from memory cache
             username.setText((String) dataCache.get("username"));
-            bio.setText((String) dataCache.get("bio"));
+            if(!dataCache.get("bio").equals("")){
+                bio.setText((String) dataCache.get("bio"));
+                bio.setVisibility(View.VISIBLE);
+            }
             birthDate.setText((String) dataCache.get("birthDate"));
             gender.setText((String) dataCache.get("gender"));
             type.setText((String) dataCache.get("type"));
+
+            // Load the list of tour package IDs and set up the RecyclerView
+            tourPackagesIdList = (List<String>) dataCache.get("tourPackagesIdList");
+            if (tourPackagesIdList != null) {
+                tourPackageRecyclerViewAdapter = new TourPackageRecyclerViewAdapter(getActivity(), userId, tourPackagesIdList);
+                recyclerViewTours.setAdapter(tourPackageRecyclerViewAdapter);
+                recyclerViewTours.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+            }
+            else
+                return false;
 
             if (dataCache.get("profilePicUrl") != null) {
                 // Load profile picture from memory cache (if available)
@@ -224,6 +296,7 @@ public class ThisProfileFragment extends Fragment {
             dataCache.put("type", type.getText().toString());
             if (profilePicUri != null)
                 dataCache.put("profilePicUrl", profilePicUri.toString());
+            dataCache.put("tourPackagesIdList", tourPackagesIdList);
         }
     }
 
@@ -236,4 +309,6 @@ public class ThisProfileFragment extends Fragment {
             progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
         }
     }
+
+
 }

@@ -39,6 +39,7 @@
     <string name="confirmDiscardChangesMessage">האם אתה בטוח שברצונך למחוק שינויים?</string>
     <string name="confirm">אישור</string>
     <string name="cancel">ביטול</string>
+    <string name="clearAll">נקה הכל</string>
     <string name="confirmChanges">אישור שינויים</string>
     <string name="confirmChangesMessage">האם אתה בטוח שברצונך להחיל שינויים?</string>
     <string name="logout">התנתקות</string>
@@ -46,5 +47,48 @@
     <string name="confirmLogoutMessage">האם אתה בטוח שברצונך להתנתק מ-TourBuddy?</string>
     <string name="search">חיפוש</string>
     <string name="username_restirction">• שם משתמש יכול להכיל רק מספרים, רווחים ותווים באנגלית.</string>
+
+
+    <!-- Tour Package Creation-->
+    <string name="tourDescription">תיאור הסיור:</string>
+    <string name="tourDescriptionGuideline">• ספק תיאור מפורט של הסיור, כולל אתרים מרכזיים ופעילויות.\n• ציין כל משמעות היסטורית או תרבותית הקשור לסיור.</string>
+
+    <string name="itinerary">לוח זמנים:</string>
+    <string name="ItineraryGuideline">• פרט את הסיור יום אחרי יום או פרט לפי נקודות.\n• ציין את זמני ההתחלה והסיום של כל פעולה.\n• כלול הפסקות או זמן פנוי.</string>
+
+    <string name="duration">משך הסיור:</string>
+    <string name="durationGuideline">• ציין באופן ברור את זמן סך הסיור.\n• כלול זמני הערכה לכל פעולה.</string>
+
+    <string name="meetingPoint">נקודת מפגש:</string>
+    <string name="meetingPointGuideline">• ציין באופן ברור איפה הסיור מתחיל.\n• כלול כל פרטים חשובים, כמו סמלים והוראות ספציפיות.</string>
+
+    <string name="includedServices">שירותים כלולים:</string>
+    <string name="includedServicesGuideline">• רשום מה כלול בחבילת הסיור (לדוג\', הסעה, ארוחות, כרטיסי כניסה).\n• ציין אם ישנם אפשרויות להוספת שירותים או שדרוגים.</string>
+
+    <string name="excludedServices">שירותים לא כלולים:</string>
+    <string name="excludedServicesGuideline">• ציין באופן ברור מה אינו כלול בחבילה.\n• זה יכול לכלול הוצאות אישיות, טיפים או פעילויות אופציונליות.</string>
+
+    <string name="price">מחיר:</string>
+    <string name="priceGuideline">• ציין באופן ברור את מחיר החבילה.\n• ציין אם ישנם הנחות לקבוצות ספציפיות או עונות מסוימות.</string>
+
+    <string name="groupSize">גודל קבוצה:</string>
+    <string name="groupSizeGuideline">• ציין את מספר המשתתפים המקסימלי עבור הסיור (הערך חייב להיות מספרי).</string>
+
+    <string name="cancellationPolicy">מדיניות ביטול:</string>
+    <string name="cancellationPolicyGuideline">• פרט באופן ברור את מדיניות הביטול, כולל כל דמי ביטול או תנאי החזר.</string>
+
+    <string name="specialRequirements">דרישות מיוחדות:</string>
+    <string name="specialRequirementsGuideline">• הדגש על דרישות או נחישות מיוחדות למשתתפים (לדוג\', רמת כושר פיזית, הגבלות גיל).</string>
+
+    <string name="additionalInformation">מידע נוסף:</string>
+    <string name="additionalInformationGuideline">• כלול כל מידע נוסף רלוונטי, כמו תרבויות מקומיות, טיפים לבטיחות, או פריטים מומלצים להביא.</string>
+
+    <string name="photosAndMultimedia">תמונות ומדיה:</string>
+
+    <string name="createPackage">צור חבילה</string>
+    <string name="packageName">שם החבילה</string>
+    <string name="packageCoverImage">תמונה ראשית לחבילה</string>
+    <string name="includedCountries">מדינות כלולות</string>
+    <string name="selectCountries">-בחר מדינות-</string>
 
 </resources>

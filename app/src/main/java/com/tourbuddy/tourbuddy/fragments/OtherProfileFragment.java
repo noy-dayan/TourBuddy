@@ -48,11 +48,7 @@ public class OtherProfileFragment extends Fragment {
     ProgressBar progressBar;
 
     // User ID received from arguments
-    private String userId;
-
-    public OtherProfileFragment() {
-        // Required empty public constructor
-    }
+    String userId;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

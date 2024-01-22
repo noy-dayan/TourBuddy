@@ -32,7 +32,7 @@ import com.tourbuddy.tourbuddy.fragments.OtherProfileFragment;
 import java.util.List;
 import java.util.Objects;
 
-public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
+public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerViewAdapter.ViewHolder> {
 
     private List<String> userIdList;
     private Activity activity;
@@ -45,8 +45,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     private ProgressBar progressBar;
     private int loadedItemCount = 0; // Counter for loaded items
 
-    public UserAdapter(Activity activity, Context context, View loadingOverlay, ProgressBar progressBar,
-                       List<String> userIdList, String countryFilter, String typeFilter, String usernameFilter, String genderFilter) {
+    public UserRecyclerViewAdapter(Activity activity, Context context, View loadingOverlay, ProgressBar progressBar,
+                                   List<String> userIdList, String countryFilter, String typeFilter, String usernameFilter, String genderFilter) {
         this.activity = activity;
         this.context = context;
         this.userIdList = userIdList;
@@ -61,8 +61,8 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.user_item_layout, parent, false);
-        return new ViewHolder(view, userIdList, this);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recyclerview_user_item_layout, parent, false);
+        return new ViewHolder(view, this);
     }
 
     @Override
@@ -79,11 +79,11 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView profilePic;
         TextView username, type;
-        UserAdapter userAdapter;
+        UserRecyclerViewAdapter userRecyclerViewAdapter;
 
-        public ViewHolder(@NonNull View itemView, List<String> userIdList, UserAdapter userAdapter) {
+        public ViewHolder(@NonNull View itemView, UserRecyclerViewAdapter userRecyclerViewAdapter) {
             super(itemView);
-            this.userAdapter = userAdapter;
+            this.userRecyclerViewAdapter = userRecyclerViewAdapter;
             profilePic = itemView.findViewById(R.id.userProfilePic);
             username = itemView.findViewById(R.id.username);
             type = itemView.findViewById(R.id.type);
@@ -93,16 +93,16 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
                 public void onClick(View v) {
                     int position = getAdapterPosition();
                     if (position != RecyclerView.NO_POSITION) {
-                        String clickedUserId = userIdList.get(position);
+                        String clickedUserId = userRecyclerViewAdapter.userIdList.get(position);
 
                         OtherProfileFragment otherProfileFragment = new OtherProfileFragment();
                         Bundle args = new Bundle();
                         args.putString("userId", clickedUserId);
                         otherProfileFragment.setArguments(args);
 
-                        // Call the non-static switchFragment method on the UserAdapter instance
-                        userAdapter.switchFragment(otherProfileFragment);
-                        userIdList.clear();
+                        // Call the non-static switchFragment method on the UserRecyclerViewAdapter instance
+                        userRecyclerViewAdapter.switchFragment(otherProfileFragment);
+                        userRecyclerViewAdapter.userIdList.clear();
                     }
                 }
             });

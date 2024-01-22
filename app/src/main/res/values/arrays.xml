@@ -27,7 +27,6 @@
     </string-array>
 
     <string-array name="countries_filter" tools:ignore="InconsistentArrays">
-        <item>All</item>
         <item>Afghanistan (AF)</item>
         <item>Åland Islands (AX)</item>
         <item>Albania (AL)</item>

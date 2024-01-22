@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/layout/tour_package_item_layout.xml -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingEnd="8dp"
+    android:paddingTop="8dp"
+    android:background="@color/transparent"
+    tools:ignore="RtlSymmetry">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:id="@+id/packageImage"
+            android:layout_width="160dp"
+            android:layout_height="120dp"
+            android:src="@drawable/add_image_icon"
+            app:layout_constraintDimensionRatio="4:3" />
+
+        <TextView
+            android:id="@+id/packageNameInput"
+            android:layout_width="160dp"
+            android:layout_height="75dp"
+            android:layout_marginBottom="8dp"
+            android:fontFamily="@font/lexend"
+            android:gravity="center|top"
+            android:padding="8dp"
+            android:text="@string/packageName"
+            android:textColor="@android:color/white"
+            android:textSize="15sp"
+            android:layout_below="@+id/packageImage" />
+    </RelativeLayout>
+</FrameLayout>
+

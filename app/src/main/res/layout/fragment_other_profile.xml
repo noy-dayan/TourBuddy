@@ -131,29 +131,48 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <androidx.constraintlayout.widget.ConstraintLayout
+
+                <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent"
+                    android:id="@+id/tourGuideLayout"
+                    android:visibility="visible">
 
-                    <Button
-                        android:id="@+id/btnDM"
+                    <androidx.constraintlayout.widget.ConstraintLayout
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
+                        android:layout_height="wrap_content">
 
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginEnd="16dp"
-                        android:layout_marginBottom="16dp"
-                        android:text="Send Message"
-                        android:background="@drawable/btn_bg"
-                        android:fontFamily="@font/lexend"
-                        android:textColor="@color/white"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
+                        <TextView
+                            android:id="@+id/toursHeadline"
+                            android:layout_width="match_parent"
+                            android:layout_height="50dp"
+                            android:layout_marginTop="16dp"
+                            android:background="@drawable/round_back_bg"
+                            android:fontFamily="@font/lexend"
+                            android:gravity="center"
+                            android:text="My Tours"
+                            android:textColor="@color/white"
+                            android:textSize="20dp"
+                            app:layout_constraintBottom_toTopOf="@+id/recyclerViewTours"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toTopOf="parent" />
+
+                        <!-- Horizontal RecyclerView for Notes -->
+                        <androidx.recyclerview.widget.RecyclerView
+                            android:id="@+id/recyclerViewTours"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:clipToPadding="false"
+                            android:paddingStart="16dp"
+                            android:paddingEnd="16dp"
+                            android:scrollbars="none"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintTop_toTopOf="@id/toursHeadline" />
+                    </androidx.constraintlayout.widget.ConstraintLayout>
+
+            </LinearLayout>
 
         </LinearLayout>
 

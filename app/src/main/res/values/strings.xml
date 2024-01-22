@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">TourBuddy</string>
+
     <string name="login">LOGIN</string>
     <string name="register">SIGN UP</string>
     <string name="email">Email</string>
@@ -39,12 +40,57 @@
     <string name="confirmDiscardChangesMessage">Are you sure you want to discard changes?\n</string>
     <string name="confirm">Confirm</string>
     <string name="cancel">Cancel</string>
+    <string name="clearAll">Clear All</string>
     <string name="confirmChanges">Confirm Changes</string>
     <string name="confirmChangesMessage">Are you sure you want to apply changes?</string>
     <string name="logout">Logout</string>
     <string name="confirmLogout">Confirm Logout</string>
     <string name="confirmLogoutMessage">Are you sure you want to log out of TourBuddy?</string>
     <string name="search">Search</string>
-    <string name="username_restirction" >• Username must be numbers, spaces or English characters.</string>
+    <string name="username_restirction">• Username must be numbers, spaces or English characters.</string>
+
+    <!-- Tour Package Creation-->
+    <string name="tourDescription">Tour Description:</string>
+    <string name="tourDescriptionGuideline">• Provide a detailed description of the tour, including the key attractions and activities.\n• Mention any historical or cultural significance of the tour.</string>
+
+    <string name="itinerary">Itinerary:</string>
+    <string name="ItineraryGuideline">• Break down the tour day by day or point by point.\n• Specify the starting and ending times for each activity.\n• Include any breaks or free time.</string>
+
+    <string name="duration">Duration:</string>
+    <string name="durationGuideline">• Clearly state the total duration of the tour.\n• Include estimated times for each activity.</string>
+
+    <string name="meetingPoint">Meeting Point:</string>
+    <string name="meetingPointGuideline">• Clearly specify where the tour begins.\n• Include any important details, such as landmarks or specific instructions.</string>
+
+    <string name="includedServices">Included Services:</string>
+    <string name="includedServicesGuideline">• List what is included in the tour package (e.g., transportation, meals, entrance fees).\n• Specify if there are any optional add-ons or upgrades.</string>
+
+    <string name="excludedServices">Excluded Services:</string>
+    <string name="excludedServicesGuideline">• Clearly state what is not included in the package.\n• This may include personal expenses, tips, or optional activities.</string>
+
+    <string name="price">Price:</string>
+    <string name="priceGuideline">• Clearly state the cost of the package.\n• Specify if there are any discounts for certain groups or seasons.</string>
+
+    <string name="groupSize">Group Size:</string>
+    <string name="groupSizeGuideline">• Indicate the maximum number of participants for the tour (Value must be numeric).</string>
+
+    <string name="cancellationPolicy">Cancellation Policy:</string>
+    <string name="cancellationPolicyGuideline">• Clearly outline the cancellation policy, including any fees or refund conditions.</string>
+
+    <string name="specialRequirements">Special Requirements:</string>
+    <string name="specialRequirementsGuideline">• Highlight any specific requirements or considerations for participants (e.g, physical fitness levels, age restrictions).</string>
+
+    <string name="additionalInformation">Additional Information:</string>
+    <string name="additionalInformationGuideline">• Include any other relevant information, such as local customs, safety tips, or recommended items to bring.</string>
+
+    <string name="photosAndMultimedia">Photos and Multimedia:</string>
+
+    <string name="createPackage">Create Package</string>
+    <string name="packageName">Package Name</string>
+    <string name="packageCoverImage">Package Cover Image:</string>
+    <string name="includedCountries">Included Countries:</string>
+    <string name="selectCountries">-Select Countries-</string>
+    <string name="editPackage">Edit Package</string>
+
 
 </resources>
