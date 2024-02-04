@@ -42,7 +42,7 @@ import java.util.Objects;
 /**
  * Fragment for displaying user profile information.
  */
-public class ThisProfileFragment extends Fragment {
+public class ThisProfileFragment extends Fragment implements TourPackageRecyclerViewAdapter.OnLoadCompleteListener {
 
     // DataCache instance for caching user data
     DataCache dataCache;
@@ -134,7 +134,7 @@ public class ThisProfileFragment extends Fragment {
         mUser = mAuth.getCurrentUser();
         if (mUser != null) {
             userId = mUser.getUid();
-            tourPackageRecyclerViewAdapter = new TourPackageRecyclerViewAdapter(getActivity(), userId, tourPackagesIdList);
+            tourPackageRecyclerViewAdapter = new TourPackageRecyclerViewAdapter(getActivity(), userId, tourPackagesIdList, true, this);
             recyclerViewTours.setAdapter(tourPackageRecyclerViewAdapter);
             recyclerViewTours.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
 
@@ -259,7 +259,7 @@ public class ThisProfileFragment extends Fragment {
             // Load the list of tour package IDs and set up the RecyclerView
             tourPackagesIdList = (List<String>) dataCache.get("tourPackagesIdList");
             if (tourPackagesIdList != null) {
-                tourPackageRecyclerViewAdapter = new TourPackageRecyclerViewAdapter(getActivity(), userId, tourPackagesIdList);
+                tourPackageRecyclerViewAdapter = new TourPackageRecyclerViewAdapter(getActivity(), userId, tourPackagesIdList, true, this);
                 recyclerViewTours.setAdapter(tourPackageRecyclerViewAdapter);
                 recyclerViewTours.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
             }
@@ -311,4 +311,7 @@ public class ThisProfileFragment extends Fragment {
     }
 
 
+    @Override
+    public void onLoadComplete() {
+    }
 }

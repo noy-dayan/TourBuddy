@@ -26,7 +26,6 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.tourbuddy.tourbuddy.R;
-import com.tourbuddy.tourbuddy.fragments.OtherProfileFragment;
 import com.tourbuddy.tourbuddy.fragments.TourPackageCreationFragment;
 import com.tourbuddy.tourbuddy.fragments.TourPackageViewFragment;
 
@@ -47,10 +46,17 @@ public class TourPackageRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
     String userId;
     List<String> tourPackagesIdList;
 
-    public TourPackageRecyclerViewAdapter(Activity activity, String userId, List<String> tourPackagesIdList) {
+    OnLoadCompleteListener onLoadCompleteListener;
+
+    boolean showFooter;
+
+    public TourPackageRecyclerViewAdapter(Activity activity, String userId, List<String> tourPackagesIdList, boolean showFooter, OnLoadCompleteListener onLoadCompleteListener) {
         this.tourPackagesIdList = tourPackagesIdList;
         this.userId = userId;
         this.activity = activity;
+        this.onLoadCompleteListener = onLoadCompleteListener;
+        this.showFooter = showFooter;
+
     }
 
     @NonNull
@@ -71,18 +77,18 @@ public class TourPackageRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         if (holder instanceof PackageViewHolder) {
             String tourPackageId = tourPackagesIdList.get(position);
-            loadDataFromFirebase(userId, tourPackageId, (PackageViewHolder) holder);
+            loadDataFromFirebase(userId, tourPackageId, (PackageViewHolder) holder, position);
         }
     }
 
     @Override
     public int getItemCount() {
-        return tourPackagesIdList.size() + 1; // Add 1 for the footer
+        return showFooter ? tourPackagesIdList.size() + 1 : tourPackagesIdList.size();
     }
 
     @Override
     public int getItemViewType(int position) {
-        return (position == tourPackagesIdList.size()) ? TYPE_FOOTER : TYPE_PACKAGE;
+        return (showFooter && position == tourPackagesIdList.size()) ? TYPE_FOOTER : TYPE_PACKAGE;
     }
 
     // ViewHolder for Tour Package Item
@@ -148,7 +154,7 @@ public class TourPackageRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
                     .commit();
         }
     }
-    private void loadDataFromFirebase(String userId, String tourPackageId, @NonNull PackageViewHolder holder) {
+    private void loadDataFromFirebase(String userId, String tourPackageId, @NonNull PackageViewHolder holder, int position) {
         if (userId != null) {
             DocumentReference userTourPackageDocumentRef = db.collection("users").document(userId)
                     .collection("tourPackages").document(tourPackageId);
@@ -168,6 +174,12 @@ public class TourPackageRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
                                                 .apply(RequestOptions.centerCropTransform())
                                                 .apply(RequestOptions.bitmapTransform(new RoundedCornersTransformation(MAIN_IMAGE_CORNER_RADIUS, 0)))
                                                 .into(holder.packageImage);
+
+                                        // Check if it's the last item
+                                        if (position == tourPackagesIdList.size() - 1)
+                                            // Trigger the callback when all elements are loaded
+                                            onLoadCompleteListener.onLoadComplete();
+
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
@@ -184,5 +196,9 @@ public class TourPackageRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
                 }
             });
         }
+    }
+
+    public interface OnLoadCompleteListener {
+        void onLoadComplete();
     }
 }

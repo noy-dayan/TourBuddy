@@ -1,13 +1,14 @@
 package com.tourbuddy.tourbuddy.fragments;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.Resources;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
-import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.text.TextUtils;
 import android.util.Log;
@@ -41,18 +42,16 @@ public class TourPackageViewFragment extends Fragment {
 
     private static final int MAIN_IMAGE_CORNER_RADIUS = 70;
     // UI elements
-    ImageView packageCoverImage;
+    ImageView packageCoverImage, btnBack;
     TextView packageName, includedCountries, tourDesc, itinerary, duration, meetingPoint, includedServices,
             excludedServices, price, groupSize, cancellationPolicy, specialRequirements, additionalInfo;
 
-    Button btnEditPackage;
+    Button btnEditPackage, btnDeletePackage;
+
     // Firebase
     FirebaseAuth mAuth;
     FirebaseFirestore db;
     StorageReference storageReference;
-
-    // SwipeRefreshLayout for pull-to-refresh functionality
-    SwipeRefreshLayout swipeRefreshLayout;
 
     // Loading overlay
     View loadingOverlay;
@@ -60,6 +59,7 @@ public class TourPackageViewFragment extends Fragment {
 
     // User ID received from arguments
     String userId, userType;
+    Uri packageCoverImageUri;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -84,6 +84,8 @@ public class TourPackageViewFragment extends Fragment {
         additionalInfo = view.findViewById(R.id.additionalInfo);
 
         btnEditPackage = view.findViewById(R.id.btnEditPackage);
+        btnDeletePackage = view.findViewById(R.id.btnDeletePackage);
+        btnBack = view.findViewById(R.id.btnBack);
 
         // Initialize Firebase instances
         mAuth = FirebaseAuth.getInstance();
@@ -99,6 +101,12 @@ public class TourPackageViewFragment extends Fragment {
         if (getArguments() != null) {
             userId = getArguments().getString("userId");
             packageName.setText(getArguments().getString("packageName"));
+
+            if(Objects.equals(mAuth.getUid(), userId)) {
+                btnEditPackage.setVisibility(View.VISIBLE);
+                btnDeletePackage.setVisibility(View.VISIBLE);
+
+            }
         }
 
         showLoading(true);
@@ -106,13 +114,151 @@ public class TourPackageViewFragment extends Fragment {
         // Data not found in cache, fetch from the server
         loadDataFromFirebase(view);
 
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(Objects.equals(mAuth.getUid(), userId))
+                    switchFragment(new ThisProfileFragment());
+                else{
+                    OtherProfileFragment otherProfileFragment = new OtherProfileFragment();
+                    Bundle args = new Bundle();
+                    args.putString("userId", userId);
+                    otherProfileFragment.setArguments(args);
+                    switchFragment(otherProfileFragment);
+                }
+
+            }
+        });
+
+        btnDeletePackage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showPackageDeletionDialog();
+            }
+        });
+
+        btnEditPackage.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TourPackageEditFragment tourPackageEditFragment = new TourPackageEditFragment();
+                Bundle args = new Bundle();
+                args.putString("userId", userId);
+                args.putString("packageName", packageName.getText().toString());
+                args.putString("packageCoverImageUri", packageCoverImageUri.toString());
+                args.putString("includedCountries", includedCountries.getText().toString());
+                args.putString("tourDesc", tourDesc.getText().toString());
+                args.putString("itinerary", itinerary.getText().toString());
+                args.putString("duration", duration.getText().toString());
+                args.putString("meetingPoint", meetingPoint.getText().toString());
+                args.putString("includedServices", includedServices.getText().toString());
+                args.putString("excludedServices", excludedServices.getText().toString());
+                args.putString("price", price.getText().toString());
+                args.putString("groupSize", groupSize.getText().toString());
+                args.putString("cancellationPolicy", cancellationPolicy.getText().toString());
+                args.putString("specialRequirements", specialRequirements.getText().toString());
+                args.putString("additionalInfo", additionalInfo.getText().toString());
+
+                tourPackageEditFragment.setArguments(args);
+                switchFragment(tourPackageEditFragment);
+
+            }
+        });
+
         return view;
     }
 
-   /**
+
+    /**
+     * Open "Discard Changes" dialog.
+     */
+    private void showPackageDeletionDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle(requireContext().getResources().getString(R.string.confrimPackageDeletion));
+        builder.setMessage(requireContext().getResources().getString(R.string.confrimPackageDeletionMessage));
+        builder.setPositiveButton(requireContext().getResources().getString(R.string.delete_package), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                deletePackage();
+            }
+        });
+
+        builder.setNegativeButton(requireContext().getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Do nothing, close the dialog
+            }
+        });
+
+        builder.show();
+    }
+
+    private void deletePackage() {
+        if (userId != null && packageName.getText() != null) {
+            // Reference to the Firestore document using the provided userId
+            DocumentReference packageDocumentRef = db.collection("users")
+                    .document(userId)
+                    .collection("tourPackages")
+                    .document(packageName.getText().toString());
+
+            // Reference to the image file in Firebase Storage
+            StorageReference imageRef = storageReference.child("images/" + userId + "/tourPackages/" + packageName.getText().toString() + "/packageCoverImage");
+
+            // Delete the package document and image
+            packageDocumentRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    // Package document deleted successfully
+
+                    // Delete the image file
+                    imageRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            // Image file deleted successfully
+
+                            // Navigate to the appropriate fragment
+                            if (Objects.equals(mAuth.getUid(), userId)) {
+                                switchFragment(new ThisProfileFragment());
+                            } else {
+                                OtherProfileFragment profileOtherFragment = new OtherProfileFragment();
+                                Bundle args = new Bundle();
+                                args.putString("userId", userId);
+                                profileOtherFragment.setArguments(args);
+                                switchFragment(profileOtherFragment);
+                            }
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            // Handle the failure to delete the image file
+                            Log.e("STORAGE", "Error deleting image file", e);
+                        }
+                    });
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    // Handle the failure to delete the package document
+                    Log.e("DATABASE", "Error deleting package document", e);
+                }
+            });
+        }
+    }
+
+    /**
+     * Switch to the specified fragment.
+     */
+    private void switchFragment(Fragment fragment) {
+        if (isAdded())
+            // Replace the current fragment with the new one
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.frameLayout, fragment)
+                    .commit();
+    }
+
+    /**
      * Fetch user data from Firebase Firestore.
      */
-   private void loadDataFromFirebase(View view) {
+    private void loadDataFromFirebase(View view) {
         if (userId != null) {
             // Reference to the Firestore document using the provided userId
             DocumentReference userDocumentRef = db.collection("users")
@@ -201,6 +347,7 @@ public class TourPackageViewFragment extends Fragment {
                                     @Override
                                     public void onSuccess(Uri uri) {
                                         // Got the download URL for 'users/me/profile.png'
+                                        packageCoverImageUri = uri;
                                         Glide.with(view)
                                                 .load(uri)
                                                 .apply(RequestOptions.centerCropTransform())
@@ -235,15 +382,13 @@ public class TourPackageViewFragment extends Fragment {
                 }
             });
         }
-   }
+    }
 
     private void enableTouristLayout(){
-        btnEditPackage.setVisibility(View.VISIBLE);
 
     }
 
     private void enableTourGuideLayout(){
-        btnEditPackage.setVisibility(View.VISIBLE);
 
     }
 
@@ -279,4 +424,3 @@ public class TourPackageViewFragment extends Fragment {
         return countryCode;
     }
 }
-

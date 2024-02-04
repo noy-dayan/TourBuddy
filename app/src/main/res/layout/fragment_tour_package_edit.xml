@@ -4,113 +4,88 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context=".fragments.TourPackageViewFragment"
+    tools:context=".fragments.TourPackageEditFragment"
     android:background="@color/dark_primary">
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
             <!-- Main overlay -->
-            <ImageView
-                android:id="@+id/packageCoverImage"
-                android:layout_width="257dp"
-                android:layout_height="204dp"
-                android:layout_marginTop="8dp"
-                android:src="@drawable/add_image_icon"
-
-                app:layout_constraintDimensionRatio="4:3"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/topRelativeLayout" />
-
-            <Button
-                android:id="@+id/btnEditPackage"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/btn_bg"
-                android:fontFamily="@font/lexend"
-                android:text="@string/editPackage"
-                android:textColor="@color/white"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/packageCoverImage" />
-
-            <Button
-                android:id="@+id/btnDeletePackage"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
-                android:background="@drawable/risky_action_btn_bg"
-                android:fontFamily="@font/lexend"
-                android:text="@string/delete_package"
-                android:textColor="@color/white"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/btnEditPackage" />
-
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/mainOverlay"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_marginStart="16dp"
-
-
-                android:layout_marginTop="16dp"
-                android:layout_marginEnd="16dp"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="60dp"
+                android:layout_marginEnd="20dp"
                 android:layout_marginBottom="80dp"
                 android:background="@drawable/round_back_bg"
-                android:visibility="visible"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="1.0"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/btnDeletePackage">
 
+                android:visibility="visible">
+
+
+                <ImageView
+                    android:id="@+id/packageCoverImage"
+                    android:layout_width="257dp"
+                    android:layout_height="204dp"
+                    android:layout_marginStart="32dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="32dp"
+                    android:src="@drawable/add_image_icon"
+                    app:layout_constraintDimensionRatio="4:3"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+
+                <TextView
+                    android:id="@+id/textView4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+
+                    android:layout_marginStart="32dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginEnd="32dp"
+                    android:fontFamily="@font/lexend"
+                    android:text="@string/packageCoverImage"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
                     android:id="@+id/textView5"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="32dp"
-                    android:layout_marginTop="32dp"
-
+                    android:layout_marginTop="24dp"
                     android:layout_marginEnd="32dp"
+
                     android:fontFamily="@font/lexend"
                     android:text="@string/includedCountries"
                     android:textColor="@color/white"
                     android:textSize="20sp"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintHorizontal_bias="0.495"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintTop_toBottomOf="@+id/packageCoverImage" />
 
-                <TextView
-                    android:id="@+id/includedCountries"
+
+                <com.tourbuddy.tourbuddy.utils.MultiSpinner
+                    android:id="@+id/countryMultiSpinner"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
-                    android:gravity="center"
-                    android:fontFamily="@font/lexend"
+                    android:background="@drawable/round_back_bg"
                     android:padding="10dp"
-                    android:text="@string/includedCountries"
-                    android:textColor="@color/white"
-
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textView5" />
@@ -120,32 +95,36 @@
                     android:id="@+id/textView6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+
                     android:layout_marginStart="32dp"
                     android:layout_marginTop="32dp"
                     android:layout_marginEnd="32dp"
-
                     android:fontFamily="@font/lexend"
                     android:text="@string/tourDescription"
                     android:textColor="@color/white"
                     android:textSize="20sp"
-
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/includedCountries" />
+                    app:layout_constraintTop_toBottomOf="@+id/countryMultiSpinner" />
 
-                <TextView
-                    android:id="@+id/tourDesc"
+                <EditText
+                    android:id="@+id/tourDescInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
+                    android:background="@drawable/input_bg"
                     android:fontFamily="@font/lexend"
-                    android:padding="10dp"
-                    android:text="@string/tourDescription"
+                    android:hint="@string/tourDescriptionGuideline"
+                    android:paddingLeft="20dp"
+                    android:paddingTop="13dp"
+                    android:paddingRight="20dp"
+                    android:paddingBottom="13dp"
                     android:textColor="@color/white"
-
+                    android:textColorHint="@color/white"
+                    android:textSize="14sp"
+                    android:gravity="start|top"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -165,21 +144,26 @@
                     android:textSize="20sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/tourDesc" />
+                    app:layout_constraintTop_toBottomOf="@+id/tourDescInput" />
 
-                <TextView
-                    android:id="@+id/itinerary"
+                <EditText
+                    android:id="@+id/itineraryInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
+                    android:background="@drawable/input_bg"
                     android:fontFamily="@font/lexend"
-                    android:padding="10dp"
-                    android:text="@string/itinerary"
+                    android:hint="@string/ItineraryGuideline"
+                    android:paddingLeft="20dp"
+                    android:paddingTop="13dp"
+                    android:paddingRight="20dp"
+                    android:paddingBottom="13dp"
                     android:textColor="@color/white"
-
+                    android:textColorHint="@color/white"
+                    android:textSize="14sp"
+                    android:gravity="start|top"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -199,20 +183,26 @@
                     android:textSize="20sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/itinerary" />
+                    app:layout_constraintTop_toBottomOf="@+id/itineraryInput" />
 
-                <TextView
-                    android:id="@+id/duration"
+                <EditText
+                    android:id="@+id/durationInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
+                    android:background="@drawable/input_bg"
                     android:fontFamily="@font/lexend"
-                    android:padding="10dp"
+                    android:hint="@string/durationGuideline"
+                    android:paddingLeft="20dp"
+                    android:paddingTop="13dp"
+                    android:paddingRight="20dp"
+                    android:paddingBottom="13dp"
                     android:textColor="@color/white"
-
+                    android:textColorHint="@color/white"
+                    android:textSize="14sp"
+                    android:gravity="start|top"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -232,20 +222,26 @@
                     android:textSize="20sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/duration" />
+                    app:layout_constraintTop_toBottomOf="@+id/durationInput" />
 
-                <TextView
-                    android:id="@+id/meetingPoint"
+                <EditText
+                    android:id="@+id/meetingPointInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
+                    android:background="@drawable/input_bg"
                     android:fontFamily="@font/lexend"
-                    android:padding="10dp"
+                    android:gravity="start|top"
+                    android:hint="@string/meetingPointGuideline"
+                    android:paddingLeft="20dp"
+                    android:paddingTop="13dp"
+                    android:paddingRight="20dp"
+                    android:paddingBottom="13dp"
                     android:textColor="@color/white"
-
+                    android:textColorHint="@color/white"
+                    android:textSize="14sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -265,20 +261,26 @@
                     android:textSize="20sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/meetingPoint" />
+                    app:layout_constraintTop_toBottomOf="@+id/meetingPointInput" />
 
-                <TextView
-                    android:id="@+id/includedServices"
+                <EditText
+                    android:id="@+id/includedServicesInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
+                    android:background="@drawable/input_bg"
                     android:fontFamily="@font/lexend"
-                    android:padding="10dp"
+                    android:gravity="start|top"
+                    android:hint="@string/includedServicesGuideline"
+                    android:paddingLeft="20dp"
+                    android:paddingTop="13dp"
+                    android:paddingRight="20dp"
+                    android:paddingBottom="13dp"
                     android:textColor="@color/white"
-
+                    android:textColorHint="@color/white"
+                    android:textSize="14sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -298,20 +300,26 @@
                     android:textSize="20sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/includedServices" />
+                    app:layout_constraintTop_toBottomOf="@+id/includedServicesInput" />
 
-                <TextView
-                    android:id="@+id/excludedServices"
+                <EditText
+                    android:id="@+id/excludedServicesInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
+                    android:background="@drawable/input_bg"
                     android:fontFamily="@font/lexend"
-                    android:padding="10dp"
+                    android:gravity="start|top"
+                    android:hint="@string/excludedServicesGuideline"
+                    android:paddingLeft="20dp"
+                    android:paddingTop="13dp"
+                    android:paddingRight="20dp"
+                    android:paddingBottom="13dp"
                     android:textColor="@color/white"
-
+                    android:textColorHint="@color/white"
+                    android:textSize="14sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -331,20 +339,26 @@
                     android:textSize="20sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/excludedServices" />
+                    app:layout_constraintTop_toBottomOf="@+id/excludedServicesInput" />
 
-                <TextView
-                    android:id="@+id/price"
+                <EditText
+                    android:id="@+id/priceInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
+                    android:background="@drawable/input_bg"
                     android:fontFamily="@font/lexend"
-                    android:padding="10dp"
+                    android:gravity="start|top"
+                    android:hint="@string/priceGuideline"
+                    android:paddingLeft="20dp"
+                    android:paddingTop="13dp"
+                    android:paddingRight="20dp"
+                    android:paddingBottom="13dp"
                     android:textColor="@color/white"
-
+                    android:textColorHint="@color/white"
+                    android:textSize="14sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -364,20 +378,26 @@
                     android:textSize="20sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/price" />
+                    app:layout_constraintTop_toBottomOf="@+id/priceInput" />
 
-                <TextView
-                    android:id="@+id/groupSize"
+                <EditText
+                    android:id="@+id/groupSizeInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
+                    android:background="@drawable/input_bg"
                     android:fontFamily="@font/lexend"
-                    android:padding="10dp"
+                    android:gravity="start|top"
+                    android:hint="@string/groupSizeGuideline"
+                    android:paddingLeft="20dp"
+                    android:paddingTop="13dp"
+                    android:paddingRight="20dp"
+                    android:paddingBottom="13dp"
                     android:textColor="@color/white"
-
+                    android:textColorHint="@color/white"
+                    android:textSize="14sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -397,20 +417,26 @@
                     android:textSize="20sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/groupSize" />
+                    app:layout_constraintTop_toBottomOf="@+id/groupSizeInput" />
 
-                <TextView
-                    android:id="@+id/cancellationPolicy"
+                <EditText
+                    android:id="@+id/cancellationPolicyInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
+                    android:background="@drawable/input_bg"
                     android:fontFamily="@font/lexend"
-                    android:padding="10dp"
+                    android:gravity="start|top"
+                    android:hint="@string/cancellationPolicyGuideline"
+                    android:paddingLeft="20dp"
+                    android:paddingTop="13dp"
+                    android:paddingRight="20dp"
+                    android:paddingBottom="13dp"
                     android:textColor="@color/white"
-
+                    android:textColorHint="@color/white"
+                    android:textSize="14sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -430,20 +456,26 @@
                     android:textSize="20sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/cancellationPolicy" />
+                    app:layout_constraintTop_toBottomOf="@+id/cancellationPolicyInput" />
 
-                <TextView
-                    android:id="@+id/specialRequirements"
+                <EditText
+                    android:id="@+id/specialRequirementsInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
+                    android:background="@drawable/input_bg"
                     android:fontFamily="@font/lexend"
-                    android:padding="10dp"
+                    android:gravity="start|top"
+                    android:hint="@string/specialRequirementsGuideline"
+                    android:paddingLeft="20dp"
+                    android:paddingTop="13dp"
+                    android:paddingRight="20dp"
+                    android:paddingBottom="13dp"
                     android:textColor="@color/white"
-
+                    android:textColorHint="@color/white"
+                    android:textSize="14sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
@@ -463,42 +495,96 @@
                     android:textSize="20sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/specialRequirements" />
+                    app:layout_constraintTop_toBottomOf="@+id/specialRequirementsInput" />
 
-                <TextView
-                    android:id="@+id/additionalInfo"
+                <EditText
+                    android:id="@+id/additionalInfoInput"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-
                     android:layout_marginStart="16dp"
                     android:layout_marginTop="8dp"
                     android:layout_marginEnd="16dp"
-                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/input_bg"
                     android:fontFamily="@font/lexend"
-                    android:padding="10dp"
-
+                    android:gravity="start|top"
+                    android:hint="@string/additionalInformationGuideline"
+                    android:paddingLeft="20dp"
+                    android:paddingTop="13dp"
+                    android:paddingRight="20dp"
+                    android:paddingBottom="13dp"
                     android:textColor="@color/white"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:textColorHint="@color/white"
+                    android:textSize="14sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintHorizontal_bias="1.0"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/textView16" />
 
+                <TextView
+                    android:id="@+id/textView17"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
 
+                    android:layout_marginStart="32dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginEnd="32dp"
+                    android:fontFamily="@font/lexend"
+                    android:text="@string/photosAndMultimedia"
+                    android:textColor="@color/white"
+                    android:textSize="20sp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/additionalInfoInput" />
 
+                <Button
+                    android:id="@+id/btnSaveChanges"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:enabled="false"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginStart="16dp"
+                    android:layout_marginTop="32dp"
+                    android:layout_marginEnd="16dp"
+                    android:layout_marginBottom="32dp"
+                    android:background="@drawable/btn_bg"
+                    android:fontFamily="@font/lexend"
+                    android:text="@string/save_changes"
+                    android:textColor="@color/white"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@+id/textView17" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 
+
+
+            <!-- Loading overlay -->
+            <RelativeLayout
+                android:id="@+id/loadingOverlay"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@android:color/background_dark"
+                android:visibility="gone"
+                android:backgroundTint="@color/dark_primary">
+
+                <ProgressBar
+                    android:id="@+id/progressBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:indeterminateTint="@color/orange_primary"
+                    android:visibility="gone" />
+
+            </RelativeLayout>
+
             <!-- Top overlay -->
             <RelativeLayout
-                android:id="@+id/topRelativeLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                android:id="@+id/topRelativeLayout">
 
                 <ImageView
                     android:id="@+id/btnBack"
@@ -508,55 +594,20 @@
                     android:src="@drawable/arrow_back_icon" />
 
                 <TextView
-                    android:id="@+id/packageName"
                     android:layout_width="wrap_content"
                     android:layout_height="50dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginStart="50dp"
-
-                    android:layout_marginEnd="50dp"
-                    android:maxLines="2"
+                    android:layout_centerInParent="true"
                     android:fontFamily="@font/lexend"
                     android:gravity="center"
-                    android:text="@string/packageName"
+                    android:text="@string/editPackage"
                     android:textColor="@color/white"
-                    app:autoSizeMaxTextSize="22sp"
-                    app:autoSizeMinTextSize="10sp"
-                    app:autoSizeStepGranularity="1dp"
-                    app:autoSizeTextType="uniform" />
+                    android:textSize="22sp" />
 
 
             </RelativeLayout>
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+        </RelativeLayout>
 
     </androidx.core.widget.NestedScrollView>
-
-    <!-- Loading overlay -->
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/loadingOverlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/background_dark"
-        android:backgroundTint="@color/dark_primary"
-        android:layout_marginTop="50dp"
-        android:visibility="gone">
-
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:indeterminateTint="@color/orange_primary"
-            android:visibility="gone"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-    </androidx.constraintlayout.widget.ConstraintLayout>
-
-
 
 </FrameLayout>

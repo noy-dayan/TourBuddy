@@ -91,6 +91,12 @@
     <string name="includedCountries">Included Countries:</string>
     <string name="selectCountries">-Select Countries-</string>
     <string name="editPackage">Edit Package</string>
+    <string name="package_name_can_not_be_changed_after_creation">• Package name can not be changed after creation.</string>
+    <string name="save_changes">Save Changes</string>
+    <string name="delete_package">Delete Package</string>
 
+    <string name="confrimPackageDeletion">Confirm Package Deletion</string>
+    <string name="confrimPackageDeletionMessage">Are you sure you want to delete package?\n</string>
+    <string name="loginMessage">Please Wait While Logging In…</string>
 
 </resources>
