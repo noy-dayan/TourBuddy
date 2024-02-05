@@ -99,6 +99,9 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
 
         recyclerViewTours = view.findViewById(R.id.recyclerViewTours);
 
+        swipeRefreshLayout.setProgressBackgroundColor(R.color.dark_primary);
+        swipeRefreshLayout.setColorScheme(R.color.orange_primary);
+
         mUser = mAuth.getCurrentUser();
         if (mUser != null)
             userId = mUser.getUid();
@@ -313,5 +316,6 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
 
     @Override
     public void onLoadComplete() {
+
     }
 }

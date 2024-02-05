@@ -31,6 +31,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.tourbuddy.tourbuddy.R;
+import com.tourbuddy.tourbuddy.utils.DataCache;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +42,8 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 public class TourPackageViewFragment extends Fragment {
 
     private static final int MAIN_IMAGE_CORNER_RADIUS = 70;
+    DataCache dataCache;
+
     // UI elements
     ImageView packageCoverImage, btnBack;
     TextView packageName, includedCountries, tourDesc, itinerary, duration, meetingPoint, includedServices,
@@ -66,6 +69,7 @@ public class TourPackageViewFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_tour_package_view, container, false);
+        dataCache = DataCache.getInstance();
 
         // Initialize UI elements
         packageName = view.findViewById(R.id.packageName);
@@ -214,11 +218,11 @@ public class TourPackageViewFragment extends Fragment {
                         @Override
                         public void onSuccess(Void aVoid) {
                             // Image file deleted successfully
-
+                            dataCache.clearCache();
                             // Navigate to the appropriate fragment
-                            if (Objects.equals(mAuth.getUid(), userId)) {
+                            if (Objects.equals(mAuth.getUid(), userId))
                                 switchFragment(new ThisProfileFragment());
-                            } else {
+                            else {
                                 OtherProfileFragment profileOtherFragment = new OtherProfileFragment();
                                 Bundle args = new Bundle();
                                 args.putString("userId", userId);

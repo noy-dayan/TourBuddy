@@ -5,13 +5,17 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragments.ThisProfileFragment"
-    android:background="@color/dark_primary">
+    android:background="@color/dark_primary"
+    >
 
     <!-- Main overlay -->
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipeRefresh"
         android:layout_height="match_parent"
-        android:layout_width="match_parent">
+        android:layout_width="match_parent"
+        android:layout_marginTop="50dp"
+        android:layout_marginBottom="60dp"
+        >
 
         <androidx.core.widget.NestedScrollView
             android:layout_width="match_parent"
@@ -23,23 +27,6 @@
                 android:orientation="vertical">
 
 
-                <RelativeLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/topRelativeLayout">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="50dp"
-                        android:layout_centerInParent="true"
-                        android:fontFamily="@font/lexend"
-                        android:gravity="center"
-                        android:text="@string/profile"
-                        android:textColor="@color/white"
-                        android:textSize="22sp" />
-
-
-                </RelativeLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/mainOverlay"
@@ -148,35 +135,12 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:id="@+id/btnDMLayout">
-
-                    <Button
-                        android:id="@+id/btnDM"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-
-                        android:layout_gravity="center_horizontal"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="16dp"
-                        android:layout_marginEnd="16dp"
-                        android:layout_marginBottom="16dp"
-                        android:text="Send Message"
-                        android:background="@drawable/btn_bg"
-                        android:fontFamily="@font/lexend"
-                        android:textColor="@color/white"
-                        app:layout_constraintBottom_toBottomOf="parent"
-                        app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-                </androidx.constraintlayout.widget.ConstraintLayout>
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:id="@+id/tourGuideLayout">
+                    android:id="@+id/tourGuideLayout"
+                    android:layout_marginTop="16dp">
 
                         <TextView
                             android:id="@+id/tourPackagesHeadline"
@@ -260,6 +224,26 @@
 
     </RelativeLayout>
 
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/topRelativeLayout">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/dark_primary"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_centerInParent="true"
+            android:fontFamily="@font/lexend"
+            android:gravity="center"
+            android:text="@string/profile"
+            android:textColor="@color/white"
+            android:textSize="22sp" />
+    </RelativeLayout>
 
 
 </FrameLayout>

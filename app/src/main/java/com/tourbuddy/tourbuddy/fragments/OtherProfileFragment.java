@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
@@ -20,16 +22,24 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.tourbuddy.tourbuddy.R;
+import com.tourbuddy.tourbuddy.adapters.TourPackageRecyclerViewAdapter;
+import com.tourbuddy.tourbuddy.utils.DataCache;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
-public class OtherProfileFragment extends Fragment {
+public class OtherProfileFragment extends Fragment implements TourPackageRecyclerViewAdapter.OnLoadCompleteListener {
+
 
     // UI elements
     ImageView profilePic;
@@ -47,7 +57,10 @@ public class OtherProfileFragment extends Fragment {
     View loadingOverlay;
     ProgressBar progressBar;
 
-    // User ID received from arguments
+    // RecyclerView for Tour Packages
+    RecyclerView recyclerViewTours;
+    TourPackageRecyclerViewAdapter tourPackageRecyclerViewAdapter;
+    List<String> tourPackagesIdList = new ArrayList<>();
     String userId;
 
     @Override
@@ -63,6 +76,7 @@ public class OtherProfileFragment extends Fragment {
         bio = view.findViewById(R.id.bio);
         birthDate = view.findViewById(R.id.birthDate);
         gender = view.findViewById(R.id.gender);
+        type = view.findViewById(R.id.type);
 
         // Initialize Firebase instances
         mAuth = FirebaseAuth.getInstance();
@@ -74,35 +88,47 @@ public class OtherProfileFragment extends Fragment {
         loadingOverlay = view.findViewById(R.id.loadingOverlay);
         progressBar = view.findViewById(R.id.progressBar);
 
+        recyclerViewTours = view.findViewById(R.id.recyclerViewTours);
+
+        swipeRefreshLayout.setProgressBackgroundColor(R.color.dark_primary);
+        swipeRefreshLayout.setColorScheme(R.color.orange_primary);
+
         // Retrieve user ID from arguments
         if (getArguments() != null) {
             userId = getArguments().getString("userId");
         }
 
         showLoading(true);
-
-        // Data not found in cache, fetch from the server
         loadDataFromFirebase(view);
+
 
         // Set up pull-to-refresh functionality
         if (swipeRefreshLayout != null) {
             swipeRefreshLayout.setOnRefreshListener(() -> {
+                tourPackagesIdList = new ArrayList<>();
                 loadDataFromFirebase(view);
                 swipeRefreshLayout.setRefreshing(false);
             });
         } else {
-            Log.e("OtherProfileFragment", "SwipeRefreshLayout is null");
+            Log.e("ThisProfileFragment", "SwipeRefreshLayout is null");
         }
 
         return view;
     }
 
+
     /**
      * Fetch user data from Firebase Firestore.
      */
     private void loadDataFromFirebase(View view) {
-        if (userId != null) {
-            // Reference to the Firestore document using the provided userId
+        // Initialize RecyclerView for Tour Packages
+        if (getArguments() != null) {
+            tourPackageRecyclerViewAdapter = new TourPackageRecyclerViewAdapter(getActivity(), userId, tourPackagesIdList, false, this);
+            recyclerViewTours.setAdapter(tourPackageRecyclerViewAdapter);
+            recyclerViewTours.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
+
+
+            // Reference to the Firestore document
             DocumentReference userDocumentRef = db.collection("users").document(userId);
 
             // Retrieve data from Firestore
@@ -110,7 +136,7 @@ public class OtherProfileFragment extends Fragment {
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                     if (isAdded() && documentSnapshot.exists()) {
-                        // Check if the user fields exist in the Firestore document
+                        // Check if the user fields exists in the Firestore document
                         if (documentSnapshot.contains("username"))
                             username.setText(documentSnapshot.getString("username"));
 
@@ -129,6 +155,13 @@ public class OtherProfileFragment extends Fragment {
                                 gender.setText(genderOptions[2]);
                             else
                                 gender.setText(genderOptions[3]);
+                        }
+
+                        if (documentSnapshot.contains("type")) {
+                            if (Objects.equals(documentSnapshot.getString("type"), "Tourist"))
+                                type.setText(getResources().getString(R.string.tourist));
+                            else
+                                type.setText(getResources().getString(R.string.tour_guide));
                         }
 
                         // Load the image into the ImageView using Glide
@@ -150,7 +183,36 @@ public class OtherProfileFragment extends Fragment {
                                         showLoading(false);
                                     }
                                 });
+
+                        // Check if the document contains a collection "tourPackages"
+                        Log.d("TAG1", "onSuccess: ");
+
+                        // Get the reference to the "tourPackages" collection
+                        CollectionReference tourPackagesRef = userDocumentRef.collection("tourPackages");
+
+                        // Retrieve documents from the "tourPackages" collection
+                        tourPackagesRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                            @Override
+                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                                    Log.d("TAG2", document.getId());
+                                    tourPackagesIdList.add(document.getId());
+
+
+                                }
+                                tourPackageRecyclerViewAdapter.notifyDataSetChanged();
+
+
+
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.e("DATABASE", "Error getting tourPackages collection", e);
+                            }
+                        });
                     }
+
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -169,5 +231,10 @@ public class OtherProfileFragment extends Fragment {
             loadingOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
             progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
         }
+    }
+
+    @Override
+    public void onLoadComplete() {
+
     }
 }

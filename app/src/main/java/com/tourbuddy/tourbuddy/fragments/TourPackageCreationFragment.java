@@ -77,6 +77,7 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
 
     private static final int MAIN_IMAGE_CORNER_RADIUS = 70;
     private static final int MAX_PACKAGE_NAME_LENGTH = 27;
+    DataCache dataCache;
     ImageView packageCoverImage, btnBack;
     Button btnCreatePackage;
     EditText packageNameInput, tourDescInput, itineraryInput, durationInput, meetingPointInput,
@@ -108,7 +109,7 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_tour_package_creation, container, false);
-
+        dataCache = DataCache.getInstance();
         // Initialize UI elements
         btnBack = view.findViewById(R.id.btnBack);
         btnCreatePackage = view.findViewById(R.id.btnCreatePackage);
@@ -153,7 +154,7 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
         btnCreatePackage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                isPackageExists(packageNameInput.getText().toString().trim());
+                showCreatePackageDialog();
             }
         });
 
@@ -161,13 +162,7 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (selectedCountries != null && !selectedCountries.isEmpty()) {
-                    Log.d("TAG", selectedCountries.toString());
-                } else {
-                    Log.d("TAG", "Selected countries is null or empty");
-                }
-                switchFragment(new ThisProfileFragment());
-
+                showDiscardChangesDialog();
             }
         });
 
@@ -271,14 +266,14 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
         });
     }
 
-    private void isPackageExists(String packageName) {
+    private void createPackage() {
         mUser = mAuth.getCurrentUser();
         if (mUser != null) {
             String userId = mUser.getUid();
             DocumentReference packageDocumentRef = db.collection("users")
                     .document(userId)
                     .collection("tourPackages")
-                    .document(packageName);
+                    .document(packageNameInput.getText().toString().trim());
 
             packageDocumentRef.get().addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                 @Override
@@ -293,6 +288,8 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
                         } else {
                             // Continue with the package creation process
                             saveUserDataToFirebase();
+                            dataCache.clearCache();
+                            switchFragment(new ThisProfileFragment());
                         }
                     } else {
                         // Handle errors while querying the database
@@ -453,7 +450,7 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
         builder.setPositiveButton(requireContext().getResources().getString(R.string.confirm), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                switchFragment(new SettingsFragment());
+                switchFragment(new ThisProfileFragment());
             }
         });
 
@@ -470,16 +467,14 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
     /**
      * Open "Confirm Changes" dialog.
      */
-    private void showConfirmChangesDialog() {
+    private void showCreatePackageDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle(requireContext().getResources().getString(R.string.confirmChanges));
-        builder.setMessage(requireContext().getResources().getString(R.string.confirmChangesMessage));
-        builder.setPositiveButton(requireContext().getResources().getString(R.string.apply), new DialogInterface.OnClickListener() {
+        builder.setTitle(requireContext().getResources().getString(R.string.createPackage));
+        builder.setMessage(requireContext().getResources().getString(R.string.confrimPackageCreationMessage));
+        builder.setPositiveButton(requireContext().getResources().getString(R.string.createPackage), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //saveUserDataToFirebase();
-                //isChanged = false;
-                //btnDone.setEnabled(false);
+                createPackage();
             }
         });
 

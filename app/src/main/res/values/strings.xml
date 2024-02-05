@@ -96,7 +96,9 @@
     <string name="delete_package">Delete Package</string>
 
     <string name="confrimPackageDeletion">Confirm Package Deletion</string>
-    <string name="confrimPackageDeletionMessage">Are you sure you want to delete package?\n</string>
+    <string name="confrimPackageDeletionMessage">Are you sure you want to delete package?</string>
     <string name="loginMessage">Please Wait While Logging In…</string>
+    <string name="confrimPackageCreationMessage">Are you sure you want create a new package?</string>
+
 
 </resources>

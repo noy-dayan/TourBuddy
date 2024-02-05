@@ -69,6 +69,21 @@
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <TextView
+                    android:id="@+id/textView0"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layoutDirection="locale"
+
+                    android:fontFamily="@font/lexend"
+                    android:text="@string/package_name_can_not_be_changed_after_creation"
+                    android:textColor="@color/white"
+                    android:textSize="11sp"
+                    app:layout_constraintEnd_toEndOf="@+id/packageNameInput"
+                    app:layout_constraintHorizontal_bias="0.0"
+                    app:layout_constraintStart_toStartOf="@+id/packageNameInput"
+                    app:layout_constraintTop_toBottomOf="@+id/packageNameInput" />
+
+                <TextView
                     android:id="@+id/textView4"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -82,7 +97,7 @@
                     android:textSize="20sp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toBottomOf="@+id/packageNameInput" />
+                    app:layout_constraintTop_toBottomOf="@+id/textView0" />
 
                 <TextView
                     android:id="@+id/textView5"
@@ -605,34 +620,37 @@
 
             </RelativeLayout>
 
-            <!-- Top overlay -->
-            <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/topRelativeLayout">
-
-                <ImageView
-                    android:id="@+id/btnBack"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:padding="14dp"
-                    android:src="@drawable/arrow_back_icon" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="50dp"
-                    android:layout_centerInParent="true"
-                    android:fontFamily="@font/lexend"
-                    android:gravity="center"
-                    android:text="@string/createPackage"
-                    android:textColor="@color/white"
-                    android:textSize="22sp" />
-
-
-            </RelativeLayout>
-
         </RelativeLayout>
 
     </androidx.core.widget.NestedScrollView>
+
+    <!-- Top overlay -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/topRelativeLayout">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/dark_primary"/>
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:padding="14dp"
+            android:src="@drawable/arrow_back_icon" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_centerInParent="true"
+            android:fontFamily="@font/lexend"
+            android:gravity="center"
+            android:text="@string/createPackage"
+            android:textColor="@color/white"
+            android:textSize="22sp" />
+    </RelativeLayout>
 
 </FrameLayout>

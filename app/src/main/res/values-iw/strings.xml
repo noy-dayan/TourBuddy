@@ -96,6 +96,8 @@
     <string name="delete_package">מחיקת חבילה</string>
     <string name="confrimPackageDeletion">אישור מחיקת החבילה</string>
     <string name="confrimPackageDeletionMessage">האם אתה בטוח שברצונך למחוק את החבילה?</string>
-    <string name="loginMessage">אנא המתן בזמן ההתחברות...</string>
+    <string name="loginMessage">אנא המתן בזמן ההתחברות…</string>
+    <string name="confrimPackageCreationMessage">האם אתה בטוח שברצונך ליצור חבילה חדשה?</string>
+
 
 </resources>

@@ -20,13 +20,13 @@
                 android:id="@+id/packageCoverImage"
                 android:layout_width="257dp"
                 android:layout_height="204dp"
-                android:layout_marginTop="8dp"
+                android:layout_marginTop="60dp"
                 android:src="@drawable/add_image_icon"
 
                 app:layout_constraintDimensionRatio="4:3"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/topRelativeLayout" />
+                app:layout_constraintTop_toTopOf="parent" />
 
             <Button
                 android:id="@+id/btnEditPackage"
@@ -491,44 +491,6 @@
 
 
 
-            <!-- Top overlay -->
-            <RelativeLayout
-                android:id="@+id/topRelativeLayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <ImageView
-                    android:id="@+id/btnBack"
-                    android:layout_width="50dp"
-                    android:layout_height="50dp"
-                    android:padding="14dp"
-                    android:src="@drawable/arrow_back_icon" />
-
-                <TextView
-                    android:id="@+id/packageName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="50dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-                    android:layout_marginStart="50dp"
-
-                    android:layout_marginEnd="50dp"
-                    android:maxLines="2"
-                    android:fontFamily="@font/lexend"
-                    android:gravity="center"
-                    android:text="@string/packageName"
-                    android:textColor="@color/white"
-                    app:autoSizeMaxTextSize="22sp"
-                    app:autoSizeMinTextSize="10sp"
-                    app:autoSizeStepGranularity="1dp"
-                    app:autoSizeTextType="uniform" />
-
-
-            </RelativeLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
@@ -557,6 +519,43 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
+    <!-- Top overlay -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/topRelativeLayout">
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/dark_primary"/>
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:padding="14dp"
+            android:src="@drawable/arrow_back_icon" />
+
+        <TextView
+            android:id="@+id/packageName"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            android:layout_marginStart="50dp"
+
+            android:layout_marginEnd="50dp"
+            android:maxLines="2"
+            android:fontFamily="@font/lexend"
+            android:gravity="center"
+            android:text="@string/packageName"
+            android:textColor="@color/white"
+            app:autoSizeMaxTextSize="22sp"
+            app:autoSizeMinTextSize="10sp"
+            app:autoSizeStepGranularity="1dp"
+            app:autoSizeTextType="uniform" />
+    </RelativeLayout>
 
 </FrameLayout>

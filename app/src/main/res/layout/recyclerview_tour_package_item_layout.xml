@@ -14,11 +14,19 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <ProgressBar
+            android:layout_width="160dp"
+            android:layout_height="120dp"
+            android:padding="30dp"
+            android:indeterminateTint="@color/orange_primary"
+            android:background="@drawable/round_back_bg"
+
+            />
+
         <ImageView
             android:id="@+id/packageImage"
             android:layout_width="160dp"
             android:layout_height="120dp"
-            android:src="@drawable/add_image_icon"
             app:layout_constraintDimensionRatio="4:3" />
 
         <TextView
@@ -29,7 +37,7 @@
             android:fontFamily="@font/lexend"
             android:gravity="center|top"
             android:padding="8dp"
-            android:text="@string/packageName"
+            android:text=""
             android:textColor="@android:color/white"
             android:textSize="15sp"
             android:layout_below="@+id/packageImage" />

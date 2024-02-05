@@ -53,10 +53,16 @@ import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function1;
 
+
+/*
+*
+* TODO:
+*  - Auto select the current selected countries in the package to be shown in the multi-spinner.
+*
+*/
 public class TourPackageEditFragment extends Fragment implements MultiSpinner.MultiSpinnerListener{
 
     private static final int MAIN_IMAGE_CORNER_RADIUS = 70;
-    private static final int MAX_PACKAGE_NAME_LENGTH = 27;
     ImageView packageCoverImage, btnBack;
     Button btnSaveChanges;
     EditText tourDescInput, itineraryInput, durationInput, meetingPointInput,
