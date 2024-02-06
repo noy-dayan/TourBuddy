@@ -71,9 +71,13 @@ dependencies {
     //
     implementation("com.google.code.gson:gson:2.8.9")
 
-    // SearchView
-    implementation("androidx.appcompat:appcompat:1.6.1")
+    // Customizable Calendar
+    implementation("io.github.architshah248.calendar:awesome-calendar:2.0.0")
+    implementation("com.squareup:android-times-square:1.5.0@aar")
 
 
+    implementation("com.github.prolificinteractive:material-calendarview:2.0.1")
+    implementation("com.jakewharton.threetenabp:threetenabp:1.3.1")
 
 }
+

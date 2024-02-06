@@ -1,11 +1,17 @@
 package com.tourbuddy.tourbuddy.fragments;
 
+import static com.prolificinteractive.materialcalendarview.MaterialCalendarView.SELECTION_MODE_RANGE;
+
+import android.content.res.Configuration;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.CalendarView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -16,6 +22,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import com.archit.calendardaterangepicker.customviews.DateRangeCalendarView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -30,14 +37,32 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.prolificinteractive.materialcalendarview.CalendarDay;
+import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
+import com.prolificinteractive.materialcalendarview.format.DateFormatTitleFormatter;
+import com.prolificinteractive.materialcalendarview.format.TitleFormatter;
+import com.squareup.timessquare.CalendarPickerView;
 import com.tourbuddy.tourbuddy.R;
 import com.tourbuddy.tourbuddy.adapters.TourPackageRecyclerViewAdapter;
 import com.tourbuddy.tourbuddy.adapters.UserRecyclerViewAdapter;
+import com.tourbuddy.tourbuddy.decorators.EventDecorator;
 import com.tourbuddy.tourbuddy.utils.DataCache;
+import org.threeten.bp.LocalDate;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
+
+import android.os.Bundle;
+
+
 
 /**
  * Fragment for displaying user profile information.
@@ -46,6 +71,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
 
     // DataCache instance for caching user data
     DataCache dataCache;
+    CalendarPickerView calendar;
 
     // UI elements
     ImageView profilePic;
@@ -69,6 +95,23 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
     TourPackageRecyclerViewAdapter tourPackageRecyclerViewAdapter;
     List<String> tourPackagesIdList = new ArrayList<>();
     String userId;
+
+
+    final List<String> pinkDateList = Arrays.asList(
+            "2024-01-01",
+            "2024-01-03", "2024-01-04", "2024-01-05", "2024-01-06");
+    final List<String> grayDateList = Arrays.asList(
+            "2024-01-09", "2024-01-10", "2024-01-11",
+            "2024-01-24", "2024-01-25", "2024-01-26", "2024-01-27", "2024-01-28", "2024-01-29");
+    final LocalDate min = getLocalDate("2024-01-01");
+    final LocalDate max = getLocalDate("2024-12-30");
+    final String DATE_FORMAT = "yyyy-MM-dd";
+
+    int pink = 0;
+    int gray = 1;
+
+    MaterialCalendarView calendarView;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -102,6 +145,18 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
         swipeRefreshLayout.setProgressBackgroundColor(R.color.dark_primary);
         swipeRefreshLayout.setColorScheme(R.color.orange_primary);
 
+        calendarView = view.findViewById(R.id.calendarView);
+
+        // Initialize calendar and set its attributes
+        calendarView.setShowOtherDates(MaterialCalendarView.SHOW_ALL);
+        calendarView.state().edit().setMinimumDate(min).setMaximumDate(max).commit();
+
+        // Set up event decorators
+        setEventDecorator(pinkDateList, R.drawable.p_center, R.drawable.p_left, R.drawable.p_right, R.drawable.p_independent);
+        setEventDecorator(grayDateList, R.drawable.g_center, R.drawable.g_left, R.drawable.g_right, R.drawable.g_independent);
+        // Set the locale for the calendar view title formatter
+        calendarView.setTitleFormatter(new DateFormatTitleFormatter());
+
         mUser = mAuth.getCurrentUser();
         if (mUser != null)
             userId = mUser.getUid();
@@ -112,6 +167,8 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
             // Data not found in cache, fetch from the server
             loadDataFromFirebase(view);
         }
+
+
 
         // Set up pull-to-refresh functionality
         if (swipeRefreshLayout != null) {
@@ -124,7 +181,75 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
             Log.e("ThisProfileFragment", "SwipeRefreshLayout is null");
         }
 
+
         return view;
+
+    }
+
+    void setEventDecorator(List<String> dateList, int centerDrawable, int leftDrawable, int rightDrawable, int independentDrawable) {
+        List<LocalDate> localDateList = convertToDateList(dateList);
+        List<CalendarDay> centerDates = new ArrayList<>();
+        List<CalendarDay> startDates = new ArrayList<>();
+        List<CalendarDay> endDates = new ArrayList<>();
+        List<CalendarDay> independentDates = new ArrayList<>();
+
+        for (LocalDate localDate : localDateList) {
+            boolean hasLeftNeighbor = localDateList.contains(localDate.minusDays(1));
+            boolean hasRightNeighbor = localDateList.contains(localDate.plusDays(1));
+
+            if (hasLeftNeighbor && hasRightNeighbor) {
+                centerDates.add(CalendarDay.from(localDate));
+            } else if (hasLeftNeighbor) {
+                startDates.add(CalendarDay.from(localDate));
+            } else if (hasRightNeighbor) {
+                endDates.add(CalendarDay.from(localDate));
+            } else {
+                independentDates.add(CalendarDay.from(localDate));
+            }
+        }
+
+        if (getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
+            setDecor(centerDates, centerDrawable);
+            setDecor(endDates, leftDrawable);
+            setDecor(startDates, rightDrawable);
+        } else {
+            setDecor(centerDates, centerDrawable);
+            setDecor(startDates, leftDrawable);
+            setDecor(endDates, rightDrawable);
+        }
+
+        setDecor(independentDates, independentDrawable);
+    }
+
+    List<LocalDate> convertToDateList(List<String> dateList) {
+        List<LocalDate> localDateList = new ArrayList<>();
+        for (String dateString : dateList) {
+            LocalDate localDate = getLocalDate(dateString);
+            if (localDate != null) {
+                localDateList.add(localDate);
+            }
+        }
+        return localDateList;
+    }
+
+    void setDecor(List<CalendarDay> calendarDayList, int drawable) {
+        calendarView.addDecorators(new EventDecorator(requireContext()
+                , drawable
+                , calendarDayList));
+    }
+
+    LocalDate getLocalDate(String date) {
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
+        try {
+            Date input = sdf.parse(date);
+            Calendar cal = Calendar.getInstance();
+            cal.setTime(Objects.requireNonNull(input));
+            return LocalDate.of(cal.get(Calendar.YEAR),
+                    cal.get(Calendar.MONTH) + 1,
+                    cal.get(Calendar.DAY_OF_MONTH));
+        } catch (ParseException | NullPointerException e) {
+            return null;
+        }
     }
 
 
