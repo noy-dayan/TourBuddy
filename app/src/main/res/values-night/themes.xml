@@ -5,5 +5,22 @@
         <item name="android:statusBarColor">@color/dark_primary</item>
     </style>
 
+    <!-- Calendar Text Appearance -->
+    <style name="DateTextAppearance" parent="TextAppearance.MaterialCalendarWidget.Date">
+        <item name="android:fontFamily">@font/lexend</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:textColor">@color/calendar_date_color</item>
+    </style>
 
+    <style name="HeaderTextAppearance" parent="TextAppearance.MaterialCalendarWidget.Header">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:textSize">17sp</item>
+        <item name="android:fontFamily">@font/lexend</item>
+    </style>
+
+    <style name="WeekDayTextAppearance" parent="TextAppearance.MaterialCalendarWidget.WeekDay">
+        <item name="android:textColor">@color/white</item>
+        <item name="android:fontFamily">@font/lexend</item>
+        <item name="android:textStyle">bold</item>
+    </style>
 </resources>

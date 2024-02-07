@@ -5,6 +5,7 @@ import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -13,6 +14,7 @@ import android.os.Bundle;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.graphics.drawable.RoundedBitmapDrawable;
 import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.fragment.app.Fragment;
@@ -39,6 +41,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.flask.colorpicker.ColorPickerView;
+import com.flask.colorpicker.OnColorSelectedListener;
+import com.flask.colorpicker.builder.ColorPickerClickListener;
+import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -83,6 +89,7 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
     EditText packageNameInput, tourDescInput, itineraryInput, durationInput, meetingPointInput,
             includedServicesInput, excludedServicesInput, priceInput, groupSizeInput,
             cancellationPolicyInput, specialRequirementsInput, additionalInfoInput;
+    int packageColor;
 
     List<String> selectedCountries;
 
@@ -104,6 +111,10 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
     // Loading overlay
     View loadingOverlay;
     ProgressBar progressBar;
+
+    // Color picker
+    ConstraintLayout colorPicker;
+    View colorView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -137,7 +148,9 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
         loadingOverlay = view.findViewById(R.id.loadingOverlay);
         progressBar = view.findViewById(R.id.progressBar);
         countryMultiSpinner = view.findViewById(R.id.countryMultiSpinner);
-
+        colorPicker = view.findViewById(R.id.colorPicker);
+        colorView = view.findViewById(R.id.colorView);
+        packageColor = R.color.orange_primary;
 
         String[] countryArray = getResources().getStringArray(R.array.countries_filter);
         List<String> countryList = Arrays.asList(countryArray);
@@ -149,6 +162,37 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
         // Set up input managers
         imageInputManager();
 
+        colorPicker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ColorPickerDialogBuilder
+                        .with(requireContext())
+                        .lightnessSliderOnly()
+                        .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
+                        .density(8)
+                        .setOnColorSelectedListener(new OnColorSelectedListener() {
+                            @Override
+                            public void onColorSelected(int selectedColor) {
+                            }
+                        })
+                        .setPositiveButton(R.string.confirm, new ColorPickerClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
+                                // Reset the colorView background tint to default
+                                colorView.setBackgroundTintList(null);
+                                colorView.setBackgroundTintList(ColorStateList.valueOf(selectedColor));
+                                packageColor = selectedColor;
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .build()
+                        .show();
+            }
+        });
 
         // Set click listeners for buttons
         btnCreatePackage.setOnClickListener(new View.OnClickListener() {
@@ -203,6 +247,8 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
             packageData.put("cancellationPolicy", cancellationPolicy);
             packageData.put("specialRequirements", specialRequirements);
             packageData.put("additionalInfo", additionalInfo);
+            packageData.put("packageColor", packageColor);
+
             if (selectedCountries != null) {
                 packageData.put("includedCountries", selectedCountries);
                 updateCountryPackagesCount(userId, selectedCountries);

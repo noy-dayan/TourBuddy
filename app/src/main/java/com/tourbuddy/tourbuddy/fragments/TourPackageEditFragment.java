@@ -4,12 +4,14 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 
 import android.text.Editable;
@@ -27,6 +29,10 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.flask.colorpicker.ColorPickerView;
+import com.flask.colorpicker.OnColorSelectedListener;
+import com.flask.colorpicker.builder.ColorPickerClickListener;
+import com.flask.colorpicker.builder.ColorPickerDialogBuilder;
 import com.github.dhaval2404.imagepicker.ImagePicker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -68,6 +74,7 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
     EditText tourDescInput, itineraryInput, durationInput, meetingPointInput,
             includedServicesInput, excludedServicesInput, priceInput, groupSizeInput,
             cancellationPolicyInput, specialRequirementsInput, additionalInfoInput;
+    int packageColor;
 
     List<String> selectedCountries;
     String packageName, userId;
@@ -89,6 +96,10 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
     // Loading overlay
     View loadingOverlay;
     ProgressBar progressBar;
+
+    // Color picker
+    ConstraintLayout colorPicker;
+    View colorView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -121,6 +132,9 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
         loadingOverlay = view.findViewById(R.id.loadingOverlay);
         progressBar = view.findViewById(R.id.progressBar);
         countryMultiSpinner = view.findViewById(R.id.countryMultiSpinner);
+        colorPicker = view.findViewById(R.id.colorPicker);
+        colorView = view.findViewById(R.id.colorView);
+        packageColor = R.color.orange_primary;
 
         //Setting Multi Selection Spinner image.
         String[] countryArray = getResources().getStringArray(R.array.countries_filter);
@@ -135,6 +149,38 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
         editTextInputManager();
         imageInputManager();
 
+
+        colorPicker.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ColorPickerDialogBuilder
+                        .with(requireContext())
+                        .lightnessSliderOnly()
+                        .wheelType(ColorPickerView.WHEEL_TYPE.CIRCLE)
+                        .density(8)
+                        .setOnColorSelectedListener(new OnColorSelectedListener() {
+                            @Override
+                            public void onColorSelected(int selectedColor) {
+                            }
+                        })
+                        .setPositiveButton(R.string.confirm, new ColorPickerClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int selectedColor, Integer[] allColors) {
+                                // Reset the colorView background tint to default
+                                colorView.setBackgroundTintList(null);
+                                colorView.setBackgroundTintList(ColorStateList.valueOf(selectedColor));
+                                packageColor = selectedColor;
+                            }
+                        })
+                        .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                            }
+                        })
+                        .build()
+                        .show();
+            }
+        });
 
         // Set click listeners for buttons
         btnBack.setOnClickListener(new View.OnClickListener() {
@@ -187,6 +233,9 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
             cancellationPolicyInput.setText(getArguments().getString("cancellationPolicy"));
             specialRequirementsInput.setText(getArguments().getString("specialRequirements"));
             additionalInfoInput.setText(getArguments().getString("additionalInfo"));
+            colorView.setBackgroundTintList(null);
+            colorView.setBackgroundTintList(ColorStateList.valueOf(getArguments().getInt("packageColor")));
+
         }
     }
 
@@ -222,6 +271,8 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
             packageData.put("cancellationPolicy", cancellationPolicy);
             packageData.put("specialRequirements", specialRequirements);
             packageData.put("additionalInfo", additionalInfo);
+            packageData.put("packageColor", packageColor);
+
             if (selectedCountries != null) {
                 packageData.put("includedCountries", selectedCountries);
                 updateCountryPackagesCount(userId, selectedCountries);

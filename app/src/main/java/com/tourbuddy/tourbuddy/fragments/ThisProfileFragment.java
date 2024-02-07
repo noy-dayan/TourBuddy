@@ -1,28 +1,29 @@
 package com.tourbuddy.tourbuddy.fragments;
 
-import static com.prolificinteractive.materialcalendarview.MaterialCalendarView.SELECTION_MODE_RANGE;
-
-import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.CalendarView;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.archit.calendardaterangepicker.customviews.DateRangeCalendarView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -39,19 +40,19 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
+import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
+import com.prolificinteractive.materialcalendarview.OnRangeSelectedListener;
 import com.prolificinteractive.materialcalendarview.format.DateFormatTitleFormatter;
-import com.prolificinteractive.materialcalendarview.format.TitleFormatter;
 import com.squareup.timessquare.CalendarPickerView;
 import com.tourbuddy.tourbuddy.R;
 import com.tourbuddy.tourbuddy.adapters.TourPackageRecyclerViewAdapter;
-import com.tourbuddy.tourbuddy.adapters.UserRecyclerViewAdapter;
 import com.tourbuddy.tourbuddy.decorators.EventDecorator;
+import com.tourbuddy.tourbuddy.decorators.RangeSelectionDecorator;
 import com.tourbuddy.tourbuddy.utils.DataCache;
 import org.threeten.bp.LocalDate;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -59,9 +60,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-
-import android.os.Bundle;
-
+import java.util.Set;
 
 
 /**
@@ -76,6 +75,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
     // UI elements
     ImageView profilePic;
     TextView username, bio, birthDate, gender, type;
+    Button btnAddNewTour;
 
     // Firebase
     FirebaseAuth mAuth;
@@ -102,13 +102,12 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
             "2024-01-03", "2024-01-04", "2024-01-05", "2024-01-06");
     final List<String> grayDateList = Arrays.asList(
             "2024-01-09", "2024-01-10", "2024-01-11",
-            "2024-01-24", "2024-01-25", "2024-01-26", "2024-01-27", "2024-01-28", "2024-01-29");
+            "2024-01-24", "2024-01-25", "2024-01-26", "2024-01-27", "2024-01-28", "2024-01-29", "2024-01-30", "2024-01-31", "2024-02-01", "2024-02-02");
     final LocalDate min = getLocalDate("2024-01-01");
     final LocalDate max = getLocalDate("2024-12-30");
     final String DATE_FORMAT = "yyyy-MM-dd";
 
-    int pink = 0;
-    int gray = 1;
+    List<LocalDate> decoratedDatesList = new ArrayList<>(); // Define this globally
 
     MaterialCalendarView calendarView;
 
@@ -128,6 +127,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
         birthDate = view.findViewById(R.id.birthDate);
         gender = view.findViewById(R.id.gender);
         type = view.findViewById(R.id.type);
+        btnAddNewTour = view.findViewById(R.id.btnAddNewTour);
 
         // Initialize Firebase instances
         mAuth = FirebaseAuth.getInstance();
@@ -141,21 +141,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
         progressBar = view.findViewById(R.id.progressBar);
 
         recyclerViewTours = view.findViewById(R.id.recyclerViewTours);
-
-        swipeRefreshLayout.setProgressBackgroundColor(R.color.dark_primary);
-        swipeRefreshLayout.setColorScheme(R.color.orange_primary);
-
         calendarView = view.findViewById(R.id.calendarView);
-
-        // Initialize calendar and set its attributes
-        calendarView.setShowOtherDates(MaterialCalendarView.SHOW_ALL);
-        calendarView.state().edit().setMinimumDate(min).setMaximumDate(max).commit();
-
-        // Set up event decorators
-        setEventDecorator(pinkDateList, R.drawable.p_center, R.drawable.p_left, R.drawable.p_right, R.drawable.p_independent);
-        setEventDecorator(grayDateList, R.drawable.g_center, R.drawable.g_left, R.drawable.g_right, R.drawable.g_independent);
-        // Set the locale for the calendar view title formatter
-        calendarView.setTitleFormatter(new DateFormatTitleFormatter());
 
         mUser = mAuth.getCurrentUser();
         if (mUser != null)
@@ -168,10 +154,87 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
             loadDataFromFirebase(view);
         }
 
+        loadCalendarInBackground();
 
+        // Instantiate the custom decorator with your custom drawable for selection
+        Drawable selectedDrawable = getResources().getDrawable(R.drawable.date_decorator_start);
+        Drawable selectedDrawable2 = getResources().getDrawable(R.drawable.date_decorator_center);
+        Drawable selectedDrawable3 = getResources().getDrawable(R.drawable.date_decorator_end);
+
+        RangeSelectionDecorator rangeDecorator = new RangeSelectionDecorator(selectedDrawable, selectedDrawable2, selectedDrawable3);
+
+        // Set the date range selection listener
+        calendarView.setOnRangeSelectedListener(new OnRangeSelectedListener() {
+            @Override
+            public void onRangeSelected(@NonNull MaterialCalendarView widget, @NonNull List<CalendarDay> dates) {
+                // Check if any of the selected dates are in the list of decorated dates
+                boolean disableSelection = dates.stream()
+                        .map(CalendarDay::getDate)
+                        .anyMatch(decoratedDatesList::contains);
+
+
+                // Check if any of the selected dates are in the list of decorated dates
+                if (disableSelection) {
+                    // Disable range selection for decorated dates
+                    btnAddNewTour.setEnabled(false);
+                    calendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_RANGE);
+                    btnAddNewTour.setText("Add New Tour");
+                } else {
+                    // Clear the existing selection
+                    rangeDecorator.clearSelection();
+
+                    // Update the range decorator with the selected dates
+                    rangeDecorator.setSelectedDates(dates);
+
+                    // Invalidate the decorators to trigger a redraw
+                    calendarView.invalidateDecorators();
+
+                    calendarView.getSelectedDates();
+
+
+                    Log.d("TAG", calendarView.getSelectedDates().toString());
+                    btnAddNewTour.setText("Add New Tour\n" + dates.get(0).getDate() + " To " + dates.get(dates.size() - 1).getDate());
+
+                    btnAddNewTour.setEnabled(true);
+
+                }
+            }
+
+        });
+        calendarView.setOnDateChangedListener(new OnDateSelectedListener() {
+            @Override
+            public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
+                if (decoratedDatesList.contains(date.getDate())) {
+                    // Disable selection for decorated dates
+                    btnAddNewTour.setEnabled(false);
+                    calendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_RANGE);
+                    btnAddNewTour.setText("Add New Tour");
+
+                } else {
+                    if (calendarView.getSelectedDate() != null) {
+                        btnAddNewTour.setEnabled(true);
+                        btnAddNewTour.setText("Add New Tour\n" + date.getDate());
+
+                    } else {
+                        btnAddNewTour.setEnabled(false);
+                        btnAddNewTour.setText("Add New Tour");
+
+
+                    }
+
+                }
+            }
+        });
+
+
+        // Add the decorator to the MaterialCalendarView
+        calendarView.addDecorator(rangeDecorator);
 
         // Set up pull-to-refresh functionality
         if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setProgressBackgroundColor(R.color.dark_primary);
+            swipeRefreshLayout.setColorScheme(R.color.orange_primary);
+
             swipeRefreshLayout.setOnRefreshListener(() -> {
                 tourPackagesIdList = new ArrayList<>();
                 loadDataFromFirebase(view);
@@ -185,9 +248,24 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
         return view;
 
     }
+    private void loadCalendarInBackground() {
+        new Thread(() -> {
+            // Initialize calendar and set its attributes
+            calendarView.setShowOtherDates(MaterialCalendarView.SHOW_ALL);
+            calendarView.state().edit().setMinimumDate(min).setMaximumDate(max).commit();
 
-    void setEventDecorator(List<String> dateList, int centerDrawable, int leftDrawable, int rightDrawable, int independentDrawable) {
+            // Set the locale for the calendar view title formatter
+            calendarView.setTitleFormatter(new DateFormatTitleFormatter());
+
+            // Set up event decorators
+            setEventDecorator(pinkDateList,-9568312);
+            setEventDecorator(grayDateList, -10638632);
+        }).start();
+    }
+
+    void setEventDecorator(List<String> dateList, int colorCode) {
         List<LocalDate> localDateList = convertToDateList(dateList);
+        decoratedDatesList.addAll(localDateList); // Add decorated dates to the list
         List<CalendarDay> centerDates = new ArrayList<>();
         List<CalendarDay> startDates = new ArrayList<>();
         List<CalendarDay> endDates = new ArrayList<>();
@@ -196,29 +274,46 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
         for (LocalDate localDate : localDateList) {
             boolean hasLeftNeighbor = localDateList.contains(localDate.minusDays(1));
             boolean hasRightNeighbor = localDateList.contains(localDate.plusDays(1));
-
-            if (hasLeftNeighbor && hasRightNeighbor) {
+            if (hasLeftNeighbor && hasRightNeighbor)
                 centerDates.add(CalendarDay.from(localDate));
-            } else if (hasLeftNeighbor) {
+            else if (hasLeftNeighbor)
                 startDates.add(CalendarDay.from(localDate));
-            } else if (hasRightNeighbor) {
+            else if (hasRightNeighbor)
                 endDates.add(CalendarDay.from(localDate));
-            } else {
+            else
                 independentDates.add(CalendarDay.from(localDate));
-            }
+
         }
+
+        Drawable dateDecoratorIndependent = createColoredDrawable(colorCode, R.drawable.date_decorator_independent);
+        Drawable dateDecoratorCenter = createColoredDrawable(colorCode, R.drawable.date_decorator_center);
+        Drawable dateDecoratorStart = createColoredDrawable(colorCode, R.drawable.date_decorator_start);
+        Drawable dateDecoratorEnd = createColoredDrawable(colorCode, R.drawable.date_decorator_end);
+
+
+        setDecor(independentDates, dateDecoratorIndependent);
+        setDecor(centerDates, dateDecoratorCenter);
 
         if (getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
-            setDecor(centerDates, centerDrawable);
-            setDecor(endDates, leftDrawable);
-            setDecor(startDates, rightDrawable);
+            setDecor(endDates, dateDecoratorStart);
+            setDecor(startDates, dateDecoratorEnd);
         } else {
-            setDecor(centerDates, centerDrawable);
-            setDecor(startDates, leftDrawable);
-            setDecor(endDates, rightDrawable);
+            setDecor(startDates, dateDecoratorStart);
+            setDecor(endDates, dateDecoratorEnd);
         }
 
-        setDecor(independentDates, independentDrawable);
+    }
+
+    Drawable createColoredDrawable(int colorCode, int drawableResId) {
+        Drawable originalDrawable = ContextCompat.getDrawable(requireContext(), drawableResId);
+        Drawable.ConstantState constantState = originalDrawable.getConstantState();
+        if (constantState != null) {
+            Drawable drawable = constantState.newDrawable().mutate();
+            drawable.setTint(colorCode);
+            return drawable;
+        } else {
+            return null;
+        }
     }
 
     List<LocalDate> convertToDateList(List<String> dateList) {
@@ -232,10 +327,8 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
         return localDateList;
     }
 
-    void setDecor(List<CalendarDay> calendarDayList, int drawable) {
-        calendarView.addDecorators(new EventDecorator(requireContext()
-                , drawable
-                , calendarDayList));
+    void setDecor(List<CalendarDay> calendarDayList, Drawable drawable) {
+        calendarView.addDecorators(new EventDecorator(drawable, calendarDayList));
     }
 
     LocalDate getLocalDate(String date) {

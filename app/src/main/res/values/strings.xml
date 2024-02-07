@@ -99,6 +99,7 @@
     <string name="confrimPackageDeletionMessage">Are you sure you want to delete package?</string>
     <string name="loginMessage">Please Wait While Logging In…</string>
     <string name="confrimPackageCreationMessage">Are you sure you want create a new package?</string>
+    <string name="package_color">Package Color:</string>
 
 
 </resources>

@@ -98,6 +98,7 @@
     <string name="confrimPackageDeletionMessage">האם אתה בטוח שברצונך למחוק את החבילה?</string>
     <string name="loginMessage">אנא המתן בזמן ההתחברות…</string>
     <string name="confrimPackageCreationMessage">האם אתה בטוח שברצונך ליצור חבילה חדשה?</string>
+    <string name="package_color">צבע החבילה:</string>
 
 
 </resources>

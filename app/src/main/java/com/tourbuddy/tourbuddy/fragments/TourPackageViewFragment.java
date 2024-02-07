@@ -48,7 +48,7 @@ public class TourPackageViewFragment extends Fragment {
     ImageView packageCoverImage, btnBack;
     TextView packageName, includedCountries, tourDesc, itinerary, duration, meetingPoint, includedServices,
             excludedServices, price, groupSize, cancellationPolicy, specialRequirements, additionalInfo;
-
+    int packageColor;
     Button btnEditPackage, btnDeletePackage;
 
     // Firebase
@@ -161,7 +161,7 @@ public class TourPackageViewFragment extends Fragment {
                 args.putString("cancellationPolicy", cancellationPolicy.getText().toString());
                 args.putString("specialRequirements", specialRequirements.getText().toString());
                 args.putString("additionalInfo", additionalInfo.getText().toString());
-
+                args.putInt("packageColor", packageColor);
                 tourPackageEditFragment.setArguments(args);
                 switchFragment(tourPackageEditFragment);
 
@@ -343,9 +343,10 @@ public class TourPackageViewFragment extends Fragment {
                         if (documentSnapshot.contains("additionalInfo"))
                             additionalInfo.setText(documentSnapshot.getString("additionalInfo"));
 
+                        if (documentSnapshot.contains("packageColor"))
+                            packageColor = Integer.parseInt(String.valueOf(documentSnapshot.get("packageColor")));
 
-
-                        // Load the image into the ImageView using Glide
+                            // Load the image into the ImageView using Glide
                         storageReference.child("images/" + userId + "/tourPackages/" + documentSnapshot.getId() + "/packageCoverImage").getDownloadUrl()
                                 .addOnSuccessListener(new OnSuccessListener<Uri>() {
                                     @Override
