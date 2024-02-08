@@ -95,11 +95,14 @@
     <string name="save_changes">Save Changes</string>
     <string name="delete_package">Delete Package</string>
 
-    <string name="confrimPackageDeletion">Confirm Package Deletion</string>
-    <string name="confrimPackageDeletionMessage">Are you sure you want to delete package?</string>
+    <string name="confirmPackageDeletion">Confirm Package Deletion</string>
+    <string name="confirmPackageDeletionMessage">Are you sure you want to delete package?</string>
     <string name="loginMessage">Please Wait While Logging In…</string>
-    <string name="confrimPackageCreationMessage">Are you sure you want create a new package?</string>
+    <string name="confirmPackageCreationMessage">Are you sure you want create a new package?</string>
     <string name="package_color">Package Color:</string>
+    <string name="cancel_tour">Delete Tour</string>
+    <string name="confirmTourCancellationMessage">Are you sure you want to cancel tour?</string>
+    <string name="confirmTourCancellation">Confirm Tour Cancellation</string>
 
 
 </resources>

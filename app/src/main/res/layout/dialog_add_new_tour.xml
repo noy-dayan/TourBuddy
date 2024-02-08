@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="32dp">
+
+    <TextView
+        android:id="@+id/tourDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/white"
+        android:fontFamily="@font/lexend"
+        android:textSize="17.5sp" />
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="2dp"
+        android:background="@color/orange_primary"
+        android:layout_marginTop="15dp"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Tour Package: "
+        android:fontFamily="@font/lexend"
+        android:textColor="@color/white"
+        android:textSize="17.5sp"
+        android:layout_marginTop="15dp"/>
+
+    <Spinner
+        android:id="@+id/tourSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+
+        />
+
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="2dp"
+        android:background="@color/orange_primary"
+        android:layout_marginTop="15dp"/>
+
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/groupSize"
+            android:fontFamily="@font/lexend"
+            android:textColor="@color/white"
+            android:textSize="17.5sp"
+            android:layout_marginTop="15dp"/>
+
+
+        <EditText
+            android:id="@+id/groupSize"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/input_bg"
+            android:fontFamily="@font/lexend"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            android:hint="@string/groupSizeGuideline"
+            android:textSize="17.5sp"
+            android:layout_marginTop="10dp"
+            android:gravity="start|top"
+            android:maxLength="3"
+            />
+
+
+
+    <Button
+        android:id="@+id/btnAddNewTour"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/btn_bg"
+        android:fontFamily="@font/lexend"
+        android:textColor="@color/white"
+        android:text="Add New Tour"
+        android:layout_marginTop="25dp"
+        android:enabled="false"
+     />
+
+</LinearLayout>

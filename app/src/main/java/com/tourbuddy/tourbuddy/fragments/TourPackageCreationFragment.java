@@ -2,12 +2,9 @@ package com.tourbuddy.tourbuddy.fragments;
 
 import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.ColorStateList;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -15,32 +12,23 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.graphics.drawable.RoundedBitmapDrawable;
-import androidx.core.graphics.drawable.RoundedBitmapDrawableFactory;
 import androidx.fragment.app.Fragment;
 
 import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
-import com.bumptech.glide.request.target.CustomTarget;
-import com.bumptech.glide.request.transition.Transition;
 import com.flask.colorpicker.ColorPickerView;
 import com.flask.colorpicker.OnColorSelectedListener;
 import com.flask.colorpicker.builder.ColorPickerClickListener;
@@ -52,7 +40,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -63,17 +50,11 @@ import com.tourbuddy.tourbuddy.R;
 import com.tourbuddy.tourbuddy.utils.DataCache;
 import com.tourbuddy.tourbuddy.utils.MultiSpinner;
 
-import org.jetbrains.annotations.Nullable;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 
 import jp.wasabeef.glide.transformations.RoundedCornersTransformation;
 import kotlin.Unit;
@@ -87,7 +68,7 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
     ImageView packageCoverImage, btnBack;
     Button btnCreatePackage;
     EditText packageNameInput, tourDescInput, itineraryInput, durationInput, meetingPointInput,
-            includedServicesInput, excludedServicesInput, priceInput, groupSizeInput,
+            includedServicesInput, excludedServicesInput, priceInput,
             cancellationPolicyInput, specialRequirementsInput, additionalInfoInput;
     int packageColor;
 
@@ -133,7 +114,6 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
         includedServicesInput = view.findViewById(R.id.includedServicesInput);
         excludedServicesInput = view.findViewById(R.id.excludedServicesInput);
         priceInput = view.findViewById(R.id.priceInput);
-        groupSizeInput = view.findViewById(R.id.groupSizeInput);
         cancellationPolicyInput = view.findViewById(R.id.cancellationPolicyInput);
         specialRequirementsInput = view.findViewById(R.id.specialRequirementsInput);
         additionalInfoInput = view.findViewById(R.id.additionalInfoInput);
@@ -229,7 +209,6 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
             String includedServices = includedServicesInput.getText().toString().trim();
             String excludedServices = excludedServicesInput.getText().toString().trim();
             String price = priceInput.getText().toString().trim();
-            String groupSize = groupSizeInput.getText().toString().trim();
             String cancellationPolicy = cancellationPolicyInput.getText().toString().trim();
             String specialRequirements = specialRequirementsInput.getText().toString().trim();
             String additionalInfo = additionalInfoInput.getText().toString().trim();
@@ -243,7 +222,6 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
             packageData.put("includedServices", includedServices);
             packageData.put("excludedServices", excludedServices);
             packageData.put("price", price);
-            packageData.put("groupSize", groupSize);
             packageData.put("cancellationPolicy", cancellationPolicy);
             packageData.put("specialRequirements", specialRequirements);
             packageData.put("additionalInfo", additionalInfo);
@@ -359,8 +337,6 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
                 isEditTextFilled(includedServicesInput) &&
                 isEditTextFilled(excludedServicesInput) &&
                 isEditTextFilled(priceInput) &&
-                isEditTextFilled(groupSizeInput) &&
-                isPositiveNumeric(groupSizeInput) &&
                 isEditTextFilled(cancellationPolicyInput) &&
                 isEditTextFilled(specialRequirementsInput) &&
                 isEditTextFilled(additionalInfoInput);
@@ -368,16 +344,6 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
 
     private boolean isEditTextFilled(EditText editText) {
         return editText.getText() != null && editText.getText().length() > 0;
-    }
-
-    private boolean isPositiveNumeric(EditText editText) {
-        String text = editText.getText().toString().trim();
-        try {
-            int number = Integer.parseInt(text);
-            return number > 0; // Checks if the input is a positive numeric value
-        } catch (NumberFormatException e) {
-            return false; // Handles the case where the input is not a valid integer
-        }
     }
 
     private void editTextInputManager() {
@@ -406,7 +372,6 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
         includedServicesInput.addTextChangedListener(textWatcher);
         excludedServicesInput.addTextChangedListener(textWatcher);
         priceInput.addTextChangedListener(textWatcher);
-        groupSizeInput.addTextChangedListener(textWatcher);
         cancellationPolicyInput.addTextChangedListener(textWatcher);
         specialRequirementsInput.addTextChangedListener(textWatcher);
         additionalInfoInput.addTextChangedListener(textWatcher);
@@ -516,7 +481,7 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
     private void showCreatePackageDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
         builder.setTitle(requireContext().getResources().getString(R.string.createPackage));
-        builder.setMessage(requireContext().getResources().getString(R.string.confrimPackageCreationMessage));
+        builder.setMessage(requireContext().getResources().getString(R.string.confirmPackageCreationMessage));
         builder.setPositiveButton(requireContext().getResources().getString(R.string.createPackage), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {

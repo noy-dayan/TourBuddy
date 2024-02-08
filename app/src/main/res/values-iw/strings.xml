@@ -94,11 +94,14 @@
     <string name="package_name_can_not_be_changed_after_creation">• לא ניתן לשנות את שם החבילה לאחר היצירה.</string>
     <string name="save_changes">שמור שינויים</string>
     <string name="delete_package">מחיקת חבילה</string>
-    <string name="confrimPackageDeletion">אישור מחיקת החבילה</string>
-    <string name="confrimPackageDeletionMessage">האם אתה בטוח שברצונך למחוק את החבילה?</string>
+    <string name="confirmPackageDeletion">אישור מחיקת החבילה</string>
+    <string name="confirmPackageDeletionMessage">האם אתה בטוח שברצונך למחוק את החבילה?</string>
     <string name="loginMessage">אנא המתן בזמן ההתחברות…</string>
-    <string name="confrimPackageCreationMessage">האם אתה בטוח שברצונך ליצור חבילה חדשה?</string>
+    <string name="confirmPackageCreationMessage">האם אתה בטוח שברצונך ליצור חבילה חדשה?</string>
     <string name="package_color">צבע החבילה:</string>
+    <string name="cancel_tour">ביטול סיור</string>
+    <string name="confirmTourCancellationMessage">האם אתה בטוח שברצונך לבטל את הסיור?</string>
+    <string name="confirmTourCancellation">אישור ביטול הסיור</string>
 
 
 </resources>

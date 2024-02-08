@@ -1,19 +1,22 @@
 package com.tourbuddy.tourbuddy.fragments;
 
-import android.graphics.Color;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +43,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
+import com.prolificinteractive.materialcalendarview.OnDateLongClickListener;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.prolificinteractive.materialcalendarview.OnRangeSelectedListener;
 import com.prolificinteractive.materialcalendarview.format.DateFormatTitleFormatter;
@@ -48,29 +52,32 @@ import com.tourbuddy.tourbuddy.R;
 import com.tourbuddy.tourbuddy.adapters.TourPackageRecyclerViewAdapter;
 import com.tourbuddy.tourbuddy.decorators.EventDecorator;
 import com.tourbuddy.tourbuddy.decorators.RangeSelectionDecorator;
+import com.tourbuddy.tourbuddy.utils.ActiveTour;
 import com.tourbuddy.tourbuddy.utils.DataCache;
+
 import org.threeten.bp.LocalDate;
+import org.threeten.bp.ZoneId;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
+import java.util.UUID;
 
 
 /**
  * Fragment for displaying user profile information.
  */
 public class ThisProfileFragment extends Fragment implements TourPackageRecyclerViewAdapter.OnLoadCompleteListener {
-
     // DataCache instance for caching user data
     DataCache dataCache;
-    CalendarPickerView calendar;
 
     // UI elements
     ImageView profilePic;
@@ -96,19 +103,15 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
     List<String> tourPackagesIdList = new ArrayList<>();
     String userId;
 
+    // Tour booking management
+    String selectedStartDate = "", selectedEndDate = "";
 
-    final List<String> pinkDateList = Arrays.asList(
-            "2024-01-01",
-            "2024-01-03", "2024-01-04", "2024-01-05", "2024-01-06");
-    final List<String> grayDateList = Arrays.asList(
-            "2024-01-09", "2024-01-10", "2024-01-11",
-            "2024-01-24", "2024-01-25", "2024-01-26", "2024-01-27", "2024-01-28", "2024-01-29", "2024-01-30", "2024-01-31", "2024-02-01", "2024-02-02");
-    final LocalDate min = getLocalDate("2024-01-01");
-    final LocalDate max = getLocalDate("2024-12-30");
+    final LocalDate min = LocalDate.now(ZoneId.systemDefault());
+    final LocalDate max = min.plusMonths(6);
     final String DATE_FORMAT = "yyyy-MM-dd";
 
     List<LocalDate> decoratedDatesList = new ArrayList<>(); // Define this globally
-
+    List<ActiveTour> activeTours;
     MaterialCalendarView calendarView;
 
 
@@ -147,6 +150,13 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
         if (mUser != null)
             userId = mUser.getUid();
 
+        // Initialize calendar and set its attributes
+        calendarView.setShowOtherDates(MaterialCalendarView.SHOW_ALL);
+        calendarView.state().edit().setMinimumDate(min).setMaximumDate(max).commit();
+
+        // Set the locale for the calendar view title formatter
+        calendarView.setTitleFormatter(new DateFormatTitleFormatter());
+
         // Attempt to load data from cache
         if (!loadDataFromCache(view)) {
             showLoading(true);
@@ -154,81 +164,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
             loadDataFromFirebase(view);
         }
 
-        loadCalendarInBackground();
-
-        // Instantiate the custom decorator with your custom drawable for selection
-        Drawable selectedDrawable = getResources().getDrawable(R.drawable.date_decorator_start);
-        Drawable selectedDrawable2 = getResources().getDrawable(R.drawable.date_decorator_center);
-        Drawable selectedDrawable3 = getResources().getDrawable(R.drawable.date_decorator_end);
-
-        RangeSelectionDecorator rangeDecorator = new RangeSelectionDecorator(selectedDrawable, selectedDrawable2, selectedDrawable3);
-
-        // Set the date range selection listener
-        calendarView.setOnRangeSelectedListener(new OnRangeSelectedListener() {
-            @Override
-            public void onRangeSelected(@NonNull MaterialCalendarView widget, @NonNull List<CalendarDay> dates) {
-                // Check if any of the selected dates are in the list of decorated dates
-                boolean disableSelection = dates.stream()
-                        .map(CalendarDay::getDate)
-                        .anyMatch(decoratedDatesList::contains);
-
-
-                // Check if any of the selected dates are in the list of decorated dates
-                if (disableSelection) {
-                    // Disable range selection for decorated dates
-                    btnAddNewTour.setEnabled(false);
-                    calendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_RANGE);
-                    btnAddNewTour.setText("Add New Tour");
-                } else {
-                    // Clear the existing selection
-                    rangeDecorator.clearSelection();
-
-                    // Update the range decorator with the selected dates
-                    rangeDecorator.setSelectedDates(dates);
-
-                    // Invalidate the decorators to trigger a redraw
-                    calendarView.invalidateDecorators();
-
-                    calendarView.getSelectedDates();
-
-
-                    Log.d("TAG", calendarView.getSelectedDates().toString());
-                    btnAddNewTour.setText("Add New Tour\n" + dates.get(0).getDate() + " To " + dates.get(dates.size() - 1).getDate());
-
-                    btnAddNewTour.setEnabled(true);
-
-                }
-            }
-
-        });
-        calendarView.setOnDateChangedListener(new OnDateSelectedListener() {
-            @Override
-            public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
-                if (decoratedDatesList.contains(date.getDate())) {
-                    // Disable selection for decorated dates
-                    btnAddNewTour.setEnabled(false);
-                    calendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_RANGE);
-                    btnAddNewTour.setText("Add New Tour");
-
-                } else {
-                    if (calendarView.getSelectedDate() != null) {
-                        btnAddNewTour.setEnabled(true);
-                        btnAddNewTour.setText("Add New Tour\n" + date.getDate());
-
-                    } else {
-                        btnAddNewTour.setEnabled(false);
-                        btnAddNewTour.setText("Add New Tour");
-
-
-                    }
-
-                }
-            }
-        });
-
-
-        // Add the decorator to the MaterialCalendarView
-        calendarView.addDecorator(rangeDecorator);
+        tourBookingManager();
 
         // Set up pull-to-refresh functionality
         if (swipeRefreshLayout != null) {
@@ -248,83 +184,381 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
         return view;
 
     }
-    private void loadCalendarInBackground() {
-        new Thread(() -> {
-            // Initialize calendar and set its attributes
-            calendarView.setShowOtherDates(MaterialCalendarView.SHOW_ALL);
-            calendarView.state().edit().setMinimumDate(min).setMaximumDate(max).commit();
 
-            // Set the locale for the calendar view title formatter
-            calendarView.setTitleFormatter(new DateFormatTitleFormatter());
 
-            // Set up event decorators
-            setEventDecorator(pinkDateList,-9568312);
-            setEventDecorator(grayDateList, -10638632);
-        }).start();
+    private void tourBookingManager(){
+        // Instantiate the custom decorator with your custom drawable for selection
+        Drawable selectedDrawable = getResources().getDrawable(R.drawable.date_decorator_start);
+        Drawable selectedDrawable2 = getResources().getDrawable(R.drawable.date_decorator_center);
+        Drawable selectedDrawable3 = getResources().getDrawable(R.drawable.date_decorator_end);
+
+        RangeSelectionDecorator rangeDecorator = new RangeSelectionDecorator(selectedDrawable, selectedDrawable2, selectedDrawable3);
+
+        // Add the decorator to the MaterialCalendarView
+        calendarView.addDecorator(rangeDecorator);
+
+        // Set the date range selection listener
+        calendarView.setOnRangeSelectedListener(new OnRangeSelectedListener() {
+            @Override
+            public void onRangeSelected(@NonNull MaterialCalendarView widget, @NonNull List<CalendarDay> dates) {
+                // Check if any of the selected dates are in the list of decorated dates
+                boolean disableSelection = dates.stream()
+                        .map(CalendarDay::getDate)
+                        .anyMatch(decoratedDatesList::contains);
+
+
+                // Check if any of the selected dates are in the list of decorated dates
+                if (disableSelection) {
+                    // Disable range selection for decorated dates
+                    btnAddNewTour.setEnabled(false);
+                    selectedStartDate = "";
+                    selectedEndDate = "";
+                    calendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_RANGE);
+                    btnAddNewTour.setText("Add New Tour");
+                } else {
+                    // Clear the existing selection
+                    rangeDecorator.clearSelection();
+
+                    // Update the range decorator with the selected dates
+                    rangeDecorator.setSelectedDates(dates);
+
+                    // Invalidate the decorators to trigger a redraw
+                    calendarView.invalidateDecorators();
+
+                    calendarView.getSelectedDates();
+
+
+                    selectedStartDate = dates.get(0).getDate().toString();
+                    selectedEndDate = dates.get(dates.size() - 1).getDate().toString();
+                    btnAddNewTour.setText("Add New Tour\n" + selectedStartDate + " To " + selectedEndDate);
+                    btnAddNewTour.setEnabled(true);
+
+                }
+            }
+
+        });
+
+        calendarView.setOnDateLongClickListener(new OnDateLongClickListener() {
+            @Override
+            public void onDateLongClick(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date) {
+                LocalDate selectedDate = LocalDate.of(date.getYear(), date.getMonth(), date.getDay());
+                // Iterate through active tours to find the corresponding tour for the selected date
+                for (ActiveTour tour : activeTours) {
+                    LocalDate startDate = getLocalDate(tour.getStartDate());
+                    LocalDate endDate;
+                    if(tour.getEndDate().isEmpty())
+                        endDate = startDate;
+                    else
+                        endDate = getLocalDate(tour.getEndDate());
+
+                    // Check if the selected date is between the start and end dates of the tour
+                    if (selectedDate.equals(startDate) || selectedDate.equals(endDate) ||
+                            (selectedDate.isAfter(startDate) && selectedDate.isBefore(endDate)))
+                        showConfirmTourCancellation(startDate.toString(), true);
+                }
+            }
+        });
+
+        calendarView.setOnDateChangedListener(new OnDateSelectedListener() {
+            @Override
+            public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
+                if (decoratedDatesList.contains(date.getDate())) {
+                    // Disable selection for decorated dates
+                    btnAddNewTour.setEnabled(false);
+                    selectedStartDate = "";
+                    selectedEndDate = "";
+                    calendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_RANGE);
+                    btnAddNewTour.setText("Add New Tour");
+
+                    LocalDate selectedDate = LocalDate.of(date.getYear(), date.getMonth(), date.getDay());
+                    // Iterate through active tours to find the corresponding tour for the selected date
+                    for (ActiveTour tour : activeTours) {
+                        LocalDate startDate = getLocalDate(tour.getStartDate());
+                        LocalDate endDate;
+                        if(tour.getEndDate().isEmpty())
+                            endDate = startDate;
+                        else
+                            endDate = getLocalDate(tour.getEndDate());
+
+                        // Check if the selected date is between the start and end dates of the tour
+                        if (selectedDate.equals(startDate) || selectedDate.equals(endDate) ||
+                                (selectedDate.isAfter(startDate) && selectedDate.isBefore(endDate))) {
+                            // Print the tour reference to the log
+                            Log.d("ActiveTourReference", "Tour reference: " + tour.getTourPackageRef());
+                        }
+                    }
+
+
+                } else {
+                    if (calendarView.getSelectedDate() != null) {
+                        selectedStartDate = date.getDate().toString();
+                        selectedEndDate = "";
+                        btnAddNewTour.setText("Add New Tour\n" + selectedStartDate);
+                        btnAddNewTour.setEnabled(true);
+                    } else {
+                        btnAddNewTour.setEnabled(false);
+                        selectedStartDate = "";
+                        selectedEndDate = "";
+                        btnAddNewTour.setText("Add New Tour");
+
+
+                    }
+
+                }
+            }
+        });
+
+
+
+
+        btnAddNewTour.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Create the dialog
+                AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_new_tour, null);
+                builder.setView(dialogView);
+                AlertDialog dialog = builder.create();
+
+                TextView tourDate = dialogView.findViewById(R.id.tourDate);
+                Button btnAddNewTour = dialogView.findViewById(R.id.btnAddNewTour);
+                EditText groupSize = dialogView.findViewById(R.id.groupSize);
+                Spinner spinner = dialogView.findViewById(R.id.tourSpinner);
+
+                // Initialize spinner
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                        R.layout.spinner_custom_layout, tourPackagesIdList);
+                adapter.setDropDownViewResource(R.layout.spinner_custom_dropdown_layout);
+                spinner.setAdapter(adapter);
+
+                if(!selectedEndDate.isEmpty())
+                    tourDate.setText("Tour Date: \n" + selectedStartDate +" To " + selectedEndDate);
+                else
+                    tourDate.setText("Tour Date: " + selectedStartDate);
+
+                // Add a TextWatcher for each EditText to enable/disable the button dynamically
+                TextWatcher textWatcher = new TextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        btnAddNewTour.setEnabled(isEditTextFilled(groupSize) && isPositiveNumeric(groupSize));
+                    }
+                };
+
+                groupSize.addTextChangedListener(textWatcher);
+
+                btnAddNewTour.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Handle adding tour here
+                        String tourPackageId = spinner.getSelectedItem().toString();
+                        String groupSizeValue = groupSize.getText().toString();
+                        DocumentReference userTourPackageDocumentRef = db.collection("users")
+                                .document(userId)
+                                .collection("tourPackages")
+                                .document(tourPackageId);
+
+                        // Create a map to store user data
+                        Map<String, Object> tourData = new HashMap<>();
+                        tourData.put("tourPackageRef", userTourPackageDocumentRef);
+                        tourData.put("groupSize", groupSizeValue);
+                        tourData.put("bookedTouristsAmount", 0);
+                        tourData.put("startDate", selectedStartDate);
+                        if(!selectedEndDate.isEmpty())
+                            tourData.put("endDate", selectedEndDate);
+
+                        // Set the document name as the user ID
+                        DocumentReference userActiveTourDocumentRef = db.collection("users").
+                                document(userId)
+                                .collection("activeTours")
+                                .document(UUID.randomUUID().toString());
+
+                        // Set the data to the Firestore document
+                        userActiveTourDocumentRef.set(tourData).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void aVoid) {
+                                Log.d("DATABASE", "DocumentSnapshot added with ID: " + userId);
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.w("DATABASE", "Error adding document", e);
+                            }
+                        });
+
+                        dataCache.clearCache();
+                        switchFragment(new ThisProfileFragment());
+                        // Close the dialog
+                        dialog.dismiss();
+                    }
+                });
+
+                // Show the dialog
+                dialog.show();
+            }
+        });
     }
 
-    void setEventDecorator(List<String> dateList, int colorCode) {
-        List<LocalDate> localDateList = convertToDateList(dateList);
-        decoratedDatesList.addAll(localDateList); // Add decorated dates to the list
-        List<CalendarDay> centerDates = new ArrayList<>();
-        List<CalendarDay> startDates = new ArrayList<>();
-        List<CalendarDay> endDates = new ArrayList<>();
-        List<CalendarDay> independentDates = new ArrayList<>();
+    private void showConfirmTourCancellation(String startDate, boolean isCancled) {
+        LocalDate tourStartDate = getLocalDate(startDate);
 
-        for (LocalDate localDate : localDateList) {
-            boolean hasLeftNeighbor = localDateList.contains(localDate.minusDays(1));
-            boolean hasRightNeighbor = localDateList.contains(localDate.plusDays(1));
-            if (hasLeftNeighbor && hasRightNeighbor)
-                centerDates.add(CalendarDay.from(localDate));
-            else if (hasLeftNeighbor)
-                startDates.add(CalendarDay.from(localDate));
-            else if (hasRightNeighbor)
-                endDates.add(CalendarDay.from(localDate));
-            else
-                independentDates.add(CalendarDay.from(localDate));
+        // Check if the tour start date has passed
+        if (tourStartDate != null && tourStartDate.isAfter(min.plusDays(1))) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+            builder.setTitle(requireContext().getResources().getString(R.string.confirmTourCancellation));
+            builder.setMessage(requireContext().getResources().getString(R.string.confirmTourCancellationMessage));
+            builder.setPositiveButton(requireContext().getResources().getString(R.string.cancel_tour), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    cancelTour(startDate, isCancled);
+                }
+            });
 
-        }
+            builder.setNegativeButton(requireContext().getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    // Do nothing, close the dialog
+                }
+            });
 
-        Drawable dateDecoratorIndependent = createColoredDrawable(colorCode, R.drawable.date_decorator_independent);
-        Drawable dateDecoratorCenter = createColoredDrawable(colorCode, R.drawable.date_decorator_center);
-        Drawable dateDecoratorStart = createColoredDrawable(colorCode, R.drawable.date_decorator_start);
-        Drawable dateDecoratorEnd = createColoredDrawable(colorCode, R.drawable.date_decorator_end);
-
-
-        setDecor(independentDates, dateDecoratorIndependent);
-        setDecor(centerDates, dateDecoratorCenter);
-
-        if (getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
-            setDecor(endDates, dateDecoratorStart);
-            setDecor(startDates, dateDecoratorEnd);
+            builder.show();
         } else {
-            setDecor(startDates, dateDecoratorStart);
-            setDecor(endDates, dateDecoratorEnd);
+            // Tour is in progress or already passed, display a message indicating cancellation is not allowed
+            Toast.makeText(requireContext(), "Cancellation is not allowed for ongoing tours.", Toast.LENGTH_SHORT).show();
         }
-
     }
+    private void cancelTour(String startDate, boolean isCancled) {
+        // Query Firestore for documents with the selected date
+        db.collection("users")
+                .document(userId)
+                .collection("activeTours")
+                .whereEqualTo("startDate", startDate) // Assuming date is stored as a string
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                        if(!isCancled){
+                            // Get data from the active tour document
+                            Map<String, Object> tourData = documentSnapshot.getData();
+
+                            // Create a reference to the document in the "completedTours" collection
+                            db.collection("users")
+                                    .document(userId)
+                                    .collection("completedTours")
+                                    .document(documentSnapshot.getId()) // Use the same document ID
+                                    .set(tourData) // Copy data from active tour to completed tour
+                                    .addOnSuccessListener(aVoid -> {
+                                        // Document successfully copied to completedTours
+                                        Log.d("Firestore", "Active tour copied to completedTours");
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        // Handle errors
+                                        Log.e("Firestore", "Error copying active tour to completedTours", e);
+                                    });
+
+                        }
+
+                        // Delete the document from the "activeTours" collection
+                        db.collection("users")
+                                .document(userId)
+                                .collection("activeTours")
+                                .document(documentSnapshot.getId())
+                                .delete()
+                                .addOnSuccessListener(aVoid -> {
+                                    // Document successfully deleted from activeTours
+                                    Log.d("Firestore", "Active tour successfully deleted!");
+                                    dataCache.clearCache();
+                                    switchFragment(new ThisProfileFragment());
+                                })
+                                .addOnFailureListener(e -> {
+                                    // Handle errors
+                                    Log.e("Firestore", "Error deleting active tour document", e);
+                                });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle errors
+                    Log.e("Firestore", "Error getting active tour documents", e);
+                });
+    }
+
+    private boolean isEditTextFilled(EditText editText) {
+        return editText.getText() != null && editText.getText().length() > 0;
+    }
+
+    private boolean isPositiveNumeric(EditText editText) {
+        String text = editText.getText().toString().trim();
+        try {
+            int number = Integer.parseInt(text);
+            return number > 0; // Checks if the input is a positive numeric value
+        } catch (NumberFormatException e) {
+            return false; // Handles the case where the input is not a valid integer
+        }
+    }
+
+    void setEventDecorator(String startDate, String endDate, int colorCode) {
+        if(isAdded()){
+            LocalDate startLocalDate = getLocalDate(startDate);
+            LocalDate endLocalDate = getLocalDate(endDate);
+
+            if (startLocalDate == null)
+                return;
+
+            if(endLocalDate == null){
+                Drawable dateDecoratorIndependent = createColoredDrawable(colorCode, R.drawable.date_decorator_independent);
+                setDecor(Collections.singletonList(CalendarDay.from(startLocalDate)), dateDecoratorIndependent);
+                decoratedDatesList.add(startLocalDate);
+                return;
+            }
+
+            // Add start, end, and middle dates to the decorated dates list
+            LocalDate currentDate = startLocalDate.plusDays(1); // Start with the day after the start date
+            List<CalendarDay> centerDates = new ArrayList<>();
+
+            while (currentDate.isBefore(endLocalDate)) {
+                decoratedDatesList.add(currentDate);
+                centerDates.add(CalendarDay.from(currentDate));
+                currentDate = currentDate.plusDays(1);
+            }
+            decoratedDatesList.add(startLocalDate);
+            decoratedDatesList.add(endLocalDate);
+
+            // Create decorators for start, end, and middle dates
+            Drawable dateDecoratorStart  = createColoredDrawable(colorCode, R.drawable.date_decorator_start);
+            Drawable dateDecoratorEnd = createColoredDrawable(colorCode, R.drawable.date_decorator_end);
+            Drawable dateDecoratorCenter  = createColoredDrawable(colorCode, R.drawable.date_decorator_center);
+
+
+            // Add decorators to the MaterialCalendarView
+            if (getResources().getConfiguration().getLayoutDirection() == View.LAYOUT_DIRECTION_RTL) {
+                setDecor(Collections.singletonList(CalendarDay.from(startLocalDate)), dateDecoratorStart);
+                setDecor(Collections.singletonList(CalendarDay.from(endLocalDate)), dateDecoratorEnd);
+            } else {
+                setDecor(Collections.singletonList(CalendarDay.from(endLocalDate)), dateDecoratorStart);
+                setDecor(Collections.singletonList(CalendarDay.from(startLocalDate)), dateDecoratorEnd);
+            }
+            setDecor(centerDates, dateDecoratorCenter);
+        }
+    }
+
+
 
     Drawable createColoredDrawable(int colorCode, int drawableResId) {
-        Drawable originalDrawable = ContextCompat.getDrawable(requireContext(), drawableResId);
-        Drawable.ConstantState constantState = originalDrawable.getConstantState();
-        if (constantState != null) {
-            Drawable drawable = constantState.newDrawable().mutate();
-            drawable.setTint(colorCode);
-            return drawable;
-        } else {
-            return null;
+        if(isAdded()) {
+            Drawable originalDrawable = ContextCompat.getDrawable(requireContext(), drawableResId);
+            Drawable.ConstantState constantState = originalDrawable.getConstantState();
+            if (constantState != null) {
+                Drawable drawable = constantState.newDrawable().mutate();
+                drawable.setTint(colorCode);
+                return drawable;
+            } else
+                return null;
         }
-    }
-
-    List<LocalDate> convertToDateList(List<String> dateList) {
-        List<LocalDate> localDateList = new ArrayList<>();
-        for (String dateString : dateList) {
-            LocalDate localDate = getLocalDate(dateString);
-            if (localDate != null) {
-                localDateList.add(localDate);
-            }
-        }
-        return localDateList;
+        return null;
     }
 
     void setDecor(List<CalendarDay> calendarDayList, Drawable drawable) {
@@ -418,9 +652,6 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                                     }
                                 });
 
-                        // Check if the document contains a collection "tourPackages"
-                            Log.d("TAG1", "onSuccess: ");
-
                             // Get the reference to the "tourPackages" collection
                             CollectionReference tourPackagesRef = userDocumentRef.collection("tourPackages");
 
@@ -428,16 +659,9 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                             tourPackagesRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                                 @Override
                                 public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                                        Log.d("TAG2", document.getId());
+                                    for (QueryDocumentSnapshot document : queryDocumentSnapshots)
                                         tourPackagesIdList.add(document.getId());
-
-
-                                    }
                                     tourPackageRecyclerViewAdapter.notifyDataSetChanged();
-
-
-
                                 }
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
@@ -445,7 +669,80 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                                     Log.e("DATABASE", "Error getting tourPackages collection", e);
                                 }
                             });
-                        }
+
+                        activeTours = new ArrayList<>();
+                        db.collection("users")
+                                .document(userId)
+                                .collection("activeTours")
+                                .get()
+                                .addOnSuccessListener(queryDocumentSnapshots -> {
+                                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                                        String endDate = "", startDate = "";
+                                        DocumentReference tourPackageRef = null;
+
+                                        // Assuming ActiveTour is a model class representing the active tours
+                                        if(document.contains("endDate"))
+                                            endDate = document.get("endDate").toString();
+
+                                        if(document.contains("startDate"))
+                                            startDate = document.get("startDate").toString();
+
+                                        if(document.contains("tourPackageRef"))
+                                            tourPackageRef = document.getDocumentReference("tourPackageRef");
+
+                                        // Cancel the tour if the end date has passed or if the start date has passed (when end date is empty)
+                                        if (endDate != null && !endDate.isEmpty()) {
+                                            LocalDate tourEndDate = LocalDate.parse(endDate);
+                                            if (tourEndDate.isBefore(min)) {
+                                                // The end date of the tour has passed, cancel the tour
+                                                cancelTour(startDate, false);
+                                                continue; // Skip to the next tour
+                                            }
+                                        } else {
+                                            // End date is empty, check if start date has passed
+                                            LocalDate tourStartDate = LocalDate.parse(startDate);
+                                            if (tourStartDate.isBefore(min)) {
+                                                // The start date of the tour has passed, cancel the tour
+                                                cancelTour(startDate, false);
+                                                continue; // Skip to the next tour
+                                            }
+                                        }
+
+
+                                        ActiveTour activeTour = new ActiveTour(startDate, endDate, tourPackageRef);
+                                        activeTours.add(activeTour);
+                                    }
+
+
+                                    // Set up event decorators
+                                    for (ActiveTour tour : activeTours) {
+                                        if (tour.getTourPackageRef() != null) {
+                                            // Handle failure to fetch color from Firestore
+                                            tour.getTourPackageRef().get().addOnSuccessListener(tourPackageDocumentSnapshot -> {
+                                                if (tourPackageDocumentSnapshot.exists()) {
+                                                    int packageColor;
+                                                    // Assuming color is stored as an integer in the 'color' field
+                                                    if (tourPackageDocumentSnapshot.contains("packageColor")) {
+                                                        packageColor = tourPackageDocumentSnapshot.getLong("packageColor").intValue();
+                                                        setEventDecorator(tour.getStartDate(), tour.getEndDate(), packageColor);
+
+                                                    }
+                                                    else {
+                                                        packageColor = getResources().getColor(R.color.orange_primary);
+                                                        setEventDecorator(tour.getStartDate(), tour.getEndDate(), packageColor);
+                                                    }
+                                                    tour.setColor(packageColor);
+                                                }
+                                            }).addOnFailureListener(Throwable::printStackTrace);
+                                        }
+                                    }
+                                    // Save Active Tours to the data cache
+                                    dataCache.put("activeTours", activeTours);
+                                })
+                                .addOnFailureListener(e -> {
+                                    Log.e("DATABASE", "Error getting active tours", e);
+                                });
+                    }
 
                 }
             }).addOnFailureListener(new OnFailureListener() {
@@ -487,6 +784,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
             else
                 return false;
 
+            // Load the profilePic
             if (dataCache.get("profilePicUrl") != null) {
                 // Load profile picture from memory cache (if available)
                 String profilePicUrl = (String) dataCache.get("profilePicUrl");
@@ -497,6 +795,16 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                             .into(profilePic);
                 }
             }
+
+            // Load the active tours to the calendar
+            if(dataCache.get("activeTours") != null) {
+                activeTours = (List<ActiveTour>) dataCache.get("activeTours");
+                for (ActiveTour tour : activeTours)
+                    setEventDecorator(tour.getStartDate(), tour.getEndDate(), tour.getColor());
+            }
+            else
+                return false;
+
             showLoading(false);
             return true; // Data loaded from memory cache
         }
@@ -531,6 +839,16 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
         }
     }
 
+    /**
+     * Switch fragment function.
+     */
+    private void switchFragment(Fragment fragment) {
+        if (isAdded())
+            // Replace the current fragment with the new one
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.frameLayout, fragment)
+                    .commit();
+    }
 
     @Override
     public void onLoadComplete() {

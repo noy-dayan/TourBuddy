@@ -164,7 +164,8 @@ public class TourPackageRecyclerViewAdapter extends RecyclerView.Adapter<Recycle
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                     if (documentSnapshot.exists()) {
                         holder.packageName.setText(documentSnapshot.getId());
-
+                        if(documentSnapshot.get("packageColor") != null)
+                            holder.packageName.setTextColor(documentSnapshot.getLong("packageColor").intValue());
                         storageReference.child("images/" + userId + "/tourPackages/" + documentSnapshot.getId() + "/packageCoverImage")
                                 .getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                                     @Override

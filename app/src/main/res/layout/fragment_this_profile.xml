@@ -280,7 +280,8 @@
             android:gravity="center"
             android:text="@string/profile"
             android:textColor="@color/white"
-            android:textSize="22sp" />
+            android:textSize="22sp"
+            />
     </RelativeLayout>
 
 

@@ -47,7 +47,7 @@ public class TourPackageViewFragment extends Fragment {
     // UI elements
     ImageView packageCoverImage, btnBack;
     TextView packageName, includedCountries, tourDesc, itinerary, duration, meetingPoint, includedServices,
-            excludedServices, price, groupSize, cancellationPolicy, specialRequirements, additionalInfo;
+            excludedServices, price, cancellationPolicy, specialRequirements, additionalInfo;
     int packageColor;
     Button btnEditPackage, btnDeletePackage;
 
@@ -82,7 +82,6 @@ public class TourPackageViewFragment extends Fragment {
         includedServices = view.findViewById(R.id.includedServices);
         excludedServices = view.findViewById(R.id.excludedServices);
         price = view.findViewById(R.id.price);
-        groupSize = view.findViewById(R.id.groupSize);
         cancellationPolicy = view.findViewById(R.id.cancellationPolicy);
         specialRequirements = view.findViewById(R.id.specialRequirements);
         additionalInfo = view.findViewById(R.id.additionalInfo);
@@ -157,7 +156,6 @@ public class TourPackageViewFragment extends Fragment {
                 args.putString("includedServices", includedServices.getText().toString());
                 args.putString("excludedServices", excludedServices.getText().toString());
                 args.putString("price", price.getText().toString());
-                args.putString("groupSize", groupSize.getText().toString());
                 args.putString("cancellationPolicy", cancellationPolicy.getText().toString());
                 args.putString("specialRequirements", specialRequirements.getText().toString());
                 args.putString("additionalInfo", additionalInfo.getText().toString());
@@ -177,8 +175,8 @@ public class TourPackageViewFragment extends Fragment {
      */
     private void showPackageDeletionDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-        builder.setTitle(requireContext().getResources().getString(R.string.confrimPackageDeletion));
-        builder.setMessage(requireContext().getResources().getString(R.string.confrimPackageDeletionMessage));
+        builder.setTitle(requireContext().getResources().getString(R.string.confirmPackageDeletion));
+        builder.setMessage(requireContext().getResources().getString(R.string.confirmPackageDeletionMessage));
         builder.setPositiveButton(requireContext().getResources().getString(R.string.delete_package), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -330,9 +328,6 @@ public class TourPackageViewFragment extends Fragment {
 
                         if (documentSnapshot.contains("price"))
                             price.setText(documentSnapshot.getString("price"));
-
-                        if (documentSnapshot.contains("groupSize"))
-                            groupSize.setText(documentSnapshot.getString("groupSize"));
 
                         if (documentSnapshot.contains("cancellationPolicy"))
                             cancellationPolicy.setText(documentSnapshot.getString("cancellationPolicy"));

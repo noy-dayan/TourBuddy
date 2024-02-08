@@ -47,6 +47,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.tourbuddy.tourbuddy.R;
+import com.tourbuddy.tourbuddy.utils.DataCache;
 import com.tourbuddy.tourbuddy.utils.MultiSpinner;
 
 import java.util.ArrayList;
@@ -69,10 +70,11 @@ import kotlin.jvm.functions.Function1;
 public class TourPackageEditFragment extends Fragment implements MultiSpinner.MultiSpinnerListener{
 
     private static final int MAIN_IMAGE_CORNER_RADIUS = 70;
+    DataCache dataCache;
     ImageView packageCoverImage, btnBack;
     Button btnSaveChanges;
     EditText tourDescInput, itineraryInput, durationInput, meetingPointInput,
-            includedServicesInput, excludedServicesInput, priceInput, groupSizeInput,
+            includedServicesInput, excludedServicesInput, priceInput,
             cancellationPolicyInput, specialRequirementsInput, additionalInfoInput;
     int packageColor;
 
@@ -105,6 +107,7 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_tour_package_edit, container, false);
+        dataCache = DataCache.getInstance();
 
         // Initialize UI elements
         btnBack = view.findViewById(R.id.btnBack);
@@ -117,7 +120,6 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
         includedServicesInput = view.findViewById(R.id.includedServicesInput);
         excludedServicesInput = view.findViewById(R.id.excludedServicesInput);
         priceInput = view.findViewById(R.id.priceInput);
-        groupSizeInput = view.findViewById(R.id.groupSizeInput);
         cancellationPolicyInput = view.findViewById(R.id.cancellationPolicyInput);
         specialRequirementsInput = view.findViewById(R.id.specialRequirementsInput);
         additionalInfoInput = view.findViewById(R.id.additionalInfoInput);
@@ -229,7 +231,6 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
             includedServicesInput.setText(getArguments().getString("includedServices"));
             excludedServicesInput.setText(getArguments().getString("excludedServices"));
             priceInput.setText(getArguments().getString("price"));
-            groupSizeInput.setText(getArguments().getString("groupSize"));
             cancellationPolicyInput.setText(getArguments().getString("cancellationPolicy"));
             specialRequirementsInput.setText(getArguments().getString("specialRequirements"));
             additionalInfoInput.setText(getArguments().getString("additionalInfo"));
@@ -253,7 +254,6 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
             String includedServices = includedServicesInput.getText().toString().trim();
             String excludedServices = excludedServicesInput.getText().toString().trim();
             String price = priceInput.getText().toString().trim();
-            String groupSize = groupSizeInput.getText().toString().trim();
             String cancellationPolicy = cancellationPolicyInput.getText().toString().trim();
             String specialRequirements = specialRequirementsInput.getText().toString().trim();
             String additionalInfo = additionalInfoInput.getText().toString().trim();
@@ -267,7 +267,6 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
             packageData.put("includedServices", includedServices);
             packageData.put("excludedServices", excludedServices);
             packageData.put("price", price);
-            packageData.put("groupSize", groupSize);
             packageData.put("cancellationPolicy", cancellationPolicy);
             packageData.put("specialRequirements", specialRequirements);
             packageData.put("additionalInfo", additionalInfo);
@@ -348,8 +347,6 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
                 isEditTextFilled(includedServicesInput) &&
                 isEditTextFilled(excludedServicesInput) &&
                 isEditTextFilled(priceInput) &&
-                isEditTextFilled(groupSizeInput) &&
-                isPositiveNumeric(groupSizeInput) &&
                 isEditTextFilled(cancellationPolicyInput) &&
                 isEditTextFilled(specialRequirementsInput) &&
                 isEditTextFilled(additionalInfoInput);
@@ -360,17 +357,6 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
     private boolean isEditTextFilled(EditText editText) {
         return editText.getText() != null && editText.getText().length() > 0;
     }
-
-    private boolean isPositiveNumeric(EditText editText) {
-        String text = editText.getText().toString().trim();
-        try {
-            int number = Integer.parseInt(text);
-            return number > 0; // Checks if the input is a positive numeric value
-        } catch (NumberFormatException e) {
-            return false; // Handles the case where the input is not a valid integer
-        }
-    }
-
 
     private void editTextInputManager() {
         // Add a TextWatcher for each EditText to enable/disable the button dynamically
@@ -397,7 +383,6 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
         includedServicesInput.addTextChangedListener(textWatcher);
         excludedServicesInput.addTextChangedListener(textWatcher);
         priceInput.addTextChangedListener(textWatcher);
-        groupSizeInput.addTextChangedListener(textWatcher);
         cancellationPolicyInput.addTextChangedListener(textWatcher);
         specialRequirementsInput.addTextChangedListener(textWatcher);
         additionalInfoInput.addTextChangedListener(textWatcher);
@@ -514,6 +499,7 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
             public void onClick(DialogInterface dialog, int which) {
                 saveUserDataToFirebase();
                 btnSaveChanges.setEnabled(false);
+                dataCache.clearCache();
             }
         });
 
