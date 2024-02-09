@@ -180,7 +180,7 @@ public class TourPackageViewFragment extends Fragment {
         builder.setPositiveButton(requireContext().getResources().getString(R.string.delete_package), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                deletePackage();
+                checkForActiveToursBeforeDeletion();
             }
         });
 
@@ -191,6 +191,48 @@ public class TourPackageViewFragment extends Fragment {
             }
         });
 
+        builder.show();
+    }
+
+    private void checkForActiveToursBeforeDeletion() {
+        if (userId != null && packageName.getText() != null) {
+            // Reference to the Firestore document using the provided userId
+            DocumentReference packageDocumentRef = db.collection("users")
+                    .document(userId)
+                    .collection("tourPackages")
+                    .document(packageName.getText().toString());
+
+            // Query active tours to check if there are any associated with this package
+            db.collection("users")
+                    .document(userId)
+                    .collection("activeTours")
+                    .whereEqualTo("tourPackageRef", packageDocumentRef)
+                    .get()
+                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                        if (!queryDocumentSnapshots.isEmpty()) {
+                            // Active tours found, notify the user and prevent deletion
+                            showActiveToursExistDialog();
+                        } else {
+                            // No active tours found, proceed with deletion
+                            deletePackage();
+                        }
+                    })
+                    .addOnFailureListener(e -> {
+                        // Handle failure to query active tours
+                        Log.e("DATABASE", "Error checking for active tours", e);
+                    });
+        }
+    }
+    private void showActiveToursExistDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+        builder.setTitle("Active Tours Exist");
+        builder.setMessage("There are active tours associated with this package.\nYou cannot delete it until all tours are completed or canceled.");
+        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                // Dismiss the dialog
+            }
+        });
         builder.show();
     }
 

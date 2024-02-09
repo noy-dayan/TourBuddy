@@ -34,16 +34,16 @@ import java.util.Objects;
 
 public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerViewAdapter.ViewHolder> {
 
-    private List<String> userIdList;
-    private Activity activity;
-    private Context context;
-    private FirebaseFirestore db = FirebaseFirestore.getInstance();
-    private FirebaseStorage storage = FirebaseStorage.getInstance();
-    private StorageReference storageReference = storage.getReference();
-    private String countryFilter, typeFilter, usernameFilter, genderFilter;
-    private View loadingOverlay;
-    private ProgressBar progressBar;
-    private int loadedItemCount = 0; // Counter for loaded items
+    List<String> userIdList;
+    Activity activity;
+    Context context;
+    FirebaseFirestore db = FirebaseFirestore.getInstance();
+    FirebaseStorage storage = FirebaseStorage.getInstance();
+    StorageReference storageReference = storage.getReference();
+    String countryFilter, typeFilter, usernameFilter, genderFilter;
+    View loadingOverlay;
+    ProgressBar progressBar;
+    int loadedItemCount = 0; // Counter for loaded items
 
     public UserRecyclerViewAdapter(Activity activity, Context context, View loadingOverlay, ProgressBar progressBar,
                                    List<String> userIdList, String countryFilter, String typeFilter, String usernameFilter, String genderFilter) {

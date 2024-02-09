@@ -47,6 +47,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.tourbuddy.tourbuddy.R;
+import com.tourbuddy.tourbuddy.utils.AppUtils;
 import com.tourbuddy.tourbuddy.utils.DataCache;
 import com.tourbuddy.tourbuddy.utils.MultiSpinner;
 
@@ -130,7 +131,7 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
         countryMultiSpinner = view.findViewById(R.id.countryMultiSpinner);
         colorPicker = view.findViewById(R.id.colorPicker);
         colorView = view.findViewById(R.id.colorView);
-        packageColor = R.color.orange_primary;
+        packageColor = getResources().getColor(R.color.orange_primary);
 
         String[] countryArray = getResources().getStringArray(R.array.countries_filter);
         List<String> countryList = Arrays.asList(countryArray);
@@ -153,6 +154,9 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
                             @Override
                             public void onColorSelected(int selectedColor) {
+                                colorView.setBackgroundTintList(null);
+                                colorView.setBackgroundTintList(ColorStateList.valueOf(selectedColor));
+                                packageColor = selectedColor;
                             }
                         })
                         .setPositiveButton(R.string.confirm, new ColorPickerClickListener() {
@@ -327,23 +331,19 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
 
     private boolean isPackageCreationValid() {
         return selectedImageUri != null &&
-                isEditTextFilled(packageNameInput) &&
+                AppUtils.isEditTextFilled(packageNameInput) &&
                 selectedCountries != null &&
                 !selectedCountries.isEmpty() &&
-                isEditTextFilled(tourDescInput) &&
-                isEditTextFilled(itineraryInput) &&
-                isEditTextFilled(durationInput) &&
-                isEditTextFilled(meetingPointInput) &&
-                isEditTextFilled(includedServicesInput) &&
-                isEditTextFilled(excludedServicesInput) &&
-                isEditTextFilled(priceInput) &&
-                isEditTextFilled(cancellationPolicyInput) &&
-                isEditTextFilled(specialRequirementsInput) &&
-                isEditTextFilled(additionalInfoInput);
-    }
-
-    private boolean isEditTextFilled(EditText editText) {
-        return editText.getText() != null && editText.getText().length() > 0;
+                AppUtils.isEditTextFilled(tourDescInput) &&
+                AppUtils.isEditTextFilled(itineraryInput) &&
+                AppUtils.isEditTextFilled(durationInput) &&
+                AppUtils.isEditTextFilled(meetingPointInput) &&
+                AppUtils.isEditTextFilled(includedServicesInput) &&
+                AppUtils.isEditTextFilled(excludedServicesInput) &&
+                AppUtils.isEditTextFilled(priceInput) &&
+                AppUtils.isEditTextFilled(cancellationPolicyInput) &&
+                AppUtils.isEditTextFilled(specialRequirementsInput) &&
+                AppUtils.isEditTextFilled(additionalInfoInput);
     }
 
     private void editTextInputManager() {

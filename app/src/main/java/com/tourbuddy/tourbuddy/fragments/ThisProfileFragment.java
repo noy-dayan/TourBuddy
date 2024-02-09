@@ -47,7 +47,6 @@ import com.prolificinteractive.materialcalendarview.OnDateLongClickListener;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
 import com.prolificinteractive.materialcalendarview.OnRangeSelectedListener;
 import com.prolificinteractive.materialcalendarview.format.DateFormatTitleFormatter;
-import com.squareup.timessquare.CalendarPickerView;
 import com.tourbuddy.tourbuddy.R;
 import com.tourbuddy.tourbuddy.adapters.TourPackageRecyclerViewAdapter;
 import com.tourbuddy.tourbuddy.decorators.EventDecorator;
@@ -71,6 +70,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.tourbuddy.tourbuddy.utils.AppUtils;
 
 /**
  * Fragment for displaying user profile information.
@@ -173,6 +173,11 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
 
             swipeRefreshLayout.setOnRefreshListener(() -> {
                 tourPackagesIdList = new ArrayList<>();
+                // Remove all existing decorators
+                calendarView.removeDecorators();
+                // Clear the list of decorated dates
+                decoratedDatesList.clear();
+
                 loadDataFromFirebase(view);
                 swipeRefreshLayout.setRefreshing(false);
             });
@@ -285,6 +290,77 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                                 (selectedDate.isAfter(startDate) && selectedDate.isBefore(endDate))) {
                             // Print the tour reference to the log
                             Log.d("ActiveTourReference", "Tour reference: " + tour.getTourPackageRef());
+
+                            DocumentReference activeTourRef = db.collection("users")
+                                    .document(userId)
+                                    .collection("activeTours")
+                                    .document(tour.getStartDate());
+
+
+
+                            activeTourRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                @Override
+                                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                    if (documentSnapshot.exists()) {
+                                        if(isAdded()) {
+                                            // Create the dialog
+                                            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                                            View dialogView = getLayoutInflater().inflate(R.layout.dialog_view_tour_details, null);
+                                            builder.setView(dialogView);
+                                            AlertDialog dialog = builder.create();
+
+                                            TextView tourDate = dialogView.findViewById(R.id.tourDate);
+                                            TextView tourPackage = dialogView.findViewById(R.id.tourPackage);
+                                            TextView groupSize = dialogView.findViewById(R.id.groupSize);
+                                            TextView bookedTouristsAmount = dialogView.findViewById(R.id.bookedTouristsAmount);
+
+
+                                            String tourPackageName = tour.getTourPackageRef().getId();
+                                            String startDate = tour.getStartDate();
+                                            String endDate = tour.getEndDate();
+
+                                            // Retrieve data from Firestore
+
+                                            int groupSizeInt = documentSnapshot.getLong("groupSize").intValue();
+                                            int bookedTouristsInt = documentSnapshot.getLong("bookedTouristsAmount").intValue();
+                                            // Populate AlertDialog
+
+                                            if (endDate != null)
+                                                tourDate.setText(startDate + " To " + endDate);
+                                            else
+                                                tourDate.setText(startDate);
+
+                                            tourPackage.setText(tourPackageName);
+                                            groupSize.setText(" / " + groupSizeInt);
+                                            int availableSpots = groupSizeInt - bookedTouristsInt;
+                                            bookedTouristsAmount.setText(String.valueOf(availableSpots));
+
+                                            // Calculate the percentage of spots left relative to group size
+                                            double percentage = (double) availableSpots / groupSizeInt * 100;
+
+                                            // Set the color of the text based on the percentage
+                                            if (availableSpots == 0) {
+                                                bookedTouristsAmount.setTextColor(getContext().getColor(R.color.red));
+                                            } else if (percentage < 25) {
+                                                bookedTouristsAmount.setTextColor(getContext().getColor(R.color.orange_primary)); // Orange color
+                                            } else if (percentage < 50) {
+                                                bookedTouristsAmount.setTextColor(getContext().getColor(R.color.yellow));
+                                            }
+
+                                            // Show the dialog
+                                            dialog.show();
+                                        }
+                                    } else {
+                                        Log.d("DATABASE", "No such document");
+                                    }
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.d("DATABASE", "Error getting document", e);
+                                }
+                            });
+
                         }
                     }
 
@@ -308,12 +384,19 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
             }
         });
 
-
-
-
         btnAddNewTour.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                LocalDate minStartDate = min.plusDays(4); // Minimum start date is 3 days from now
+
+                // Check if the selected start date is at least 3 days from the current date
+                if (LocalDate.parse(selectedStartDate).isBefore(minStartDate)) {
+                    // Display an error message to the user
+                    Toast.makeText(requireContext(), "Tours must be set up at least 3 days in advance", Toast.LENGTH_SHORT).show();
+                    return; // Prevent further execution of tour setup
+                }
+
+
                 // Create the dialog
                 AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
                 View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_new_tour, null);
@@ -346,7 +429,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
 
                     @Override
                     public void afterTextChanged(Editable editable) {
-                        btnAddNewTour.setEnabled(isEditTextFilled(groupSize) && isPositiveNumeric(groupSize));
+                        btnAddNewTour.setEnabled(AppUtils.isEditTextFilled(groupSize) && AppUtils.isPositiveNumeric(groupSize));
                     }
                 };
 
@@ -355,9 +438,9 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                 btnAddNewTour.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        // Handle adding tour here
+                        // Handle adding tour
                         String tourPackageId = spinner.getSelectedItem().toString();
-                        String groupSizeValue = groupSize.getText().toString();
+                        int groupSizeValue = Integer.parseInt(groupSize.getText().toString());
                         DocumentReference userTourPackageDocumentRef = db.collection("users")
                                 .document(userId)
                                 .collection("tourPackages")
@@ -376,7 +459,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                         DocumentReference userActiveTourDocumentRef = db.collection("users").
                                 document(userId)
                                 .collection("activeTours")
-                                .document(UUID.randomUUID().toString());
+                                .document(selectedStartDate);
 
                         // Set the data to the Firestore document
                         userActiveTourDocumentRef.set(tourData).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -404,18 +487,18 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
         });
     }
 
-    private void showConfirmTourCancellation(String startDate, boolean isCancled) {
+    private void showConfirmTourCancellation(String startDate, boolean isCanceled) {
         LocalDate tourStartDate = getLocalDate(startDate);
 
         // Check if the tour start date has passed
-        if (tourStartDate != null && tourStartDate.isAfter(min.plusDays(1))) {
+        if (tourStartDate != null && tourStartDate.isAfter(min.plusDays(3))) {
             AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setTitle(requireContext().getResources().getString(R.string.confirmTourCancellation));
             builder.setMessage(requireContext().getResources().getString(R.string.confirmTourCancellationMessage));
             builder.setPositiveButton(requireContext().getResources().getString(R.string.cancel_tour), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    cancelTour(startDate, isCancled);
+                    cancelTour(startDate, isCanceled);
                 }
             });
 
@@ -429,10 +512,11 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
             builder.show();
         } else {
             // Tour is in progress or already passed, display a message indicating cancellation is not allowed
-            Toast.makeText(requireContext(), "Cancellation is not allowed for ongoing tours.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Cancellation is not allowed for ongoing/close occurring tours", Toast.LENGTH_SHORT).show();
         }
     }
-    private void cancelTour(String startDate, boolean isCancled) {
+
+    private void cancelTour(String startDate, boolean isCanceled) {
         // Query Firestore for documents with the selected date
         db.collection("users")
                 .document(userId)
@@ -441,7 +525,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
-                        if(!isCancled){
+                        if(!isCanceled){
                             // Get data from the active tour document
                             Map<String, Object> tourData = documentSnapshot.getData();
 
@@ -484,20 +568,6 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                     // Handle errors
                     Log.e("Firestore", "Error getting active tour documents", e);
                 });
-    }
-
-    private boolean isEditTextFilled(EditText editText) {
-        return editText.getText() != null && editText.getText().length() > 0;
-    }
-
-    private boolean isPositiveNumeric(EditText editText) {
-        String text = editText.getText().toString().trim();
-        try {
-            int number = Integer.parseInt(text);
-            return number > 0; // Checks if the input is a positive numeric value
-        } catch (NumberFormatException e) {
-            return false; // Handles the case where the input is not a valid integer
-        }
     }
 
     void setEventDecorator(String startDate, String endDate, int colorCode) {
@@ -544,8 +614,6 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
             setDecor(centerDates, dateDecoratorCenter);
         }
     }
-
-
 
     Drawable createColoredDrawable(int colorCode, int drawableResId) {
         if(isAdded()) {
@@ -606,10 +674,12 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                         if (documentSnapshot.contains("username"))
                             username.setText(documentSnapshot.getString("username"));
 
-                        if (documentSnapshot.contains("bio")) {
-                            bio.setText(documentSnapshot.getString("bio"));
-                            bio.setVisibility(View.VISIBLE);
-                        }
+                        if (documentSnapshot.contains("bio"))
+                            if(!Objects.equals(documentSnapshot.getString("bio"), "")){
+                                bio.setText(documentSnapshot.getString("bio"));
+                                bio.setVisibility(View.VISIBLE);
+                            }
+
                         if (documentSnapshot.contains("birthDate"))
                             birthDate.setText(documentSnapshot.getString("birthDate"));
 
