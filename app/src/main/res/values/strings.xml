@@ -103,6 +103,7 @@
     <string name="cancel_tour">Delete Tour</string>
     <string name="confirmTourCancellationMessage">Are you sure you want to cancel tour?</string>
     <string name="confirmTourCancellation">Confirm Tour Cancellation</string>
+    <string name="review_guideline">• Provide honest and constructive feedback about your tour experience, focusing on both positive aspects and areas for improvement.</string>
 
 
 </resources>

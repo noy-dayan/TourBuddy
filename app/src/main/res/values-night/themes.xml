@@ -27,4 +27,11 @@
         <item name="android:fontFamily">@font/lexend</item>
         <item name="android:textStyle">bold</item>
     </style>
+
+
+    <style name="RatingBar" parent="Widget.AppCompat.RatingBar.Indicator">
+        <item name="colorControlNormal">@color/grey</item>
+        <item name="colorControlActivated">@color/orange_primary</item>
+    </style>
+
 </resources>

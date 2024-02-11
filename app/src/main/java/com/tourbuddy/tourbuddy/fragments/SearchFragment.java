@@ -235,7 +235,7 @@ public class SearchFragment extends Fragment {
         recyclerView.setAdapter(userRecyclerViewAdapter);
         mUser = mAuth.getCurrentUser();
         if (mUser != null) {
-            showLoading(true);
+            //showLoading(true);
             String currUserId = mUser.getUid();
 
             // Reference to the Firestore collection "users"

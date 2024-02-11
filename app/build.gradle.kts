@@ -67,20 +67,22 @@ dependencies {
 
     implementation("androidx.core:core-ktx:1.12.0")
 
-
-    //
-    implementation("com.google.code.gson:gson:2.8.9")
-
-    // Customizable Calendar
-    implementation("io.github.architshah248.calendar:awesome-calendar:2.0.0")
-    implementation("com.squareup:android-times-square:1.5.0@aar")
-
-
     implementation("com.github.prolificinteractive:material-calendarview:2.0.1")
     implementation("com.jakewharton.threetenabp:threetenabp:1.3.1")
 
     // Color Picker
     implementation("com.github.QuadFlask:colorpicker:0.0.15")
 
+    // Rating Bar
+    implementation("com.github.shallcheek:RatingBar:v1.0")
+
+    // Average Rating System
+    implementation("com.github.Inconnu08:android-ratingreviews:1.2.0") {
+
+    }
+
 }
 
+configurations {
+    implementation.get().exclude(mapOf("group" to "org.jetbrains", "module" to "annotations"))
+}

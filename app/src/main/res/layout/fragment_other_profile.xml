@@ -168,7 +168,7 @@
                     >
 
                     <TextView
-                        android:id="@+id/tourPackagesHeadline"
+                        android:id="@+id/tourPackagesORbookedToursHeadline"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:background="@color/black"
@@ -191,7 +191,7 @@
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:scrollbars="none"
-                        app:layout_constraintTop_toBottomOf="@id/tourPackagesHeadline" />
+                        app:layout_constraintTop_toBottomOf="@id/tourPackagesORbookedToursHeadline" />
 
 
                     <com.prolificinteractive.materialcalendarview.MaterialCalendarView
@@ -204,7 +204,7 @@
                         app:mcv_headerTextAppearance="@style/HeaderTextAppearance"
                         app:mcv_leftArrow="@drawable/arrow_back_icon"
                         app:mcv_rightArrow="@drawable/arrow_forward_icon"
-                        app:mcv_selectionColor="@color/transparent"
+                        app:mcv_selectionColor="@color/dark_primary"
                         app:mcv_selectionMode="single"
                         app:mcv_weekDayTextAppearance="@style/WeekDayTextAppearance" />
 
@@ -223,6 +223,57 @@
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/calendarView" />
+
+                    <com.taufiqrahman.reviewratings.RatingReviews
+                        xmlns:bar="http://schemas.android.com/apk/res-auto"
+                        android:id="@+id/avg_rating_reviews"
+
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:layout_marginBottom="8dp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/reviewsHeadline"
+                        bar:animation="true"
+                        bar:max_value="100"
+                        bar:show_label="true"
+                        bar:spaces="0dp"
+                        bar:text_color="#333333"
+                        bar:text_size="10sp"
+                        bar:width="15dp" />
+
+                    <Button
+                        android:visibility="gone"
+                        android:id="@+id/btnAddReview"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+
+                        android:layout_gravity="center_horizontal"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginEnd="16dp"
+                        android:layout_marginBottom="32dp"
+                        android:background="@drawable/btn_bg"
+                        android:fontFamily="@font/lexend"
+                        android:text="Add Review"
+                        android:textColor="@color/white"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/avg_rating_reviews" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerViewReviews"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/btnAddReview" />
+
+
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -1,25 +1,23 @@
 package com.tourbuddy.tourbuddy.fragments;
 
 import android.app.AlertDialog;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -28,13 +26,17 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.chaek.android.RatingBar;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
@@ -44,14 +46,14 @@ import com.prolificinteractive.materialcalendarview.CalendarDay;
 import com.prolificinteractive.materialcalendarview.MaterialCalendarView;
 import com.prolificinteractive.materialcalendarview.OnDateLongClickListener;
 import com.prolificinteractive.materialcalendarview.OnDateSelectedListener;
-import com.prolificinteractive.materialcalendarview.OnRangeSelectedListener;
 import com.prolificinteractive.materialcalendarview.format.DateFormatTitleFormatter;
+import com.taufiqrahman.reviewratings.BarLabels;
+import com.taufiqrahman.reviewratings.RatingReviews;
 import com.tourbuddy.tourbuddy.R;
+import com.tourbuddy.tourbuddy.adapters.ReviewRecyclerViewAdapter;
 import com.tourbuddy.tourbuddy.adapters.TourPackageRecyclerViewAdapter;
 import com.tourbuddy.tourbuddy.decorators.EventDecorator;
-import com.tourbuddy.tourbuddy.decorators.RangeSelectionDecorator;
 import com.tourbuddy.tourbuddy.utils.ActiveTour;
-import com.tourbuddy.tourbuddy.utils.AppUtils;
 import com.tourbuddy.tourbuddy.utils.DataCache;
 
 import org.threeten.bp.LocalDate;
@@ -68,13 +70,18 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class OtherProfileFragment extends Fragment implements TourPackageRecyclerViewAdapter.OnLoadCompleteListener {
 
+    // Initialize DataCache
+    DataCache dataCache;
 
     // UI elements
     ImageView profilePic;
     TextView username, bio, birthDate, gender, type;
+    Button btnAddReview, btnDM;
 
     // Firebase
     FirebaseAuth mAuth;
@@ -89,10 +96,13 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
     ProgressBar progressBar;
 
     // RecyclerView for Tour Packages
-    RecyclerView recyclerViewTours;
+    RecyclerView recyclerViewTours, recyclerViewReviews;
     TourPackageRecyclerViewAdapter tourPackageRecyclerViewAdapter;
+    ReviewRecyclerViewAdapter reviewsRecyclerViewAdapter;
     List<String> tourPackagesIdList = new ArrayList<>();
-    String userId;
+    List<String> reviewersIdList = new ArrayList<>();
+
+    String otherUserId, thisUserId, thisUserType = "Tour Guide", otherUserType;
 
     final LocalDate min = LocalDate.now(ZoneId.systemDefault());
     final LocalDate max = min.plusMonths(6);
@@ -100,6 +110,7 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
 
     List<LocalDate> decoratedDatesList = new ArrayList<>(); // Define this globally
     List<ActiveTour> activeTours;
+    List<DocumentReference> bookedToursRefs;
     MaterialCalendarView calendarView;
 
     @Override
@@ -107,7 +118,7 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_other_profile, container, false);
-
+        dataCache = DataCache.getInstance();
         // Initialize UI elements
         swipeRefreshLayout = view.findViewById(R.id.swipeRefresh);
         profilePic = view.findViewById(R.id.profilePic);
@@ -116,6 +127,8 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
         birthDate = view.findViewById(R.id.birthDate);
         gender = view.findViewById(R.id.gender);
         type = view.findViewById(R.id.type);
+        btnAddReview = view.findViewById(R.id.btnAddReview);
+        btnDM = view.findViewById(R.id.btnDM);
 
         // Initialize Firebase instances
         mAuth = FirebaseAuth.getInstance();
@@ -127,6 +140,7 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
         loadingOverlay = view.findViewById(R.id.loadingOverlay);
         progressBar = view.findViewById(R.id.progressBar);
 
+        recyclerViewReviews = view.findViewById(R.id.recyclerViewReviews);
         recyclerViewTours = view.findViewById(R.id.recyclerViewTours);
         calendarView = view.findViewById(R.id.calendarView);
 
@@ -134,9 +148,12 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
         swipeRefreshLayout.setColorScheme(R.color.orange_primary);
 
         // Retrieve user ID from arguments
-        if (getArguments() != null) {
-            userId = getArguments().getString("userId");
-        }
+        if (getArguments() != null)
+            otherUserId = getArguments().getString("userId");
+
+        FirebaseUser mUser = mAuth.getCurrentUser();
+        if (mUser != null)
+            thisUserId = mUser.getUid();
 
         // Initialize calendar and set its attributes
         calendarView.setShowOtherDates(MaterialCalendarView.SHOW_ALL);
@@ -148,7 +165,174 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
         showLoading(true);
         loadDataFromFirebase(view);
 
-        tourBookingManager();
+        DocumentReference otherUserDocumentRef = db.collection("users").document(otherUserId);
+
+        // Retrieve userType from Firestore, duplicated from loadDataFromFirebase in case there's an asynchronous delay
+        otherUserDocumentRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot thisUserdocumentSnapshot) {
+                if (isAdded() && thisUserdocumentSnapshot.exists()) {
+                    // Check if the user type exists in the Firestore document
+                    if (thisUserdocumentSnapshot.contains("type")) {
+                        otherUserType = thisUserdocumentSnapshot.getString("type");
+                        if (Objects.equals(otherUserType, "Tour Guide")) {
+                            tourGuide_tourBookingManager();
+                            tourGuide_reviewsManager(view);
+                        }
+                        else {
+                            calendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_SINGLE);
+                            tourist_reviewsManager();
+
+                        }
+                    }
+                }
+            }
+        });
+
+        RatingReviews ratingReviews = view.findViewById(R.id.avg_rating_reviews);
+
+        int colors[] = new int[]{
+                Color.parseColor("#0e9d58"),
+                Color.parseColor("#bfd047"),
+                Color.parseColor("#ffc105"),
+                Color.parseColor("#ef7e14"),
+                Color.parseColor("#d36259")};
+
+        int raters[] = new int[]{
+                new Random().nextInt(100),
+                new Random().nextInt(100),
+                new Random().nextInt(100),
+                new Random().nextInt(100),
+                new Random().nextInt(100)
+        };
+
+        ratingReviews.createRatingBars(100, BarLabels.STYPE1, colors, raters);
+
+        DocumentReference thisUserDocumentRef = db.collection("users").document(thisUserId);
+
+        // Retrieve data from Firestore
+        thisUserDocumentRef.get()
+                .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                   @Override
+                   public void onSuccess(DocumentSnapshot thisUserdocumentSnapshot) {
+                       if (isAdded() && thisUserdocumentSnapshot.exists()) {
+                           // Check if the user type exists in the Firestore document
+                           if (thisUserdocumentSnapshot.contains("type"))
+                               thisUserType = thisUserdocumentSnapshot.getString("type");
+
+                           if(Objects.equals(thisUserType, "Tourist"))
+                               btnAddReview.setVisibility(View.VISIBLE);
+                       }
+                   }
+               });
+
+
+        btnAddReview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if(isAdded()) {
+                    // Create the dialog
+                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                    View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_review, null);
+                    builder.setView(dialogView);
+                    AlertDialog dialog = builder.create();
+                    final int[] rating = {9};
+                    EditText review = dialogView.findViewById(R.id.review);
+                    com.chaek.android.RatingBar ratingBar = dialogView.findViewById(R.id.ratingBar);
+                    Button btnAddReview = dialogView.findViewById(R.id.btnAddReview);
+
+                    ratingBar.setRatingBarListener(new RatingBar.RatingBarListener() {
+                        @Override
+                        public void setRatingBar(int i) {
+                            if(i == 0)
+                                rating[0] = 1;
+                            else
+                                rating[0] = i;
+
+
+                        }
+                    });
+
+                    btnAddReview.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            // Assuming you have the necessary variables available
+                            String reviewText = String.valueOf(review.getText());
+                            final String[] reviewerUsername = new String[1];
+                            final String[] tourGuide = new String[1];
+                            reviewerUsername[0] = "";
+                            tourGuide[0] = "";
+
+                            thisUserDocumentRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                @Override
+                                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                    if(documentSnapshot.contains("username"))
+                                        reviewerUsername[0] = documentSnapshot.getString("username");
+                                }
+                            }).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                @Override
+                                public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                    otherUserDocumentRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                        @Override
+                                        public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                            if(documentSnapshot.contains("username"))
+                                                tourGuide[0] = documentSnapshot.getString("username");
+                                        }
+                                    }).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                            Calendar calendar = Calendar.getInstance();
+                                            Date currentTime = calendar.getTime();
+
+                                            SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                                            String currentTimeAndDate = sdf.format(currentTime);
+
+                                            // Create a new review object
+                                            Map<String, Object> reviewData = new HashMap<>();
+                                            reviewData.put("tourGuide", tourGuide[0]);
+                                            reviewData.put("rating", rating[0]);
+                                            reviewData.put("review", reviewText);
+                                            reviewData.put("reviewerUsername", reviewerUsername[0]);
+                                            reviewData.put("time&date", currentTimeAndDate);
+
+                                            // Get reference to the Firestore database
+                                            FirebaseFirestore db = FirebaseFirestore.getInstance();
+
+                                            // Reference to the reviews collection for the current user
+                                            DocumentReference userReviewsRef = db.collection("users").document(thisUserId).collection("reviews").document(otherUserId);
+
+                                            // Add the review to Firestore
+                                            userReviewsRef.set(reviewData)
+                                                    .addOnSuccessListener(documentReference -> {
+                                                        //Log.d("DATABASE", "Review added with ID: " + otherUserId);
+                                                        DocumentReference tourGuideReviewsRef = db.collection("users").document(otherUserId).collection("reviews").document(thisUserId);
+                                                        Map<String, Object> reviewRef = new HashMap<>();
+                                                        reviewRef.put("reviewRef", userReviewsRef);
+                                                        tourGuideReviewsRef.set(reviewRef);
+                                                        dialog.dismiss();
+                                                        // Optionally, you can perform any actions after the review is successfully added
+                                                    })
+                                                    .addOnFailureListener(e -> {
+                                                        Log.w("DATABASE", "Error adding review", e);
+                                                        dialog.dismiss();
+                                                        // Handle errors if review addition fails
+                                                    });
+                                        }
+                                    });
+                                }
+                            });
+
+
+
+
+                        }
+                    });
+
+                    dialog.show();
+
+                }
+            }
+        });
 
         // Set up pull-to-refresh functionality
         if (swipeRefreshLayout != null) {
@@ -170,9 +354,192 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
         return view;
     }
 
+    private void tourGuide_reviewsManager(View view) {
 
 
-    private void tourBookingManager(){
+        CollectionReference collectionReference = db.collection("users").document(otherUserId).collection("reviews");
+
+        // Clear the list before adding new items
+        reviewersIdList.clear();
+
+        collectionReference.get().addOnSuccessListener(queryDocumentSnapshots -> {
+            for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                // Add document ID to the reviewersIdList
+                reviewersIdList.add(documentSnapshot.getId());
+            }
+
+            // Notify the adapter if needed
+            if (reviewsRecyclerViewAdapter != null) {
+                reviewsRecyclerViewAdapter.notifyDataSetChanged();
+            }
+
+            // Initialize and set up the adapter after fetching the data
+            reviewsRecyclerViewAdapter = new ReviewRecyclerViewAdapter(getActivity(), reviewersIdList, otherUserId);
+            recyclerViewReviews.setAdapter(reviewsRecyclerViewAdapter);
+            recyclerViewReviews.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false));
+        }).addOnFailureListener(e -> {
+            // Handle failure
+        });
+    }
+
+
+    private void tourist_reviewsManager(){
+
+    }
+    private void tourist_tourBookingManager(){
+        calendarView.setOnDateChangedListener(new OnDateSelectedListener() {
+            @Override
+            public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
+                if (decoratedDatesList.contains(date.getDate())) {
+                    // Disable selection for decorated dates
+                    calendarView.clearSelection();
+                    LocalDate selectedDate = LocalDate.of(date.getYear(), date.getMonth(), date.getDay());
+                    // Set up event decorators
+                    for (DocumentReference tourRef : bookedToursRefs) {
+                        // Handle failure to fetch color from Firestore
+                        tourRef.get().addOnSuccessListener(tourDocumentSnapshot -> {
+                            if (tourDocumentSnapshot.exists()) {
+                                DocumentReference tourPackageRef = tourDocumentSnapshot.getDocumentReference("tourPackageRef");
+                                if (tourPackageRef != null) {
+                                    tourPackageRef.get().addOnSuccessListener(tourPackageDocumentSnapshot -> {
+                                        if (tourPackageDocumentSnapshot.exists()) {
+                                            // Fetch tourPackageName from the referenced tourPackageRef document
+                                            LocalDate startDate, endDate;
+                                            if (tourDocumentSnapshot.contains("startDate")) {
+                                                startDate = getLocalDate(tourDocumentSnapshot.getString("startDate"));
+                                                if(tourDocumentSnapshot.contains("endDate"))
+                                                    endDate = getLocalDate(tourDocumentSnapshot.getString("endDate"));
+                                                else
+                                                    endDate = startDate;
+                                                if (selectedDate.equals(startDate) || selectedDate.equals(endDate) ||
+                                                        (selectedDate.isAfter(startDate) && selectedDate.isBefore(endDate))) {
+                                                    if(isAdded()) {
+                                                        // Create the dialog
+                                                        AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                                                        View dialogView = getLayoutInflater().inflate(R.layout.dialog_view_tour_details, null);
+                                                        builder.setView(dialogView);
+                                                        AlertDialog dialog = builder.create();
+
+                                                        TextView tourDate = dialogView.findViewById(R.id.tourDate);
+                                                        TextView tourPackage = dialogView.findViewById(R.id.tourPackage);
+                                                        TextView groupSize = dialogView.findViewById(R.id.groupSize);
+                                                        TextView bookedTouristsAmount = dialogView.findViewById(R.id.bookedTouristsAmount);
+
+
+                                                        tourPackageRef.getParent().getParent().get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                                            @Override
+                                                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                                if (documentSnapshot.exists()) { // Check if the query snapshot is not empty
+                                                                    // Assuming there's only one document in the result (parent document)
+
+                                                                    String tourGuideName = documentSnapshot.getString("username");
+
+                                                                    if (tourGuideName != null) {
+                                                                        ConstraintLayout touristOnlyLayout = dialogView.findViewById(R.id.touristOnlyLayout);
+                                                                        touristOnlyLayout.setVisibility(View.VISIBLE);
+                                                                        TextView tourGuide = dialogView.findViewById(R.id.tourGuide);
+                                                                        tourGuide.setText(tourGuideName);
+
+                                                                        touristOnlyLayout.setOnClickListener(new View.OnClickListener() {
+                                                                            @Override
+                                                                            public void onClick(View v) {
+                                                                                dialog.dismiss();
+                                                                                if(!Objects.equals(thisUserId, documentSnapshot.getId())){
+                                                                                    Bundle args = new Bundle();
+                                                                                    args.putString("userId", documentSnapshot.getId());
+                                                                                    OtherProfileFragment otherProfileFragment = new OtherProfileFragment();
+                                                                                    otherProfileFragment.setArguments(args);
+                                                                                    switchFragment(otherProfileFragment);
+                                                                                }
+                                                                                else
+                                                                                    switchFragment(new ThisProfileFragment());
+                                                                            }
+                                                                        });
+                                                                    } else {
+                                                                        // Handle case where username field is not found or null
+                                                                        Log.e("DATABASE", "Username field is null or not found in parent document");
+                                                                    }
+                                                                } else {
+                                                                    // Handle case where no parent document is found
+                                                                    Log.e("DATABASE", "No parent document found for tourPackageRef");
+                                                                }
+                                                            }
+
+                                                        });
+
+
+                                                        // Retrieve data from Firestore
+                                                        int groupSizeInt = tourDocumentSnapshot.getLong("groupSize").intValue();
+                                                        int bookedTouristsInt = tourDocumentSnapshot.getLong("bookedTouristsAmount").intValue();
+
+                                                        // Populate AlertDialog
+                                                        if (endDate != startDate)
+                                                            tourDate.setText(startDate.toString() + " To " + endDate.toString());
+                                                        else
+                                                            tourDate.setText(startDate.toString());
+
+                                                        // Set the tour package name in the dialog
+                                                        tourPackage.setText(tourPackageRef.getId()); // Set the tour package name
+
+                                                        DocumentReference userDocument = tourPackageRef.getParent().getParent();
+
+                                                        groupSize.setText(" / " + groupSizeInt);
+                                                        int availableSpots = groupSizeInt - bookedTouristsInt;
+                                                        bookedTouristsAmount.setText(String.valueOf(availableSpots));
+
+                                                        // Calculate the percentage of spots left relative to group size
+                                                        double percentage = (double) availableSpots / groupSizeInt * 100;
+
+                                                        // Set the color of the text based on the percentage
+                                                        if (availableSpots == 0) {
+                                                            bookedTouristsAmount.setTextColor(getContext().getColor(R.color.red));
+                                                        } else if (percentage < 25) {
+                                                            bookedTouristsAmount.setTextColor(getContext().getColor(R.color.orange_primary)); // Orange color
+                                                        } else if (percentage < 50) {
+                                                            bookedTouristsAmount.setTextColor(getContext().getColor(R.color.yellow));
+                                                        }
+
+                                                        userDocument.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                                            @Override
+                                                            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                                Log.d("TAG", documentSnapshot.getString("username"));
+                                                                // Show the dialog
+                                                                dialog.show();
+
+                                                            }
+                                                        }).addOnFailureListener(new OnFailureListener() {
+                                                            @Override
+                                                            public void onFailure(@NonNull Exception e) {
+                                                                Log.e("DATABASE", "Error getting tourPackageRef parent document", e);
+                                                            }
+                                                        });
+
+                                                    }
+                                                }
+                                            }
+
+                                        }
+                                    }).addOnFailureListener(e -> {
+                                        // Handle failure to fetch tourPackageRef document
+                                        Log.e("DATABASE", "Error getting tourPackageRef document", e);
+                                    });
+                                } else {
+                                    Log.e("DATABASE", "tourPackageRef is null");
+                                }
+                            }
+                        }).addOnFailureListener(e -> {
+                            // Handle failure to fetch tourRef document
+                            Log.e("DATABASE", "Error getting tourRef document", e);
+                        });
+
+                    }
+
+                }
+            }
+        });
+    }
+
+    private void tourGuide_tourBookingManager(){
         calendarView.setOnDateChangedListener(new OnDateSelectedListener() {
             @Override
             public void onDateSelected(@NonNull MaterialCalendarView widget, @NonNull CalendarDay date, boolean selected) {
@@ -190,96 +557,221 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
 
                         // Check if the selected date is between the start and end dates of the tour
                         if (selectedDate.equals(startDate) || selectedDate.equals(endDate) ||
-                                (selectedDate.isAfter(startDate) && selectedDate.isBefore(endDate))) {
-                            // Print the tour reference to the log
-                            Log.d("ActiveTourReference", "Tour reference: " + tour.getTourPackageRef());
-
-                            DocumentReference activeTourRef = db.collection("users")
-                                    .document(userId)
-                                    .collection("activeTours")
-                                    .document(tour.getStartDate());
-
-
-
-                            activeTourRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                @Override
-                                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                    if (documentSnapshot.exists()) {
-                                        if(isAdded()) {
-                                            // Create the dialog
-                                            AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
-                                            View dialogView = getLayoutInflater().inflate(R.layout.dialog_view_tour_details, null);
-                                            builder.setView(dialogView);
-                                            AlertDialog dialog = builder.create();
-
-                                            TextView tourDate = dialogView.findViewById(R.id.tourDate);
-                                            TextView tourPackage = dialogView.findViewById(R.id.tourPackage);
-                                            TextView groupSize = dialogView.findViewById(R.id.groupSize);
-                                            TextView bookedTouristsAmount = dialogView.findViewById(R.id.bookedTouristsAmount);
-                                            Button btnBookTour = dialogView.findViewById(R.id.btnBookTour);
-                                            btnBookTour.setVisibility(View.VISIBLE);
-
-
-                                            String tourPackageName = tour.getTourPackageRef().getId();
-                                            String startDate = tour.getStartDate();
-                                            String endDate = tour.getEndDate();
-
-                                            // Retrieve data from Firestore
-
-                                            int groupSizeInt = documentSnapshot.getLong("groupSize").intValue();
-                                            int bookedTouristsInt = documentSnapshot.getLong("bookedTouristsAmount").intValue();
-                                            // Populate AlertDialog
-
-                                            if (endDate != null)
-                                                tourDate.setText(startDate + " To " + endDate);
-                                            else
-                                                tourDate.setText(startDate);
-
-                                            tourPackage.setText(tourPackageName);
-                                            groupSize.setText(" / " + groupSizeInt);
-                                            int availableSpots = groupSizeInt - bookedTouristsInt;
-                                            bookedTouristsAmount.setText(String.valueOf(availableSpots));
-
-                                            // Calculate the percentage of spots left relative to group size
-                                            double percentage = (double) availableSpots / groupSizeInt * 100;
-
-                                            // Set the color of the text based on the percentage
-                                            if (availableSpots == 0) {
-                                                bookedTouristsAmount.setTextColor(getContext().getColor(R.color.red));
-                                            } else if (percentage < 25) {
-                                                bookedTouristsAmount.setTextColor(getContext().getColor(R.color.orange_primary)); // Orange color
-                                            } else if (percentage < 50) {
-                                                bookedTouristsAmount.setTextColor(getContext().getColor(R.color.yellow));
-                                            }
-
-                                            if (availableSpots == 0) {
-                                                btnBookTour.setEnabled(false);
-                                            }
-                                                // Show the dialog
-                                            dialog.show();
-                                        }
-                                    } else {
-                                        Log.d("DATABASE", "No such document");
-                                    }
-                                }
-                            }).addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {
-                                    Log.d("DATABASE", "Error getting document", e);
-                                }
-                            });
-
-                        }
+                                (selectedDate.isAfter(startDate) && selectedDate.isBefore(endDate)))
+                            tourGuide_showTourDetailsDialog(tour);
                     }
-
-
                 }
+            }
+        });
+    }
+
+    private void tourGuide_showTourDetailsDialog(ActiveTour tour){
+        DocumentReference activeTourRef = db.collection("users")
+                .document(otherUserId)
+                .collection("activeTours")
+                .document(tour.getStartDate());
+
+        activeTourRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot activeTourDocumentSnapshot) {
+                if (activeTourDocumentSnapshot.exists()) {
+                    if(isAdded()) {
+                        // Retrieve data from Firestore
+                        // Reference to the Firestore document
+                        DocumentReference thisUserDocumentRef = db.collection("users").document(thisUserId);
+
+                        // Retrieve data from Firestore
+                        thisUserDocumentRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                            @Override
+                            public void onSuccess(DocumentSnapshot thisUserdocumentSnapshot) {
+                                if (isAdded() && thisUserdocumentSnapshot.exists()) {
+                                    // Check if the user type exists in the Firestore document
+                                    if (thisUserdocumentSnapshot.contains("type"))
+                                        thisUserType = thisUserdocumentSnapshot.getString("type");
+
+                                    // Create the dialog
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
+                                    View dialogView = getLayoutInflater().inflate(R.layout.dialog_view_tour_details, null);
+                                    builder.setView(dialogView);
+                                    AlertDialog dialog = builder.create();
+
+                                    TextView tourDate = dialogView.findViewById(R.id.tourDate);
+                                    TextView tourPackage = dialogView.findViewById(R.id.tourPackage);
+                                    TextView groupSize = dialogView.findViewById(R.id.groupSize);
+                                    TextView bookedTouristsAmount = dialogView.findViewById(R.id.bookedTouristsAmount);
+                                    Button btnBookTour = dialogView.findViewById(R.id.btnBookTour);
+                                    btnBookTour.setVisibility(View.VISIBLE);
+
+
+                                    String tourPackageName = tour.getTourPackageRef().getId();
+                                    String startDate = tour.getStartDate();
+                                    String endDate = tour.getEndDate();
+
+                                    int groupSizeInt = activeTourDocumentSnapshot.getLong("groupSize").intValue();
+                                    int bookedTouristsInt = activeTourDocumentSnapshot.getLong("bookedTouristsAmount").intValue();
+                                    // Populate AlertDialog
+
+                                    if (endDate != null)
+                                        tourDate.setText(startDate + " To " + endDate);
+                                    else
+                                        tourDate.setText(startDate);
+
+                                    tourPackage.setText(tourPackageName);
+                                    groupSize.setText(" / " + groupSizeInt);
+                                    int availableSpots = groupSizeInt - bookedTouristsInt;
+                                    bookedTouristsAmount.setText(String.valueOf(availableSpots));
+
+                                    // Calculate the percentage of spots left relative to group size
+                                    double percentage = (double) availableSpots / groupSizeInt * 100;
+
+                                    // Set the color of the text based on the percentage
+                                    if (availableSpots == 0)
+                                        bookedTouristsAmount.setTextColor(getContext().getColor(R.color.red));
+                                    else if (percentage < 25)
+                                        bookedTouristsAmount.setTextColor(getContext().getColor(R.color.orange_primary)); // Orange color
+                                    else if (percentage < 50)
+                                        bookedTouristsAmount.setTextColor(getContext().getColor(R.color.yellow));
+
+                                    if(Objects.equals(thisUserType, "Tour Guide"))
+                                        btnBookTour.setVisibility(View.GONE);
+
+                                    else if (availableSpots == 0)
+                                        btnBookTour.setEnabled(false);
+
+
+
+
+                                    btnBookTour.setOnClickListener(new View.OnClickListener() {
+                                        @Override
+                                        public void onClick(View v) {
+                                            // Reference to the booked tours of the current user
+                                            CollectionReference bookedToursRef = db.collection("users")
+                                                    .document(thisUserId).collection("bookedTours");
+                                            final boolean[] isOverlap = {false};
+                                            bookedToursRef.get().addOnSuccessListener(queryDocumentSnapshots -> {
+                                                final AtomicInteger completedQueries = new AtomicInteger(0);
+                                                final int totalQueries = queryDocumentSnapshots.size();
+                                                for (QueryDocumentSnapshot bookedTour : queryDocumentSnapshots) {
+                                                    String bookedStartDate = bookedTour.getId();
+                                                    final String[] bookedEndDate = {null};
+
+                                                    DocumentReference tourRef = bookedTour.getDocumentReference("tourRef");
+
+                                                    tourRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                                        @Override
+                                                        public void onSuccess(DocumentSnapshot tourDocumentSnapshot) {
+                                                            if (isAdded() && tourDocumentSnapshot.exists()) {
+                                                                // Check if booked tour has an end date
+                                                                if (tourDocumentSnapshot.contains("endDate")) {
+                                                                    bookedEndDate[0] = tourDocumentSnapshot.getString("endDate");
+                                                                }
+                                                            }
+                                                        }
+                                                    }).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+                                                        @Override
+                                                        public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                                            // Check for overlap
+                                                            if (checkOverlappingTours(tour.getStartDate(), tour.getEndDate(), bookedStartDate, bookedEndDate[0])) {
+                                                                // A tour is already booked within the given date range
+                                                                Toast.makeText(requireContext(), "You have already booked a tour during this period", Toast.LENGTH_SHORT).show();
+                                                                isOverlap[0] = true;
+                                                            }
+                                                            completedQueries.incrementAndGet();
+                                                            if (completedQueries.get() == totalQueries && !isOverlap[0]) {
+                                                                // No overlapping tour found, proceed to book the tour
+                                                                bookTour(tour.getStartDate(), activeTourDocumentSnapshot);
+                                                                dialog.dismiss();
+                                                            }
+                                                        }
+                                                    });
+                                                }
+                                                if (totalQueries == 0 || completedQueries.get() == totalQueries && !isOverlap[0]) {
+                                                    // No booked tours found or all queries completed with no overlap
+                                                    bookTour(tour.getStartDate(), activeTourDocumentSnapshot);
+                                                    dialog.dismiss();
+                                                }
+                                            }).addOnFailureListener(e -> {
+                                                // Handle failure
+                                                Log.e("DATABASE", "Error checking booked tours", e);
+                                            });
+                                        }
+                                    });
+
+
+                                    // Show the dialog
+                                    dialog.show();
+                                }
+
+                            }
+                        }).addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                Log.e("DATABASE", "Error getting document", e);
+                            }
+                        });
+                    }
+                } else
+                    Log.d("DATABASE", "No such document");
+
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d("DATABASE", "Error getting document", e);
             }
         });
 
     }
 
 
+    // Method to check overlap between two date ranges
+    private boolean checkOverlappingTours(String newStartDate, String newEndDate, String existingStartDate, String existingEndDate) {
+        try {
+            SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT, Locale.ENGLISH);
+            Date newStart = sdf.parse(newStartDate);
+            Date newEnd = sdf.parse(newEndDate);
+            Date existingStart = sdf.parse(existingStartDate);
+            Date existingEnd = existingEndDate != null ? sdf.parse(existingEndDate) : null;
+
+            // Check if any day between the start and end dates of the new tour falls within existing tour's date range
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(newStart);
+            while (!calendar.getTime().after(newEnd)) {
+                Date currentDate = calendar.getTime();
+                if ((existingStart == null || !currentDate.before(existingStart)) && (existingEnd == null || !currentDate.after(existingEnd)))
+                    return true; // Overlap found
+
+                calendar.add(Calendar.DAY_OF_MONTH, 1); // Move to the next day
+            }
+
+            return false; // No overlap found
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private void bookTour(String startDate, DocumentSnapshot tourRef) {
+        // Create a new booked tour document
+        Map<String, Object> bookedTourData = new HashMap<>();
+        bookedTourData.put("tourRef", tourRef.getReference()); // Use getData() to retrieve all data from DocumentSnapshot
+
+        // Add the booked tour to the user's collection of booked tours
+        db.collection("users").document(thisUserId).collection("bookedTours").document(startDate)
+                .set(bookedTourData)
+                .addOnSuccessListener(aVoid -> {
+                    // Tour successfully booked
+                    Toast.makeText(requireContext(), "Tour booked successfully!", Toast.LENGTH_SHORT).show();
+                    DocumentReference tourDocRef = tourRef.getReference();
+                    tourDocRef.update("bookedTouristsAmount", FieldValue.increment(1))
+                            .addOnFailureListener(e -> Log.e("DATABASE", "Error incrementing bookedTouristsAmount", e));
+                    dataCache.clearCache();
+                })
+                .addOnFailureListener(e -> {
+                    // Handle failure
+                    Log.e("DATABASE", "Error booking tour", e);
+                });
+    }
 
     void setEventDecorator(String startDate, String endDate, int colorCode) {
         if(isAdded()){
@@ -366,14 +858,14 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
     private void loadDataFromFirebase(View view) {
         // Initialize RecyclerView for Tour Packages
 
-        if (userId != null) {
-            tourPackageRecyclerViewAdapter = new TourPackageRecyclerViewAdapter(getActivity(), userId, tourPackagesIdList, false, this);
+        if (otherUserId != null) {
+            tourPackageRecyclerViewAdapter = new TourPackageRecyclerViewAdapter(getActivity(), otherUserId, tourPackagesIdList, false, this);
             recyclerViewTours.setAdapter(tourPackageRecyclerViewAdapter);
             recyclerViewTours.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false));
 
 
             // Reference to the Firestore document
-            DocumentReference userDocumentRef = db.collection("users").document(userId);
+            DocumentReference userDocumentRef = db.collection("users").document(otherUserId);
 
             // Retrieve data from Firestore
             userDocumentRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
@@ -404,14 +896,20 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                         }
 
                         if (documentSnapshot.contains("type")) {
-                            if (Objects.equals(documentSnapshot.getString("type"), "Tourist"))
+                            otherUserType = documentSnapshot.getString("type");
+                            if (Objects.equals(documentSnapshot.getString("type"), "Tourist")) {
                                 type.setText(getResources().getString(R.string.tourist));
+                                TextView bookedToursHeadline = view.findViewById(R.id.tourPackagesORbookedToursHeadline);
+                                bookedToursHeadline.setText("My Booked Tours");
+                                tourist_tourBookingManager();
+                            }
                             else
                                 type.setText(getResources().getString(R.string.tour_guide));
+
                         }
 
                         // Load the image into the ImageView using Glide
-                        storageReference.child("images/" + userId + "/profilePic").getDownloadUrl()
+                        storageReference.child("images/" + otherUserId + "/profilePic").getDownloadUrl()
                                 .addOnSuccessListener(new OnSuccessListener<Uri>() {
                                     @Override
                                     public void onSuccess(Uri uri) {
@@ -430,75 +928,226 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                                     }
                                 });
 
-                        // Get the reference to the "tourPackages" collection
-                        CollectionReference tourPackagesRef = userDocumentRef.collection("tourPackages");
+                        if(Objects.equals(otherUserType, "Tour Guide")) {
+                            // Get the reference to the "tourPackages" collection
+                            CollectionReference tourPackagesRef = userDocumentRef.collection("tourPackages");
 
-                        // Retrieve documents from the "tourPackages" collection
-                        tourPackagesRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
-                            @Override
-                            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                                for (QueryDocumentSnapshot document : queryDocumentSnapshots)
-                                    tourPackagesIdList.add(document.getId());
-                                tourPackageRecyclerViewAdapter.notifyDataSetChanged();
-                            }
-                        }).addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                Log.e("DATABASE", "Error getting tourPackages collection", e);
-                            }
-                        });
+                            // Retrieve documents from the "tourPackages" collection
+                            tourPackagesRef.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                @Override
+                                public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                    for (QueryDocumentSnapshot document : queryDocumentSnapshots)
+                                        tourPackagesIdList.add(document.getId());
+                                    tourPackageRecyclerViewAdapter.notifyDataSetChanged();
+                                }
+                            }).addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {
+                                    Log.e("DATABASE", "Error getting tourPackages collection", e);
+                                }
+                            });
 
-                        activeTours = new ArrayList<>();
-                        db.collection("users")
-                                .document(userId)
-                                .collection("activeTours")
-                                .get()
-                                .addOnSuccessListener(queryDocumentSnapshots -> {
-                                    for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
-                                        String endDate = "", startDate = "";
-                                        DocumentReference tourPackageRef = null;
+                            activeTours = new ArrayList<>();
+                            db.collection("users")
+                                    .document(otherUserId)
+                                    .collection("activeTours")
+                                    .get()
+                                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                                            String endDate = "", startDate = "";
+                                            DocumentReference tourPackageRef = null;
 
-                                        // Assuming ActiveTour is a model class representing the active tours
-                                        if(document.contains("endDate"))
-                                            endDate = document.get("endDate").toString();
+                                            // Assuming ActiveTour is a model class representing the active tours
+                                            if(document.contains("endDate"))
+                                                endDate = document.get("endDate").toString();
 
-                                        if(document.contains("startDate"))
-                                            startDate = document.get("startDate").toString();
+                                            if(document.contains("startDate"))
+                                                startDate = document.get("startDate").toString();
 
-                                        if(document.contains("tourPackageRef"))
-                                            tourPackageRef = document.getDocumentReference("tourPackageRef");
+                                            if(document.contains("tourPackageRef"))
+                                                tourPackageRef = document.getDocumentReference("tourPackageRef");
 
-                                        ActiveTour activeTour = new ActiveTour(startDate, endDate, tourPackageRef);
-                                        activeTours.add(activeTour);
-                                    }
-
-
-                                    // Set up event decorators
-                                    for (ActiveTour tour : activeTours) {
-                                        if (tour.getTourPackageRef() != null) {
-                                            // Handle failure to fetch color from Firestore
-                                            tour.getTourPackageRef().get().addOnSuccessListener(tourPackageDocumentSnapshot -> {
-                                                if (tourPackageDocumentSnapshot.exists()) {
-                                                    int packageColor;
-                                                    // Assuming color is stored as an integer in the 'color' field
-                                                    if (tourPackageDocumentSnapshot.contains("packageColor")) {
-                                                        packageColor = tourPackageDocumentSnapshot.getLong("packageColor").intValue();
-                                                        setEventDecorator(tour.getStartDate(), tour.getEndDate(), packageColor);
-
-                                                    }
-                                                    else {
-                                                        packageColor = getResources().getColor(R.color.orange_primary);
-                                                        setEventDecorator(tour.getStartDate(), tour.getEndDate(), packageColor);
-                                                    }
-                                                    tour.setColor(packageColor);
-                                                }
-                                            }).addOnFailureListener(Throwable::printStackTrace);
+                                            ActiveTour activeTour = new ActiveTour(startDate, endDate, tourPackageRef);
+                                            activeTours.add(activeTour);
                                         }
-                                    }
-                                })
-                                .addOnFailureListener(e -> {
-                                    Log.e("DATABASE", "Error getting active tours", e);
-                                });
+
+
+                                        // Set up event decorators
+                                        for (ActiveTour tour : activeTours) {
+                                            if (tour.getTourPackageRef() != null) {
+                                                // Handle failure to fetch color from Firestore
+                                                tour.getTourPackageRef().get().addOnSuccessListener(tourPackageDocumentSnapshot -> {
+                                                    if (tourPackageDocumentSnapshot.exists()) {
+                                                        int packageColor;
+                                                        // Assuming color is stored as an integer in the 'color' field
+                                                        if (tourPackageDocumentSnapshot.contains("packageColor")) {
+                                                            packageColor = tourPackageDocumentSnapshot.getLong("packageColor").intValue();
+                                                            setEventDecorator(tour.getStartDate(), tour.getEndDate(), packageColor);
+
+                                                        }
+                                                        else {
+                                                            packageColor = getResources().getColor(R.color.orange_primary);
+                                                            setEventDecorator(tour.getStartDate(), tour.getEndDate(), packageColor);
+                                                        }
+                                                        tour.setColor(packageColor);
+                                                    }
+                                                }).addOnFailureListener(Throwable::printStackTrace);
+                                            }
+                                        }
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e("DATABASE", "Error getting active tours", e);
+                                    });
+
+                        }
+
+                        else {
+                            bookedToursRefs = new ArrayList<>();
+                            db.collection("users")
+                                    .document(otherUserId)
+                                    .collection("bookedTours")
+                                    .get()
+                                    .addOnSuccessListener(queryDocumentSnapshots -> {
+                                        for (QueryDocumentSnapshot document : queryDocumentSnapshots) {
+                                            DocumentReference tourRef = document.getDocumentReference("tourRef");
+                                            bookedToursRefs.add(tourRef);
+                                        }
+                                        // Set up event decorators
+                                        for (DocumentReference tourRef : bookedToursRefs) {
+                                            // Handle failure to fetch color from Firestore
+                                            tourRef.get().addOnSuccessListener(tourDocumentSnapshot -> {
+                                                if (tourDocumentSnapshot.exists()) {
+                                                    DocumentReference tourPackageRef = tourDocumentSnapshot.getDocumentReference("tourPackageRef");
+                                                    if (tourPackageRef != null) {
+                                                        tourPackageRef.get().addOnSuccessListener(tourPackageDocumentSnapshot -> {
+                                                            if (tourPackageDocumentSnapshot.exists()) {
+                                                                int packageColor = getResources().getColor(R.color.orange_primary);
+                                                                String startDate, endDate;
+                                                                // Assuming color is stored as an integer in the 'packageColor' field
+                                                                if (tourPackageDocumentSnapshot.contains("packageColor")) {
+                                                                    packageColor = tourPackageDocumentSnapshot.getLong("packageColor").intValue();
+                                                                }
+
+                                                                if (tourDocumentSnapshot.contains("startDate")) {
+                                                                    startDate = tourDocumentSnapshot.getString("startDate");
+                                                                    if(tourDocumentSnapshot.contains("endDate"))
+                                                                        endDate = tourDocumentSnapshot.getString("endDate");
+                                                                    else
+                                                                        endDate = "";
+
+                                                                    if(Objects.equals(endDate, "")) {
+                                                                        if (!getLocalDate(startDate).isBefore(min))
+                                                                            setEventDecorator(startDate, endDate, packageColor);
+                                                                        else{
+                                                                            tourRef.delete().addOnSuccessListener(aVoid -> {
+                                                                                        // Refresh the fragment after deleting the tour reference
+                                                                                        tourPackagesIdList = new ArrayList<>();
+
+                                                                                        // Remove all existing decorators
+                                                                                        calendarView.removeDecorators();
+                                                                                        // Clear the list of decorated dates
+                                                                                        decoratedDatesList.clear();
+
+                                                                                        loadDataFromFirebase(view);
+                                                                                    })
+                                                                                    .addOnFailureListener(e -> {
+                                                                                        Log.e("DATABASE", "Error deleting tourRef document", e);
+                                                                                    });
+
+                                                                            db.collection("users")
+                                                                                    .document(otherUserId)
+                                                                                    .collection("bookedTours").document(tourRef.getId())
+                                                                                    .delete().addOnFailureListener(new OnFailureListener() {
+                                                                                        @Override
+                                                                                        public void onFailure(@NonNull Exception e) {
+                                                                                            Log.e("DATABASE", "Error deleting tour document", e);
+
+                                                                                        }
+                                                                                    });
+
+                                                                        }
+                                                                    }
+                                                                    else{
+                                                                        if(!getLocalDate(endDate).isBefore(min))
+                                                                            setEventDecorator(startDate, endDate, packageColor);
+                                                                        else {
+                                                                            tourRef.delete().addOnSuccessListener(aVoid -> {
+                                                                                        // Refresh the fragment after deleting the tour reference
+                                                                                        tourPackagesIdList = new ArrayList<>();
+
+                                                                                        // Remove all existing decorators
+                                                                                        calendarView.removeDecorators();
+                                                                                        // Clear the list of decorated dates
+                                                                                        decoratedDatesList.clear();
+
+                                                                                        loadDataFromFirebase(view);
+                                                                                    })
+                                                                                    .addOnFailureListener(e -> {
+                                                                                        Log.e("DATABASE", "Error deleting tourRef document", e);
+                                                                                    });
+
+                                                                            db.collection("users")
+                                                                                    .document(otherUserId)
+                                                                                    .collection("bookedTours").document(tourRef.getId())
+                                                                                    .delete().addOnFailureListener(new OnFailureListener() {
+                                                                                        @Override
+                                                                                        public void onFailure(@NonNull Exception e) {
+                                                                                            Log.e("DATABASE", "Error deleting tour document", e);
+
+                                                                                        }
+                                                                                    });
+                                                                        }
+                                                                    }
+                                                                }
+                                                            }
+                                                        }).addOnFailureListener(e -> {
+                                                            // Handle failure to fetch tourPackageRef document
+                                                            Log.e("DATABASE", "Error getting tourPackageRef document", e);
+                                                        });
+                                                    } else {
+                                                        Log.e("DATABASE", "tourPackageRef is null");
+                                                    }
+                                                }
+                                                else{
+                                                    tourRef.delete().addOnSuccessListener(aVoid -> {
+                                                                // Refresh the fragment after deleting the tour reference
+                                                                tourPackagesIdList = new ArrayList<>();
+
+                                                                // Remove all existing decorators
+                                                                calendarView.removeDecorators();
+                                                                // Clear the list of decorated dates
+                                                                decoratedDatesList.clear();
+
+                                                                loadDataFromFirebase(view);
+                                                            })
+                                                            .addOnFailureListener(e -> {
+                                                                Log.e("DATABASE", "Error deleting tourRef document", e);
+                                                            });
+
+                                                    db.collection("users")
+                                                            .document(otherUserId)
+                                                            .collection("bookedTours").document(tourRef.getId())
+                                                            .delete().addOnFailureListener(new OnFailureListener() {
+                                                                @Override
+                                                                public void onFailure(@NonNull Exception e) {
+                                                                    Log.e("DATABASE", "Error deleting tour document", e);
+
+                                                                }
+                                                            });
+                                                }
+                                            }).addOnFailureListener(e -> {
+                                                // Handle failure to fetch tourRef document
+                                                Log.e("DATABASE", "Error getting tourRef document", e);
+                                            });
+                                        }
+                                    })
+                                    .addOnFailureListener(e -> {
+                                        Log.e("DATABASE", "Error getting active tours", e);
+                                    });
+                            // Save Active Tours to the data cache
+                            dataCache.put("bookedTours", bookedToursRefs);
+                        }
+
                     }
 
                 }
@@ -520,6 +1169,17 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
             loadingOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
             progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
         }
+    }
+
+    /**
+     * Switch fragment function.
+     */
+    private void switchFragment(Fragment fragment) {
+        if (isAdded())
+            // Replace the current fragment with the new one
+            requireActivity().getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.frameLayout, fragment)
+                    .commit();
     }
 
     @Override

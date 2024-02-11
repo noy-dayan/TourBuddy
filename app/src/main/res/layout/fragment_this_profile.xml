@@ -145,7 +145,7 @@
                     >
 
                     <TextView
-                        android:id="@+id/tourPackagesHeadline"
+                        android:id="@+id/tourPackagesORbookedToursHeadline"
                         android:layout_width="match_parent"
                         android:layout_height="50dp"
                         android:layout_marginTop="16dp"
@@ -169,7 +169,7 @@
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:scrollbars="none"
-                        app:layout_constraintTop_toBottomOf="@id/tourPackagesHeadline" />
+                        app:layout_constraintTop_toBottomOf="@id/tourPackagesORbookedToursHeadline" />
 
 
                     <com.prolificinteractive.materialcalendarview.MaterialCalendarView
