@@ -45,19 +45,19 @@ import java.util.concurrent.TimeUnit;
 public class ReviewRecyclerViewAdapter extends RecyclerView.Adapter<ReviewRecyclerViewAdapter.ViewHolder> {
 
     List<String> reviewerIdList;
-    String tourGuideId;
+    String otherUserId;
     Activity activity;
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     FirebaseStorage storage = FirebaseStorage.getInstance();
     StorageReference storageReference = storage.getReference();
     static FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    Boolean isTourist;
 
-
-    public ReviewRecyclerViewAdapter(Activity activity, List<String> reviewerIdList, String tourGuideId) {
+    public ReviewRecyclerViewAdapter(Activity activity, List<String> reviewerIdList, String otherUserId, boolean isTourist) {
         this.activity = activity;
         this.reviewerIdList = reviewerIdList;
-        this.tourGuideId = tourGuideId;
-        Log.d("fgdfgdfgdfgdfg", reviewerIdList.toString());
+        this.otherUserId = otherUserId;
+        this.isTourist = isTourist;
     }
 
     @NonNull
@@ -65,12 +65,17 @@ public class ReviewRecyclerViewAdapter extends RecyclerView.Adapter<ReviewRecycl
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.recyclerview_review_item_layout, parent, false);
         return new ViewHolder(view, this);
+
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String reviewerId = reviewerIdList.get(position);
-        loadDataFromFirebase(reviewerId, holder);
+        if(isTourist)
+            loadTouristDataFromFirebase(reviewerId, holder);
+        else
+            loadTourGuideDataFromFirebase(reviewerId, holder);
+
     }
 
     @Override
@@ -122,7 +127,6 @@ public class ReviewRecyclerViewAdapter extends RecyclerView.Adapter<ReviewRecycl
             userProfilePic = itemView.findViewById(R.id.userProfilePic);
             reviewerUsername = itemView.findViewById(R.id.reviewerUsername);
             //tourGuide = itemView.findViewById(R.id.tourGuide);
-            //tourPackage = itemView.findViewById(R.id.tourPackage);
             timePassed = itemView.findViewById(R.id.timePassed);
             ratingBar = itemView.findViewById(R.id.ratingBar);
             review = itemView.findViewById(R.id.review);
@@ -131,10 +135,74 @@ public class ReviewRecyclerViewAdapter extends RecyclerView.Adapter<ReviewRecycl
         }
     }
 
-    void loadDataFromFirebase(String reviewerId, @NonNull ViewHolder holder) {
+
+
+    void loadTouristDataFromFirebase(String reviewerId, @NonNull ViewHolder holder) {
         if (reviewerId != null) {
-            Log.d("TAG", reviewerId);
-            DocumentReference reviewDocumentRef = db.collection("users").document(reviewerId).collection("reviews").document(tourGuideId);
+            DocumentReference reviewDocumentRef = db.collection("users").document(otherUserId).collection("reviews").document(reviewerId);
+
+            reviewDocumentRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                    if (documentSnapshot.exists()) {
+                        if(documentSnapshot.contains("tourGuide"))
+                            holder.reviewerUsername.setText(documentSnapshot.getString("tourGuide"));
+
+                        if(documentSnapshot.contains("review")) {
+                            holder.review.setText(documentSnapshot.getString("review"));
+                            if(holder.review.getText().equals(""))
+                                holder.reviewLayout.setVisibility(View.GONE);
+
+                        }
+                        if(documentSnapshot.contains("rating"))
+                            holder.ratingBar.setScore(documentSnapshot.getLong("rating"));
+
+                        if(documentSnapshot.contains("time&date"))
+                            holder.timePassed.setText(getTimePassed(documentSnapshot.getString("time&date")));
+                    }
+                }
+            });
+
+            // Load the image into the ImageView using Glide
+            storageReference.child("images/" + reviewerId + "/profilePic").getDownloadUrl()
+                    .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            // Got the download URL for 'users/me/profile.png'
+                            Glide.with(holder.itemView)
+                                    .load(uri)
+                                    .apply(RequestOptions.circleCropTransform())
+                                    .into(holder.userProfilePic);
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception exception) {
+                            // Handle failure to load image
+                        }
+                    });
+
+            holder.userProfilePic.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    FirebaseUser mUser = mAuth.getCurrentUser();
+                    if(mUser.getUid().equals(reviewerId))
+                        switchFragment(new ThisProfileFragment());
+                    else {
+                        Bundle args = new Bundle();
+                        args.putString("userId", reviewerId);
+                        OtherProfileFragment otherProfileFragment = new OtherProfileFragment();
+                        otherProfileFragment.setArguments(args);
+                        switchFragment(otherProfileFragment);
+                    }
+                }
+            });
+        }
+    }
+
+
+    void loadTourGuideDataFromFirebase(String reviewerId, @NonNull ViewHolder holder) {
+        if (reviewerId != null) {
+            DocumentReference reviewDocumentRef = db.collection("users").document(reviewerId).collection("reviews").document(otherUserId);
 
             reviewDocumentRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override

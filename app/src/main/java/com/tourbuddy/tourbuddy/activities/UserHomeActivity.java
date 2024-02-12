@@ -109,6 +109,7 @@ public class UserHomeActivity extends AppCompatActivity {
         // Set the default selected item to be "Profile"
         bottomNavigationView.setSelectedItemId(R.id.profile);
 
+
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             // Check if the selected item is already the one corresponding to the current fragment
             if (item.getItemId() == R.id.search && !(getSupportFragmentManager().findFragmentById(R.id.frameLayout) instanceof SearchFragment))

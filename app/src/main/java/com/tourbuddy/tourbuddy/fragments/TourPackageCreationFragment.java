@@ -310,8 +310,8 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
                         DocumentSnapshot document = task.getResult();
                         if (document.exists()) {
                             // Show an error message or handle the case where the package already exists
-                            Toast.makeText(requireContext(), "Package with the same name already exists", Toast.LENGTH_LONG).show();
-                            packageNameInput.setError("Package with the same name already exists");
+                            Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.package_with_the_same_name_already_exists), Toast.LENGTH_LONG).show();
+                            packageNameInput.setError(requireContext().getResources().getString(R.string.package_with_the_same_name_already_exists));
 
                         } else {
                             // Continue with the package creation process

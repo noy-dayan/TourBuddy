@@ -135,7 +135,7 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
             userDocumentRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    if (documentSnapshot.exists()) {
+                    if (context != null && documentSnapshot.exists()) {
                         if (documentSnapshot.contains("username"))
                             holder.username.setText(documentSnapshot.getString("username"));
 

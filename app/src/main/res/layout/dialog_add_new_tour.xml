@@ -23,7 +23,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Tour Package: "
+        android:text="@string/tour_package"
         android:fontFamily="@font/lexend"
         android:textColor="@color/white"
         android:textSize="17.5sp"
@@ -84,7 +84,7 @@
         android:background="@drawable/btn_bg"
         android:fontFamily="@font/lexend"
         android:textColor="@color/white"
-        android:text="Add New Tour"
+        android:text="@string/add_new_tour"
         android:layout_marginTop="25dp"
         android:enabled="false"
      />

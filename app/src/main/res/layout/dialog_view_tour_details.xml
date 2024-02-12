@@ -20,7 +20,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:fontFamily="@font/lexend"
-            android:text="Tour Guide:"
+            android:text="@string/tour_guide2"
             android:textColor="@color/white"
             android:textSize="17.5sp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -73,7 +73,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:fontFamily="@font/lexend"
-            android:text="Tour Date: "
+            android:text="@string/tour_date"
             android:textColor="@color/white"
             android:textSize="17.5sp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -119,7 +119,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:fontFamily="@font/lexend"
-            android:text="Tour Package:"
+            android:text="@string/tour_package"
             android:textColor="@color/white"
             android:textSize="17.5sp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -159,7 +159,8 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="15dp">
+        android:layout_marginTop="15dp"
+        android:layoutDirection="ltr">
 
         <TextView
             android:id="@+id/textView13"
@@ -167,7 +168,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="start"
             android:fontFamily="@font/lexend"
-            android:text="Available Spots:"
+            android:text="@string/available_spots"
             android:textColor="@color/white"
             android:textSize="17.5sp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -218,7 +219,7 @@
         android:background="@drawable/btn_bg"
         android:fontFamily="@font/lexend"
         android:textColor="@color/white"
-        android:text="Book Tour"
+        android:text="@string/book_tour"
         android:visibility="gone"
         android:layout_marginTop="25dp"
      />

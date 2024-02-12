@@ -150,7 +150,7 @@
                         android:layout_marginTop="16dp"
                         android:layout_marginEnd="16dp"
                         android:layout_marginBottom="16dp"
-                        android:text="Send Message"
+                        android:text="@string/send_message"
                         android:background="@drawable/btn_bg"
                         android:fontFamily="@font/lexend"
                         android:textColor="@color/white"
@@ -174,12 +174,27 @@
                         android:background="@color/black"
                         android:fontFamily="@font/lexend"
                         android:gravity="center"
-                        android:text="My Tour Packages"
+                        android:text="@string/my_tour_packages"
                         android:textColor="@color/orange_primary"
-                        android:textSize="20dp"
+                        android:textSize="20sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:visibility="gone"
+                        android:id="@+id/noAvailableTourPackages"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:fontFamily="@font/lexend"
+                        android:gravity="center"
+                        android:text="@string/this_user_has_no_available_tour_packages"
+                        android:textColor="@color/grey"
+                        android:textSize="15sp"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/tourPackagesORbookedToursHeadline" />
 
                     <!-- Horizontal RecyclerView for Notes -->
                     <androidx.recyclerview.widget.RecyclerView
@@ -191,7 +206,7 @@
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:scrollbars="none"
-                        app:layout_constraintTop_toBottomOf="@id/tourPackagesORbookedToursHeadline" />
+                        app:layout_constraintTop_toBottomOf="@id/noAvailableTourPackages" />
 
 
                     <com.prolificinteractive.materialcalendarview.MaterialCalendarView
@@ -217,31 +232,99 @@
                         android:background="@color/black"
                         android:fontFamily="@font/lexend"
                         android:gravity="center"
-                        android:text="My Reviews"
+                        android:text="@string/my_reviews"
                         android:textColor="@color/orange_primary"
                         android:textSize="20sp"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
                         app:layout_constraintTop_toBottomOf="@+id/calendarView" />
 
-                    <com.taufiqrahman.reviewratings.RatingReviews
-                        xmlns:bar="http://schemas.android.com/apk/res-auto"
-                        android:id="@+id/avg_rating_reviews"
-
-                        android:layout_width="0dp"
+                    <TextView
+                        android:id="@+id/noAvailableReviews"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:layout_marginBottom="8dp"
+                        android:layout_marginTop="16dp"
+                        android:fontFamily="@font/lexend"
+                        android:gravity="center"
+                        android:text="@string/this_user_has_no_available_reviews"
+                        android:textColor="@color/grey"
+                        android:textSize="15sp"
                         app:layout_constraintEnd_toEndOf="parent"
-                        app:layout_constraintStart_toEndOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/reviewsHeadline"
-                        bar:animation="true"
-                        bar:max_value="100"
-                        bar:show_label="true"
-                        bar:spaces="0dp"
-                        bar:text_color="#333333"
-                        bar:text_size="10sp"
-                        bar:width="15dp" />
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/reviewsHeadline" />
+
+                    <androidx.constraintlayout.widget.ConstraintLayout
+                        android:id="@+id/totalRatingLayout"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:orientation="horizontal"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toBottomOf="@+id/noAvailableReviews"
+                        android:visibility="gone">
+
+                        <LinearLayout
+                            android:id="@+id/linearLayout"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="center|top">
+
+                            <TextView
+                                android:id="@+id/totalRating"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center_vertical"
+                                android:layout_marginStart="16dp"
+                                android:fontFamily="@font/lexend"
+                                android:text="4.5"
+                                android:textColor="@color/white"
+                                android:textSize="50sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintStart_toStartOf="parent"
+                                app:layout_constraintTop_toTopOf="parent" />
+
+                            <TextView
+                                android:id="@+id/textView20"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:layout_marginStart="16dp"
+                                android:layout_marginEnd="16dp"
+                                android:fontFamily="@font/lexend"
+                                android:lines="2"
+                                android:text="@string/out_of_5_stars"
+                                android:textColor="@color/white"
+                                android:textSize="25sp"
+                                app:layout_constraintBottom_toBottomOf="parent"
+                                app:layout_constraintEnd_toEndOf="parent"
+                                app:layout_constraintHorizontal_bias="0.0"
+                                app:layout_constraintStart_toEndOf="@+id/textView19"
+                                app:layout_constraintTop_toTopOf="parent" />
+                        </LinearLayout>
+
+                        <com.chaek.android.RatingBar
+                            android:id="@+id/ratingBar"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:layout_marginBottom="8dp"
+                            app:layout_constraintBottom_toBottomOf="parent"
+                            app:layout_constraintEnd_toEndOf="parent"
+                            app:layout_constraintStart_toStartOf="parent"
+                            app:layout_constraintTop_toBottomOf="@+id/linearLayout"
+                            app:rating_flag="TEN"
+                            app:rating_star_color="@color/orange_primary"
+                            app:rating_star_empty_color="@color/grey"
+                            app:rating_star_height="40dp"
+                            app:rating_star_margin="5dp"
+                            app:rating_star_width="40dp"
+                            app:rating_start_count="9"
+                            />
+
+                    </androidx.constraintlayout.widget.ConstraintLayout>
 
                     <Button
                         android:visibility="gone"
@@ -256,11 +339,11 @@
                         android:layout_marginBottom="32dp"
                         android:background="@drawable/btn_bg"
                         android:fontFamily="@font/lexend"
-                        android:text="Add Review"
+                        android:text="@string/add_review"
                         android:textColor="@color/white"
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/avg_rating_reviews" />
+                        app:layout_constraintTop_toBottomOf="@+id/totalRatingLayout" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recyclerViewReviews"

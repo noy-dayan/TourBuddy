@@ -26,7 +26,6 @@
             android:layout_height="wrap_content"
             android:textColor="@color/white"
             android:textSize="16sp"
-            android:text="@string/username"
             android:fontFamily="@font/lexend"/>
 
         <TextView
@@ -35,7 +34,6 @@
             android:layout_height="wrap_content"
             android:textColor="@color/white"
             android:textSize="12sp"
-            android:text="@string/account_type"
             android:fontFamily="@font/lexend"/>
 
     </LinearLayout>

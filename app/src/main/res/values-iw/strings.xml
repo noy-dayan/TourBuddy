@@ -1,12 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">TourBuddy</string>
     <string name="login">התחברות</string>
     <string name="register">הרשמה</string>
     <string name="email">אימייל</string>
     <string name="password">סיסמה</string>
     <string name="forgotPassword">שכחת את הסיסמה?</string>
-    <string name="createNewAccount">אין לך חשבון? הירשם</string>
+    <string name="create_new_account">אין לך חשבון? הירשם</string>
     <string name="OrLine">או</string>
     <string name="alreadyHaveAnAccount">כבר יש לך חשבון? התחבר</string>
     <string name="confirmPassword">אשר סיסמה</string>
@@ -102,6 +101,32 @@
     <string name="cancel_tour">ביטול סיור</string>
     <string name="confirmTourCancellationMessage">האם אתה בטוח שברצונך לבטל את הסיור?</string>
     <string name="confirmTourCancellation">אישור ביטול הסיור</string>
+    <string name="review_guideline">• ספק משוב כנה ובונה על חווית הסיור שלך, תוך התמקדות הן בהיבטים החיוביים והן בתחומים לשיפור.</string>
+    <string name="my_booked_tours">הסיורים שלי</string>
+    <string name="to">" עד "</string>
+    <string name="add_new_tour">הוסף סיור חדש</string>
+    <string name="tour_date">תאריך הסיור:</string>
+    <string name="tour_package">חבילת הסיור:</string>
+    <string name="rating">דירוג:</string>
+    <string name="review">ביקורת:</string>
+    <string name="add_review">הוסף ביקורת</string>
+    <string name="tour_guide2">מדריך טיולים:</string>
+    <string name="available_spots">מקומות פנויים:</string>
+    <string name="book_tour">להזמין סיור</string>
+    <string name="send_message">שלח הודעה</string>
+    <string name="my_tour_packages">חבילות הסיור שלי</string>
+    <string name="this_user_has_no_available_tour_packages">למשתמש זה אין חבילות סיור זמינות</string>
+    <string name="my_reviews">הביקורות שלי</string>
+    <string name="this_user_has_no_available_reviews">למשתמש זה אין ביקורות זמינות</string>
+    <string name="out_of_5_stars">מתוך 5\nכוכבים</string>
+    <string name="user_type">סוג משתמש:</string>
+    <string name="country">מדינה:</string>
+    <string name="you_have_no_available_tour_packages">אין לך חבילות סיור זמינות</string>
+    <string name="you_have_no_available_reviews">אין לך ביקורות זמינות</string>
+    <string name="you_have_already_booked_a_tour_during_this_period">כבר הזמנת סיור בתקופת זמן זו</string>
+    <string name="tour_booked_successfully">הסיור הוזמן בהצלחה!</string>
+    <string name="tours_must_be_set_up_at_least_3_days_in_advance">יש לקבוע סיורים לפחות 3 ימים מראש</string>
+    <string name="cancellation_is_not_allowed_for_ongoing_or_close_occurring_tours">"לא ניתן לבטל סיורים מתמשכים/קרובים להתרחש "</string>
 
 
 </resources>

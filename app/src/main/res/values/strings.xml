@@ -1,12 +1,12 @@
 <resources>
-    <string name="app_name">TourBuddy</string>
+    <string name="app_name" translatable="false">TourBuddy</string>
 
     <string name="login">LOGIN</string>
     <string name="register">SIGN UP</string>
     <string name="email">Email</string>
     <string name="password">Password</string>
     <string name="forgotPassword">Forgot Password?</string>
-    <string name="createNewAccount">Don\'t have an account? Sign up</string>
+    <string name="create_new_account">Don\'t have an account? Sign up</string>
     <string name="OrLine">OR</string>
     <string name="alreadyHaveAnAccount">Already have an account? Login</string>
     <string name="confirmPassword">Confirm Password</string>
@@ -104,6 +104,33 @@
     <string name="confirmTourCancellationMessage">Are you sure you want to cancel tour?</string>
     <string name="confirmTourCancellation">Confirm Tour Cancellation</string>
     <string name="review_guideline">• Provide honest and constructive feedback about your tour experience, focusing on both positive aspects and areas for improvement.</string>
+    <string name="my_booked_tours">My Booked Tours</string>
+    <string name="to">" To "</string>
+    <string name="add_new_tour">Add New Tour</string>
+    <string name="tour_date">Tour Date:</string>
+    <string name="tour_package">Tour Package:</string>
+    <string name="rating">Rating:</string>
+    <string name="review">Review:</string>
+    <string name="add_review">Add Review</string>
+    <string name="tour_guide2">Tour Guide:</string>
+    <string name="available_spots">Available Spots:</string>
+    <string name="book_tour">Book Tour</string>
+    <string name="send_message">Send Message</string>
+    <string name="my_tour_packages">My Tour Packages</string>
+    <string name="this_user_has_no_available_tour_packages">This user has no available tour packages</string>
+    <string name="my_reviews">My Reviews</string>
+    <string name="this_user_has_no_available_reviews">This user has no available reviews</string>
+    <string name="out_of_5_stars">Out of\n5 Stars</string>
+    <string name="user_type">User Type:</string>
+    <string name="country">Country:</string>
+    <string name="you_have_no_available_tour_packages">You have no available tour packages</string>
+    <string name="you_have_no_available_reviews">You have no available reviews</string>
+    <string name="you_have_already_booked_a_tour_during_this_period">You have already booked a tour during this period</string>
+    <string name="tour_booked_successfully">Tour booked successfully!</string>
+    <string name="tours_must_be_set_up_at_least_3_days_in_advance">Tours must be set up at least 3 days in advance</string>
+    <string name="cancellation_is_not_allowed_for_ongoing_or_close_occurring_tours">Cancellation is not allowed for ongoing/close occurring tours</string>
+    <string name="package_with_the_same_name_already_exists">Package with the same name already exists</string>
+    <string name="please_wait_while_logging_in">Please Wait While Logging In...</string>
 
 
 </resources>

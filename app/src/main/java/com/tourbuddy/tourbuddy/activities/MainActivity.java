@@ -120,8 +120,8 @@ public class MainActivity extends AppCompatActivity {
             inputPassword.requestFocus();
         } else {
             // Display progress dialog
-            progressDialog.setMessage("Please Wait While Logging In...");
-            progressDialog.setTitle("Login");
+            progressDialog.setMessage(getResources().getString(R.string.please_wait_while_logging_in));
+            progressDialog.setTitle(getResources().getString(R.string.login));
             progressDialog.setCanceledOnTouchOutside(false);
             progressDialog.show();
 
