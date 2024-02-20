@@ -542,9 +542,8 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                             .map(CalendarDay::getDate)
                             .anyMatch(decoratedDatesList::contains);
 
-
                     // Check if any of the selected dates are in the list of decorated dates
-                    if (disableSelection) {
+                    if (disableSelection || tourPackagesIdList.isEmpty()) {
                         // Disable range selection for decorated dates
                         btnAddNewTour.setEnabled(false);
                         selectedStartDate = "";
@@ -568,8 +567,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                         selectedEndDate = dates.get(dates.size() - 1).getDate().toString();
 
                         if (isAdded()) {
-                            btnAddNewTour.setText(requireContext().getResources().getString(R.string.add_new_tour) +
-                                    "\n" + selectedStartDate + requireContext().getResources().getString(R.string.to) + selectedEndDate);
+                            btnAddNewTour.setText(requireContext().getResources().getString(R.string.add_new_tour) + "\n" + selectedStartDate + requireContext().getResources().getString(R.string.to) + selectedEndDate);
                             btnAddNewTour.setEnabled(true);
                         }
 
@@ -703,6 +701,12 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
 
                         } else {
                             if (calendarView.getSelectedDate() != null) {
+                                if(tourPackagesIdList.isEmpty()){
+                                    btnAddNewTour.setEnabled(false);
+                                    selectedStartDate = "";
+                                    selectedEndDate = "";
+                                    btnAddNewTour.setText(R.string.add_new_tour);
+                                }
                                 selectedStartDate = date.getDate().toString();
                                 selectedEndDate = "";
                                 btnAddNewTour.setText(requireContext().getResources().getString(R.string.add_new_tour) + "\n" + selectedStartDate);
@@ -858,7 +862,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
         } else {
             if(isAdded())
                 // Tour is in progress or already passed, display a message indicating cancellation is not allowed
-                Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.you_have_already_booked_a_tour_during_this_period), Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.cancellation_is_not_allowed_for_ongoing_or_close_occurring_tours), Toast.LENGTH_SHORT).show();
         }
     }
 
