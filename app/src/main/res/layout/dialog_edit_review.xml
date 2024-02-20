@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:padding="32dp"
+    android:background="@color/dark_primary">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_gravity="center_vertical"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/rating"
+            android:fontFamily="@font/lexend"
+            android:textColor="@color/white"
+            android:textSize="17.5sp"
+            />
+
+        <com.chaek.android.RatingBar
+            android:layout_gravity="center_vertical"
+            android:id="@+id/ratingBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:rating_flag="TEN"
+            app:rating_star_color="@color/orange_primary"
+            app:rating_star_empty_color="@color/grey"
+            app:rating_star_height="30dp"
+            app:rating_star_margin="5dp"
+            app:rating_star_width="30dp"
+            app:rating_start_count="9"
+            android:layout_marginStart="16dp"/>
+    </LinearLayout>
+    <View
+        android:layout_width="wrap_content"
+        android:layout_height="2dp"
+        android:background="@color/orange_primary"
+        android:layout_marginTop="15dp"/>
+
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/review"
+            android:fontFamily="@font/lexend"
+            android:textColor="@color/white"
+            android:textSize="17.5sp"
+            android:layout_marginTop="15dp"/>
+
+
+        <EditText
+            android:id="@+id/review"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/input_bg"
+            android:fontFamily="@font/lexend"
+            android:paddingStart="20dp"
+            android:paddingEnd="20dp"
+            android:paddingTop="10dp"
+            android:paddingBottom="10dp"
+
+            android:textColor="@color/white"
+            android:textColorHint="@color/white"
+            android:hint="@string/review_guideline"
+            android:textSize="17.5sp"
+            android:layout_marginTop="10dp"
+            android:gravity="start|top"
+            android:maxLength="2000"
+            />
+
+
+    <Button
+        android:id="@+id/btnDeleteReview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/risky_action_btn_bg"
+        android:fontFamily="@font/lexend"
+        android:textColor="@color/white"
+        android:text="@string/delete_review"
+        android:layout_marginTop="25dp"
+        />
+
+    <Button
+        android:id="@+id/btnConfirmChanges"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/btn_bg"
+        android:fontFamily="@font/lexend"
+        android:textColor="@color/white"
+        android:text="@string/confirmChanges"
+        android:layout_marginTop="16dp"
+     />
+
+</LinearLayout>

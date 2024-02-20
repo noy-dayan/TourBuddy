@@ -127,6 +127,18 @@
     <string name="tour_booked_successfully">הסיור הוזמן בהצלחה!</string>
     <string name="tours_must_be_set_up_at_least_3_days_in_advance">יש לקבוע סיורים לפחות 3 ימים מראש</string>
     <string name="cancellation_is_not_allowed_for_ongoing_or_close_occurring_tours">"לא ניתן לבטל סיורים מתמשכים/קרובים להתרחש "</string>
+    <string name="package_with_the_same_name_already_exists">חבילה עם שם זהה כבר קיימת</string>
+    <string name="please_wait_while_logging_in">בבקשה המתן בזמן התחברות...</string>
+    <string name="ago">לפני</string>
+    <string name="days">ימים</string>
+    <string name="months">חודשים</string>
+    <string name="minutes">דקות</string>
+    <string name="just_now">עכשיו</string>
+    <string name="years">שנים</string>
+    <string name="hours">שעות</string>
+    <string name="edit_review">עריכת ביקורת</string>
+    <string name="delete_review">מחיקת ביקורת</string>
+    <string name="delete_review_message">האם אתה בטוח שברצונך למחוק את הביקורת?</string>
 
 
 </resources>

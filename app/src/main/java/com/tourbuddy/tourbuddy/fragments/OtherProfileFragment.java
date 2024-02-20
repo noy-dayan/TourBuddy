@@ -225,7 +225,6 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                                 if(Objects.equals(thisUserType, "Tourist"))
                                     if(Objects.equals(otherUserType, "Tour Guide")){
-                                        btnAddReview.setVisibility(View.VISIBLE);
                                         btnAddReview.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
@@ -294,9 +293,6 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                                                                             reviewData.put("review", reviewText);
                                                                             reviewData.put("reviewerUsername", reviewerUsername[0]);
                                                                             reviewData.put("time&date", currentTimeAndDate);
-
-                                                                            // Get reference to the Firestore database
-                                                                            FirebaseFirestore db = FirebaseFirestore.getInstance();
 
                                                                             // Reference to the reviews collection for the current user
                                                                             DocumentReference userReviewsRef = db.collection("users").document(thisUserId).collection("reviews").document(otherUserId);
@@ -408,9 +404,21 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
         reviewsIdList.clear();
 
         collectionReference.get().addOnSuccessListener(queryDocumentSnapshots -> {
-            for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+            for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                 // Add document ID to the reviewsIdList
                 reviewsIdList.add(documentSnapshot.getId());
+
+            if (reviewsIdList != null) {
+                // Move the current user's review to the top if it exists
+                if (reviewsIdList.contains(thisUserId)) {
+                    btnAddReview.setVisibility(View.GONE);
+                    reviewsIdList.remove(thisUserId);
+                    reviewsIdList.add(0, thisUserId);
+                }
+                else
+                    btnAddReview.setVisibility(View.VISIBLE);
+
+
             }
             collectionReference.getParent().get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
@@ -436,7 +444,7 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
             }
 
             // Initialize and set up the adapter after fetching the data
-            reviewsRecyclerViewAdapter = new ReviewRecyclerViewAdapter(getActivity(), reviewsIdList, otherUserId, false);
+            reviewsRecyclerViewAdapter = new ReviewRecyclerViewAdapter(getActivity(), requireContext(), reviewsIdList, otherUserId, false);
             recyclerViewReviews.setAdapter(reviewsRecyclerViewAdapter);
             recyclerViewReviews.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false));
         }).addOnFailureListener(e -> {
@@ -466,7 +474,7 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
             }
 
             // Initialize and set up the adapter after fetching the data
-            reviewsRecyclerViewAdapter = new ReviewRecyclerViewAdapter(getActivity(), reviewsIdList, otherUserId, true);
+            reviewsRecyclerViewAdapter = new ReviewRecyclerViewAdapter(getActivity(), requireContext(), reviewsIdList, otherUserId, true);
             recyclerViewReviews.setAdapter(reviewsRecyclerViewAdapter);
             recyclerViewReviews.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false));
         }).addOnFailureListener(e -> {

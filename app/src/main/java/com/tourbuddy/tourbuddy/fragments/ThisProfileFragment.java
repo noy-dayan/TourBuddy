@@ -245,10 +245,16 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
             reviewsIdList.clear();
 
             collectionReference.get().addOnSuccessListener(queryDocumentSnapshots -> {
-                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                     // Add document ID to the reviewsIdList
                     reviewsIdList.add(documentSnapshot.getId());
-                }
+
+                if (reviewsIdList != null && !reviewsIdList.isEmpty())
+                    // Move the current user's review to the top if it exists
+                    if (reviewsIdList.contains(userId)) {
+                        reviewsIdList.remove(userId);
+                        reviewsIdList.add(0, userId);
+                    }
 
                 collectionReference.getParent().get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                     @Override
@@ -273,7 +279,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
 
                 if(isAdded()) {
                     // Initialize and set up the adapter after fetching the data
-                    reviewsRecyclerViewAdapter = new ReviewRecyclerViewAdapter(getActivity(), reviewsIdList, userId, false);
+                    reviewsRecyclerViewAdapter = new ReviewRecyclerViewAdapter(getActivity(), requireContext(), reviewsIdList, userId, false);
                     recyclerViewReviews.setAdapter(reviewsRecyclerViewAdapter);
                     recyclerViewReviews.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false));
                 }
@@ -290,10 +296,9 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
             reviewsIdList.clear();
 
             collectionReference.get().addOnSuccessListener(queryDocumentSnapshots -> {
-                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots) {
+                for (QueryDocumentSnapshot documentSnapshot : queryDocumentSnapshots)
                     // Add document ID to the reviewsIdList
                     reviewsIdList.add(documentSnapshot.getId());
-                }
 
                 if (!reviewsIdList.isEmpty())
                     noAvailableReviews.setVisibility(View.GONE);
@@ -307,7 +312,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
 
                 if(isAdded()) {
                     // Initialize and set up the adapter after fetching the data
-                    reviewsRecyclerViewAdapter = new ReviewRecyclerViewAdapter(getActivity(), reviewsIdList, userId, true);
+                    reviewsRecyclerViewAdapter = new ReviewRecyclerViewAdapter(getActivity(), requireContext(), reviewsIdList, userId, true);
                     recyclerViewReviews.setAdapter(reviewsRecyclerViewAdapter);
                     recyclerViewReviews.setLayoutManager(new LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false));
                 }

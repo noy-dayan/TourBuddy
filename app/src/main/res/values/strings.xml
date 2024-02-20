@@ -131,6 +131,16 @@
     <string name="cancellation_is_not_allowed_for_ongoing_or_close_occurring_tours">Cancellation is not allowed for ongoing/close occurring tours</string>
     <string name="package_with_the_same_name_already_exists">Package with the same name already exists</string>
     <string name="please_wait_while_logging_in">Please Wait While Logging In...</string>
+    <string name="ago">ago</string>
+    <string name="days">days</string>
+    <string name="months">months</string>
+    <string name="minutes">minutes</string>
+    <string name="just_now">Just now</string>
+    <string name="years">years</string>
+    <string name="hours">hours</string>
+    <string name="edit_review">Edit Review</string>
+    <string name="delete_review">Delete Review</string>
+    <string name="delete_review_message">Are you sure you want to delete review?</string>
 
 
 </resources>
