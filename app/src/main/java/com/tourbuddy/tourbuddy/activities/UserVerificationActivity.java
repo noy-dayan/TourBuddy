@@ -7,6 +7,7 @@ import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -17,6 +18,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.tourbuddy.tourbuddy.R;
+import com.tourbuddy.tourbuddy.utils.AppUtils;
 
 /**
  * Activity for user verification, for users to confirm their account.
@@ -25,6 +27,7 @@ public class UserVerificationActivity extends AppCompatActivity {
 
     // UI elements
     Button btnVerify, btnResendVerification;
+    ImageView btnBack;
     SwipeRefreshLayout swipeRefreshLayout;
 
     // Firebase authentication
@@ -43,6 +46,7 @@ public class UserVerificationActivity extends AppCompatActivity {
         btnVerify = findViewById(R.id.btnVerify);
         btnVerify.setEnabled(false);
         btnResendVerification = findViewById(R.id.btnResendVerification);
+        btnBack = findViewById(R.id.btnBack);
 
         // Initialize Firebase authentication
         mAuth = FirebaseAuth.getInstance();
@@ -54,12 +58,23 @@ public class UserVerificationActivity extends AppCompatActivity {
         // Start the resend verification timer
         resendVerificationTimer();
 
+        if (mUser.isEmailVerified())
+            btnVerify.setEnabled(true);
+
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppUtils.switchActivity(UserVerificationActivity.this, MainActivity.class, "rtl");
+            }
+        });
+
         // Verify button click listener
         btnVerify.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mUser.isEmailVerified())
-                    sendUserToNextActivity(new Intent(UserVerificationActivity.this, UserSetupActivity.class));
+                if (mUser.isEmailVerified()) {
+                    AppUtils.switchActivity(UserVerificationActivity.this, UserSetupActivity.class, "ltr");
+                }
                 else
                     btnVerify.setError("Email is not verified");
             }
@@ -109,13 +124,6 @@ public class UserVerificationActivity extends AppCompatActivity {
         } else {
             Log.e("UserVerificationActivity", "SwipeRefreshLayout is null");
         }
-    }
-
-    // Move to the next activity and clear the task stack
-    private void sendUserToNextActivity(Intent intent) {
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
     }
 
     // Set up and start the resend verification timer

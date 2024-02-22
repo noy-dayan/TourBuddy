@@ -267,6 +267,7 @@ public class ReviewRecyclerViewAdapter extends RecyclerView.Adapter<ReviewRecycl
                 public void onClick(View v) {
                     if(thisUserId.equals(reviewerId))
                         switchFragment(new ThisProfileFragment());
+
                     else {
                         Bundle args = new Bundle();
                         args.putString("userId", reviewerId);

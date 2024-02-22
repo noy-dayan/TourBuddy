@@ -7,6 +7,6 @@
     <color name="orange_primary">#f59d05</color>
     <color name="transparent">#00000000</color>
     <color name="grey">#808080</color>
+    <color name="greyV2">#38343c</color>
     <color name="yellow">#FDDA0D</color>
-
 </resources>

@@ -31,6 +31,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.tourbuddy.tourbuddy.R;
+import com.tourbuddy.tourbuddy.utils.AppUtils;
 import com.tourbuddy.tourbuddy.utils.DataCache;
 
 import java.util.ArrayList;
@@ -121,13 +122,13 @@ public class TourPackageViewFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if(Objects.equals(mAuth.getUid(), userId))
-                    switchFragment(new ThisProfileFragment());
+                    AppUtils.switchFragment(TourPackageViewFragment.this, new ThisProfileFragment());
                 else{
                     OtherProfileFragment otherProfileFragment = new OtherProfileFragment();
                     Bundle args = new Bundle();
                     args.putString("userId", userId);
                     otherProfileFragment.setArguments(args);
-                    switchFragment(otherProfileFragment);
+                    AppUtils.switchFragment(TourPackageViewFragment.this, otherProfileFragment);
                 }
 
             }
@@ -161,7 +162,8 @@ public class TourPackageViewFragment extends Fragment {
                 args.putString("additionalInfo", additionalInfo.getText().toString());
                 args.putInt("packageColor", packageColor);
                 tourPackageEditFragment.setArguments(args);
-                switchFragment(tourPackageEditFragment);
+                AppUtils.switchFragment(TourPackageViewFragment.this, tourPackageEditFragment);
+
 
             }
         });
@@ -261,13 +263,14 @@ public class TourPackageViewFragment extends Fragment {
                             dataCache.clearCache();
                             // Navigate to the appropriate fragment
                             if (Objects.equals(mAuth.getUid(), userId))
-                                switchFragment(new ThisProfileFragment());
+                                AppUtils.switchFragment(TourPackageViewFragment.this, new ThisProfileFragment());
                             else {
                                 OtherProfileFragment profileOtherFragment = new OtherProfileFragment();
                                 Bundle args = new Bundle();
                                 args.putString("userId", userId);
                                 profileOtherFragment.setArguments(args);
-                                switchFragment(profileOtherFragment);
+                                AppUtils.switchFragment(TourPackageViewFragment.this, profileOtherFragment);
+
                             }
                         }
                     }).addOnFailureListener(new OnFailureListener() {
@@ -286,17 +289,6 @@ public class TourPackageViewFragment extends Fragment {
                 }
             });
         }
-    }
-
-    /**
-     * Switch to the specified fragment.
-     */
-    private void switchFragment(Fragment fragment) {
-        if (isAdded())
-            // Replace the current fragment with the new one
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.frameLayout, fragment)
-                    .commit();
     }
 
     /**

@@ -9,7 +9,6 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -39,6 +38,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.tourbuddy.tourbuddy.R;
+import com.tourbuddy.tourbuddy.utils.AppUtils;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -61,7 +61,7 @@ public class UserSetupActivity extends AppCompatActivity {
     Spinner spinnerGender;
     Button btnDone;
     EditText inputUsername, inputBirthDate, inputBio;
-    ImageView profilePic;
+    ImageView profilePic, btnBack;
     RadioGroup toggleRadioGroup;
 
     // Calendar for birth date selection
@@ -120,6 +120,37 @@ public class UserSetupActivity extends AppCompatActivity {
         calendar = Calendar.getInstance();
 
         btnDone = findViewById(R.id.btnDone);
+        btnBack = findViewById(R.id.btnBack);
+
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AppUtils.switchActivity(UserSetupActivity.this, MainActivity.class, "rtl");
+            }
+        });
+
+        // Retrieve the data from the intent
+        Intent intent = getIntent();
+        if (intent != null) {
+            String username = intent.getStringExtra("username");
+            Uri userProfilePicUri = intent.getParcelableExtra("userProfilePicUri");
+
+            // Check if the data is received successfully
+            if (username != null && userProfilePicUri != null) {
+                // Data received successfully
+                selectedImageUri = userProfilePicUri;
+                Glide.with(UserSetupActivity.this)
+                        .load(selectedImageUri)
+                        .apply(RequestOptions.circleCropTransform())
+                        .into(profilePic);
+
+                inputUsername.setText(username);
+            }
+
+        } else
+            // Intent is null, handle the error condition
+            AppUtils.switchActivity(UserSetupActivity.this, MainActivity.class, "rtl");
+
 
         // Profile picture click listener
         profilePic.setOnClickListener(new View.OnClickListener() {
@@ -255,9 +286,8 @@ public class UserSetupActivity extends AppCompatActivity {
                 saveUserDataToFirebase();
 
                 // After saving user data, start the UserHomeActivity
-                Intent userProfileIntent = new Intent(UserSetupActivity.this, UserHomeActivity.class);
-                startActivity(userProfileIntent);
-                finish(); // Optional: Close the current activity if needed
+                AppUtils.switchActivity(UserSetupActivity.this, UserHomeActivity.class, "ltr");
+                finish();
             }
         });
     }

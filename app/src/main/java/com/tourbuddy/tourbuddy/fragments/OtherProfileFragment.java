@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,6 +55,7 @@ import com.tourbuddy.tourbuddy.adapters.ReviewRecyclerViewAdapter;
 import com.tourbuddy.tourbuddy.adapters.TourPackageRecyclerViewAdapter;
 import com.tourbuddy.tourbuddy.decorators.EventDecorator;
 import com.tourbuddy.tourbuddy.utils.ActiveTour;
+import com.tourbuddy.tourbuddy.utils.AppUtils;
 import com.tourbuddy.tourbuddy.utils.DataCache;
 
 import org.threeten.bp.LocalDate;
@@ -96,8 +98,7 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
     SwipeRefreshLayout swipeRefreshLayout;
 
     // Loading overlay
-    View loadingOverlay;
-    ProgressBar progressBar;
+    RelativeLayout userDataLoadingOverlay, calendarLoadingOverlay;
 
     // RecyclerView for Tour Packages
     RecyclerView recyclerViewTours, recyclerViewReviews;
@@ -152,8 +153,8 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
         storageReference = storage.getReference();
 
         // Initialize loading overlay elements
-        loadingOverlay = view.findViewById(R.id.loadingOverlay);
-        progressBar = view.findViewById(R.id.progressBar);
+        userDataLoadingOverlay = view.findViewById(R.id.userDataLoadingOverlay);
+        calendarLoadingOverlay = view.findViewById(R.id.calendarLoadingOverlay);
 
         recyclerViewReviews = view.findViewById(R.id.recyclerViewReviews);
         recyclerViewTours = view.findViewById(R.id.recyclerViewTours);
@@ -177,7 +178,8 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
         // Set the locale for the calendar view title formatter
         calendarView.setTitleFormatter(new DateFormatTitleFormatter());
 
-        showLoading(true);
+        userDataLoadingOverlay.setVisibility(View.VISIBLE);
+        calendarLoadingOverlay.setVisibility(View.VISIBLE);
 
 
         DocumentReference otherUserDocumentRef = db.collection("users").document(otherUserId);
@@ -337,7 +339,7 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                                                                                                         args.putString("userId", otherUserDocumentRef.getId());
                                                                                                         OtherProfileFragment otherProfileFragment = new OtherProfileFragment();
                                                                                                         otherProfileFragment.setArguments(args);
-                                                                                                        switchFragment(otherProfileFragment);
+                                                                                                        AppUtils.switchFragment(OtherProfileFragment.this, otherProfileFragment);
                                                                                                         dialog.dismiss();
                                                                                                     }
                                                                                                 });
@@ -544,10 +546,10 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                                                                                     args.putString("userId", documentSnapshot.getId());
                                                                                     OtherProfileFragment otherProfileFragment = new OtherProfileFragment();
                                                                                     otherProfileFragment.setArguments(args);
-                                                                                    switchFragment(otherProfileFragment);
+                                                                                    AppUtils.switchFragment(OtherProfileFragment.this, otherProfileFragment);
                                                                                 }
                                                                                 else
-                                                                                    switchFragment(new ThisProfileFragment());
+                                                                                    AppUtils.switchFragment(OtherProfileFragment.this, new ThisProfileFragment());
                                                                             }
                                                                         });
                                                                     } else {
@@ -1007,13 +1009,13 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                                                 .load(uri)
                                                 .apply(RequestOptions.circleCropTransform())
                                                 .into(profilePic);
-                                        showLoading(false);
+                                        userDataLoadingOverlay.setVisibility(View.GONE);
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception exception) {
                                         // Handle failure to load image
-                                        showLoading(false);
+                                        userDataLoadingOverlay.setVisibility(View.GONE);
                                     }
                                 });
 
@@ -1062,9 +1064,14 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                                             activeTours.add(activeTour);
                                         }
 
+                                        int index = 0; // Initialize an index counter before the loop
+                                        int totalTours = activeTours.size(); // Get the total number of tours
+                                        if(totalTours == 0)
+                                            calendarLoadingOverlay.setVisibility(View.GONE);
 
                                         // Set up event decorators
                                         for (ActiveTour tour : activeTours) {
+                                            final int currentIndex = index++; // Use a final variable to use inside the lambda expression
                                             if (tour.getTourPackageRef() != null) {
                                                 // Handle failure to fetch color from Firestore
                                                 tour.getTourPackageRef().get().addOnSuccessListener(tourPackageDocumentSnapshot -> {
@@ -1080,6 +1087,10 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                                                             packageColor = requireContext().getResources().getColor(R.color.orange_primary);
                                                             setEventDecorator(tour.getStartDate(), tour.getEndDate(), packageColor);
                                                         }
+                                                        // New block to check if this is the last tour
+                                                        if (currentIndex == totalTours - 1)
+                                                            // This is the last tour, so remove the loading overlay
+                                                            calendarLoadingOverlay.setVisibility(View.GONE);
                                                         tour.setColor(packageColor);
                                                     }
                                                 }).addOnFailureListener(Throwable::printStackTrace);
@@ -1103,8 +1114,14 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                                             DocumentReference tourRef = document.getDocumentReference("tourRef");
                                             bookedToursRefs.add(tourRef);
                                         }
+                                        int index = 0; // Initialize an index counter before the loop
+                                        int totalTours = bookedToursRefs.size(); // Get the total number of tours
+                                        if(totalTours == 0)
+                                            calendarLoadingOverlay.setVisibility(View.GONE);
+
                                         // Set up event decorators
                                         for (DocumentReference tourRef : bookedToursRefs) {
+                                            final int currentIndex = index++; // Use a final variable to use inside the lambda expression
                                             // Handle failure to fetch color from Firestore
                                             tourRef.get().addOnSuccessListener(tourDocumentSnapshot -> {
                                                 if (tourDocumentSnapshot.exists()) {
@@ -1127,8 +1144,12 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                                                                         endDate = "";
 
                                                                     if(Objects.equals(endDate, "")) {
-                                                                        if (!getLocalDate(startDate).isBefore(min))
+                                                                        if (!getLocalDate(startDate).isBefore(min)) {
                                                                             setEventDecorator(startDate, endDate, packageColor);
+                                                                            if (currentIndex == totalTours - 1)
+                                                                                // This is the last tour, so remove the loading overlay
+                                                                                calendarLoadingOverlay.setVisibility(View.GONE);
+                                                                        }
                                                                         else{
                                                                             if(isAdded()) {
 
@@ -1162,8 +1183,12 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                                                                         }
                                                                     }
                                                                     else{
-                                                                        if(!getLocalDate(endDate).isBefore(min))
+                                                                        if(!getLocalDate(endDate).isBefore(min)) {
                                                                             setEventDecorator(startDate, endDate, packageColor);
+                                                                            if (currentIndex == totalTours - 1)
+                                                                                // This is the last tour, so remove the loading overlay
+                                                                                calendarLoadingOverlay.setVisibility(View.GONE);
+                                                                        }
                                                                         else {
                                                                             if(isAdded()) {
 
@@ -1258,28 +1283,6 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                 }
             });
         }
-    }
-
-
-    /**
-     * Show/hide the loading screen.
-     */
-    private void showLoading(boolean show) {
-        if (isAdded()) {
-            loadingOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
-            progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
-    }
-
-    /**
-     * Switch fragment function.
-     */
-    private void switchFragment(Fragment fragment) {
-        if (isAdded())
-            // Replace the current fragment with the new one
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.frameLayout, fragment)
-                    .commit();
     }
 
     @Override

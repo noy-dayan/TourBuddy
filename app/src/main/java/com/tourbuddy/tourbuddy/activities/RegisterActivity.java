@@ -21,6 +21,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.tourbuddy.tourbuddy.R;
+import com.tourbuddy.tourbuddy.utils.AppUtils;
 
 import java.util.regex.Pattern;
 
@@ -66,8 +67,7 @@ public class RegisterActivity extends AppCompatActivity {
         alreadyHaveAccount.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                startActivity(new Intent(RegisterActivity.this, MainActivity.class));
-                overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+                AppUtils.switchActivity(RegisterActivity.this, MainActivity.class, "rtl");
             }
         });
 
@@ -116,7 +116,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 @Override
                                 public void onSuccess(Void unused) {
                                     Log.d("EmailVerification", "Email verification sent successfully");
-                                    sendUserToNextActivity(new Intent(RegisterActivity.this, UserVerificationActivity.class));
+                                    AppUtils.switchActivity(RegisterActivity.this, UserVerificationActivity.class, "ltr");
                                     progressDialog.dismiss();
                                 }
                             }).addOnFailureListener(new OnFailureListener() {
@@ -147,22 +147,10 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-
-    /**
-     * Override the back button press to provide custom transition animation.
-     */
+    // Override the back button press to provide custom transition animation
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        this.overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
-    }
-
-    /**
-     * Method to transition to the next activity with clearing task and adding flags.
-     */
-    private void sendUserToNextActivity(Intent intent) {
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
-        overridePendingTransition(R.anim.slide_in_right, R.anim.slide_out_left);
+        AppUtils.switchActivity(RegisterActivity.this, MainActivity.class, "rtl");
     }
 }

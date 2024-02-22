@@ -39,6 +39,7 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.tourbuddy.tourbuddy.R;
+import com.tourbuddy.tourbuddy.utils.AppUtils;
 import com.tourbuddy.tourbuddy.utils.DataCache;
 
 import java.text.SimpleDateFormat;
@@ -138,7 +139,7 @@ public class EditProfileFragment extends Fragment {
                 if (isChanged)
                     showDiscardChangesDialog();
                 else
-                    switchFragment(new SettingsFragment());
+                    AppUtils.switchFragment(EditProfileFragment.this, new SettingsFragment());
 
             }
         });
@@ -381,17 +382,6 @@ public class EditProfileFragment extends Fragment {
     }
 
     /**
-     * Switch fragment function.
-     */
-    private void switchFragment(Fragment fragment) {
-        if (isAdded())
-            // Replace the current fragment with the new one
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.frameLayout, fragment)
-                    .commit();
-    }
-
-    /**
      * Save user data to Firebase Firestore.
      */
     private void saveUserDataToFirebase() {
@@ -547,7 +537,7 @@ public class EditProfileFragment extends Fragment {
         builder.setPositiveButton(requireContext().getResources().getString(R.string.confirm), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                switchFragment(new SettingsFragment());
+                AppUtils.switchFragment(EditProfileFragment.this, new SettingsFragment());
             }
         });
 

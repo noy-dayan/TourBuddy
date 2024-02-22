@@ -10,13 +10,13 @@ import android.util.Log;
 public class DataCache extends Application {
 
     // Singleton instance of DataCache
-    private static DataCache instance;
+    static DataCache instance;
 
     // LruCache for storing key-value pairs
-    private final LruCache<String, Object> cache;
+    final LruCache<String, Object> cache;
 
     // Flag to track whether the app is terminating
-    private boolean isAppTerminating = false;
+    boolean isAppTerminating = false;
 
     /**
      * Constructor for initializing the LruCache.

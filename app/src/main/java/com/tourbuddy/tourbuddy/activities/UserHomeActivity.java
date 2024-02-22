@@ -22,18 +22,30 @@ import com.tourbuddy.tourbuddy.fragments.ChatFragment;
 import com.tourbuddy.tourbuddy.fragments.ThisProfileFragment;
 import com.tourbuddy.tourbuddy.fragments.SearchFragment;
 import com.tourbuddy.tourbuddy.fragments.SettingsFragment;
+import com.tourbuddy.tourbuddy.utils.AppUtils;
 import com.tourbuddy.tourbuddy.utils.DataCache;
 
 import java.util.Locale;
 
+/**
+ * Activity for the user's home screen, managing fragment transactions and bottom navigation.
+ */
 public class UserHomeActivity extends AppCompatActivity {
+    //Data cache instance for caching data
     DataCache dataCache;
 
+    //Binding instance for the activity layout
     ActivityUserHomeBinding binding;
 
+    // Firebase authentication instance
     FirebaseAuth mAuth;
+
+    // Firebase user instance
     FirebaseUser mUser;
+
+    // Firestore database instance
     FirebaseFirestore db;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,12 +60,20 @@ public class UserHomeActivity extends AppCompatActivity {
         loadLanguageData();
     }
 
+    /**
+     * Replaces the current fragment with the selected fragment.
+     *
+     * @param selectedFragment The fragment to be displayed.
+     */
     private void replaceFragment(Fragment selectedFragment) {
         getSupportFragmentManager().beginTransaction()
                 .replace(R.id.frameLayout, selectedFragment)
                 .commit();
     }
 
+    /**
+     * Loads language data from Firestore and sets the app locale accordingly.
+     */
     private void loadLanguageData() {
         mUser = mAuth.getCurrentUser();
         if (mUser != null) {
@@ -68,12 +88,9 @@ public class UserHomeActivity extends AppCompatActivity {
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                     if (documentSnapshot.exists()) {
                         if (documentSnapshot.contains("language"))
-                            setAppLocale(documentSnapshot.getString("language"));
+                            AppUtils.setAppLocale(UserHomeActivity.this, documentSnapshot.getString("language"));
                         fragmentManager();
-
-
                     }
-
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
@@ -81,22 +98,13 @@ public class UserHomeActivity extends AppCompatActivity {
                     Log.e("DATABASE", "Error getting document", e);
                 }
             });
-
-
         }
     }
 
-    private void setAppLocale(String languageCode) {
-        Locale locale = new Locale(languageCode);
-        Locale.setDefault(locale);
-
-        Configuration configuration = new Configuration();
-        configuration.locale = locale;
-
-        getResources().updateConfiguration(configuration, getResources().getDisplayMetrics());
-    }
-
-    private void fragmentManager(){
+    /**
+     * Manages the fragment transactions and bottom navigation.
+     */
+    private void fragmentManager() {
         // Inflate the layout after setting the locale
         binding = ActivityUserHomeBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
@@ -108,7 +116,6 @@ public class UserHomeActivity extends AppCompatActivity {
         BottomNavigationView bottomNavigationView = binding.bottomNavigationView;
         // Set the default selected item to be "Profile"
         bottomNavigationView.setSelectedItemId(R.id.profile);
-
 
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             // Check if the selected item is already the one corresponding to the current fragment
@@ -123,6 +130,5 @@ public class UserHomeActivity extends AppCompatActivity {
 
             return true;
         });
-
     }
 }

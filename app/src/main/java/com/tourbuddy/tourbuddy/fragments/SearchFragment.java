@@ -235,7 +235,6 @@ public class SearchFragment extends Fragment {
         recyclerView.setAdapter(userRecyclerViewAdapter);
         mUser = mAuth.getCurrentUser();
         if (mUser != null) {
-            //showLoading(true);
             String currUserId = mUser.getUid();
 
             // Reference to the Firestore collection "users"
@@ -267,16 +266,6 @@ public class SearchFragment extends Fragment {
                     Log.e("DATABASE", "Error getting documents", e);
                 }
             });
-        }
-    }
-
-    /**
-     * Show/hide the loading screen.
-     */
-    private void showLoading(boolean show) {
-        if (isAdded()) {
-            loadingOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
-            progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
         }
     }
 }

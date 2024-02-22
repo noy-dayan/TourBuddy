@@ -1,5 +1,6 @@
 package com.tourbuddy.tourbuddy.fragments;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -34,7 +35,10 @@ import com.google.firebase.storage.StorageReference;
 import com.tourbuddy.tourbuddy.R;
 import com.tourbuddy.tourbuddy.activities.MainActivity;
 import com.tourbuddy.tourbuddy.adapters.LanguageSpinnerAdapter;
+import com.tourbuddy.tourbuddy.utils.AppUtils;
 import com.tourbuddy.tourbuddy.utils.DataCache;
+
+import org.checkerframework.checker.units.qual.A;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -108,7 +112,8 @@ public class SettingsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 // Navigate to the EditProfileFragment when the button is clicked
-                switchFragment(new EditProfileFragment());
+                AppUtils.switchFragment(SettingsFragment.this, new EditProfileFragment());
+
             }
         });
 
@@ -116,7 +121,7 @@ public class SettingsFragment extends Fragment {
         btnAbout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switchFragment(new AboutFragment());
+                AppUtils.switchFragment(SettingsFragment.this, new AboutFragment());
             }
         });
 
@@ -140,9 +145,7 @@ public class SettingsFragment extends Fragment {
         mAuth.signOut();
 
         // Navigate to the login activity
-        Intent intent = new Intent(requireContext(), MainActivity.class);
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(intent);
+        AppUtils.switchActivity(requireActivity(), MainActivity.class, "ltr");
         requireActivity().finish(); // Finish the current activity
     }
 
@@ -306,7 +309,7 @@ public class SettingsFragment extends Fragment {
                 String selectedLanguageCode = languageCodes[position];
 
                 // Set the app language based on the selected item
-                setAppLocale(selectedLanguageCode);
+                AppUtils.setAppLocale(requireContext(), selectedLanguageCode);
                 updateLanguageToFirebase(selectedLanguageCode);
             }
 
@@ -350,7 +353,7 @@ public class SettingsFragment extends Fragment {
                                     dataCache.clearCache();
 
                                     // Refresh the fragment only if the language has changed
-                                    switchFragment(new SettingsFragment());
+                                    AppUtils.switchFragment(SettingsFragment.this, new SettingsFragment());
                                 }
                             }).addOnFailureListener(new OnFailureListener() {
                                 @Override
@@ -375,17 +378,6 @@ public class SettingsFragment extends Fragment {
     }
 
     /**
-     * Switch to the specified fragment.
-     */
-    private void switchFragment(Fragment fragment) {
-        if (isAdded())
-            // Replace the current fragment with the new one
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.frameLayout, fragment)
-                    .commit();
-    }
-
-    /**
      * Show or hide the loading screen.
      */
     private void showLoading(boolean show) {
@@ -393,18 +385,5 @@ public class SettingsFragment extends Fragment {
             loadingOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
             progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
         }
-    }
-
-    /**
-     * Set the app's locale based on the selected language code.
-     */
-    private void setAppLocale(String languageCode) {
-        Locale locale = new Locale(languageCode);
-        Locale.setDefault(locale);
-
-        Configuration configuration = new Configuration();
-        configuration.locale = locale;
-
-        getResources().updateConfiguration(configuration, getResources().getDisplayMetrics());
     }
 }

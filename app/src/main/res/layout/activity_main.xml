@@ -181,22 +181,10 @@
                 android:layout_width="50dp"
                 android:layout_height="50dp"
                 android:layout_marginTop="16dp"
-                app:layout_constraintEnd_toStartOf="@+id/orLine"
-                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/orLine"
                 app:srcCompat="@drawable/google_logo" />
-
-            <ImageView
-                android:id="@+id/btnFacebook"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginTop="16dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintStart_toEndOf="@+id/orLine"
-                app:layout_constraintTop_toBottomOf="@+id/orLine"
-                app:srcCompat="@drawable/facebook_logo" />
 
             <ImageView
                 android:id="@+id/logoImage"

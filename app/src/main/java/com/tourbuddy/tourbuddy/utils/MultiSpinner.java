@@ -14,13 +14,16 @@ import com.tourbuddy.tourbuddy.R;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * MultiSpinner is a custom spinner allowing multiple selection of items.
+ */
 public class MultiSpinner extends androidx.appcompat.widget.AppCompatSpinner implements
         DialogInterface.OnMultiChoiceClickListener, DialogInterface.OnCancelListener {
 
-    private List<String> items;
-    private boolean[] selected;
-    private String defaultText;
-    private MultiSpinnerListener listener;
+    List<String> items; // List of items to be displayed in the spinner
+    boolean[] selected; // Boolean array to track which items are selected
+    String defaultText; // Default text to display when no items are selected
+    MultiSpinnerListener listener; // Listener for item selection events
 
     public MultiSpinner(Context context) {
         super(context);
@@ -34,17 +37,26 @@ public class MultiSpinner extends androidx.appcompat.widget.AppCompatSpinner imp
         super(arg0, arg1, arg2);
     }
 
+    /**
+     * Handles click events on the dialog's checkboxes.
+     */
     @Override
     public void onClick(DialogInterface dialog, int which, boolean isChecked) {
         selected[which] = isChecked;
     }
 
+    /**
+     * Handles cancellation of the dialog.
+     */
     @Override
     public void onCancel(DialogInterface dialog) {
-        // refresh text on spinner
+        // Refresh text on spinner
         updateSpinner();
     }
 
+    /**
+     * Overrides the performClick method to show a custom dialog for multi-selection.
+     */
     @Override
     public boolean performClick() {
         AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
@@ -52,29 +64,32 @@ public class MultiSpinner extends androidx.appcompat.widget.AppCompatSpinner imp
         builder.setMultiChoiceItems(items.toArray(new CharSequence[items.size()]), selected, this);
 
         builder.setPositiveButton(android.R.string.ok,
-            new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
 
         builder.setNegativeButton(R.string.clearAll,
-            new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    // Clear all selections
-                    Arrays.fill(selected, false);
-                    // Update the spinner without closing the dialog
-                    updateSpinner();
-                }
-            });
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Clear all selections
+                        Arrays.fill(selected, false);
+                        // Update the spinner without closing the dialog
+                        updateSpinner();
+                    }
+                });
 
         builder.setOnCancelListener(this);
         builder.show();
         return true;
     }
 
+    /**
+     * Updates the spinner text based on the selected items.
+     */
     private void updateSpinner() {
         StringBuffer spinnerBuffer = new StringBuffer();
         boolean someSelected = false;
@@ -95,35 +110,43 @@ public class MultiSpinner extends androidx.appcompat.widget.AppCompatSpinner imp
         }
         else {
             spinnerText = defaultText;
-             adapter = new ArrayAdapter<>(getContext(), R.layout.spinner_custom_centered_layout, new String[]{spinnerText});
+            adapter = new ArrayAdapter<>(getContext(), R.layout.spinner_custom_centered_layout, new String[]{spinnerText});
         }
         setAdapter(adapter);
 
+        // Notify listener about selected items
         listener.onItemsSelected(selected);
     }
 
+    /**
+     * Gets the list of items in the spinner.
+     */
     public List<String> getItems() {
         return items;
     }
-    public void setItems(List<String> items, String allText,
-                         MultiSpinnerListener listener) {
+
+    /**
+     * Sets the items in the spinner along with the default text and listener.
+     */
+    public void setItems(List<String> items, String allText, MultiSpinnerListener listener) {
         this.items = items;
         this.defaultText = allText;
         this.listener = listener;
 
-        // all not selected by default
+        // All items are not selected by default
         selected = new boolean[items.size()];
         Arrays.fill(selected, false);
 
-
-        // all text on the spinner
+        // Set default text on the spinner
         ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
                 R.layout.spinner_custom_centered_layout, new String[]{defaultText});
-
 
         setAdapter(adapter);
     }
 
+    /**
+     * Interface for listening to item selection events.
+     */
     public interface MultiSpinnerListener {
         void onItemsSelected(boolean[] selected);
     }

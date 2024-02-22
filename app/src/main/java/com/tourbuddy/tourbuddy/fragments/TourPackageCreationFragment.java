@@ -317,7 +317,7 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
                             // Continue with the package creation process
                             saveUserDataToFirebase();
                             dataCache.clearCache();
-                            switchFragment(new ThisProfileFragment());
+                            AppUtils.switchFragment(TourPackageCreationFragment.this, new ThisProfileFragment());
                         }
                     } else {
                         // Handle errors while querying the database
@@ -438,20 +438,6 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
     }
 
     /**
-     * Switch fragment function.
-     */
-    private void switchFragment(Fragment fragment) {
-        if (isAdded())
-            // Replace the current fragment with the new one
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.frameLayout, fragment)
-                    .commit();
-    }
-
-
-
-
-    /**
      * Open "Discard Changes" dialog.
      */
     private void showDiscardChangesDialog() {
@@ -461,7 +447,7 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
         builder.setPositiveButton(requireContext().getResources().getString(R.string.confirm), new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                switchFragment(new ThisProfileFragment());
+                AppUtils.switchFragment(TourPackageCreationFragment.this, new ThisProfileFragment());
             }
         });
 
@@ -497,16 +483,6 @@ public class TourPackageCreationFragment extends Fragment implements MultiSpinne
         });
 
         builder.show();
-    }
-
-    /**
-     * Enable/Disable loading screen.
-     */
-    private void showLoading(boolean show) {
-        if (isAdded()) {
-            loadingOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
-            progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
     }
 
     @Override

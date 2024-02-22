@@ -195,7 +195,7 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
                     args.putString("userId", userId);
                     args.putString("packageName", packageName);
                     tourPackageViewFragment.setArguments(args);
-                    switchFragment(tourPackageViewFragment);
+                    AppUtils.switchFragment(TourPackageEditFragment.this, tourPackageViewFragment);
                 }
 
 
@@ -443,18 +443,6 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
     }
 
     /**
-     * Switch fragment function.
-     */
-    private void switchFragment(Fragment fragment) {
-        if (isAdded())
-            // Replace the current fragment with the new one
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.frameLayout, fragment)
-                    .commit();
-    }
-
-
-    /**
      * Open "Discard Changes" dialog.
      */
     private void showDiscardChangesDialog() {
@@ -469,7 +457,8 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
                 args.putString("userId", userId);
                 args.putString("packageName", packageName);
                 tourPackageViewFragment.setArguments(args);
-                switchFragment(tourPackageViewFragment);            }
+                AppUtils.switchFragment(TourPackageEditFragment.this, tourPackageViewFragment);
+            }
         });
 
         builder.setNegativeButton(requireContext().getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
@@ -506,16 +495,6 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
         });
 
         builder.show();
-    }
-
-    /**
-     * Enable/Disable loading screen.
-     */
-    private void showLoading(boolean show) {
-        if (isAdded()) {
-            loadingOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
-            progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
     }
 
     @Override

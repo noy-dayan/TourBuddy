@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -101,9 +102,8 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
     // SwipeRefreshLayout for pull-to-refresh functionality
     SwipeRefreshLayout swipeRefreshLayout;
 
-    // Loading overlay
-    View loadingOverlay;
-    ProgressBar progressBar;
+    // Loading overlays
+    RelativeLayout calendarLoadingOverlay, userDataLoadingOverlay;
 
     // RecyclerView for Tour Packages
     RecyclerView recyclerViewTours, recyclerViewReviews;
@@ -164,8 +164,8 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
             storageReference = storage.getReference();
 
             // Initialize loading overlay elements
-            loadingOverlay = view.findViewById(R.id.loadingOverlay);
-            progressBar = view.findViewById(R.id.progressBar);
+            calendarLoadingOverlay = view.findViewById(R.id.calendarLoadingOverlay);
+            userDataLoadingOverlay = view.findViewById(R.id.userDataLoadingOverlay);
 
             recyclerViewReviews = view.findViewById(R.id.recyclerViewReviews);
             recyclerViewTours = view.findViewById(R.id.recyclerViewTours);
@@ -184,7 +184,9 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
 
             // Attempt to load data from cache
             if (!loadDataFromCache(view)) {
-                showLoading(true);
+                calendarLoadingOverlay.setVisibility(View.VISIBLE);
+                userDataLoadingOverlay.setVisibility(View.VISIBLE);
+
                 // Data not found in cache, fetch from the server
                 loadDataFromFirebase(view);
             }
@@ -429,10 +431,12 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                                                                                     args.putString("userId", documentSnapshot.getId());
                                                                                     OtherProfileFragment otherProfileFragment = new OtherProfileFragment();
                                                                                     otherProfileFragment.setArguments(args);
-                                                                                    switchFragment(otherProfileFragment);
+                                                                                    AppUtils.switchFragment(ThisProfileFragment.this, otherProfileFragment);
+
                                                                                 }
                                                                                 else
-                                                                                    switchFragment(new ThisProfileFragment());
+                                                                                    AppUtils.switchFragment(ThisProfileFragment.this, new ThisProfileFragment());
+
                                                                             }
                                                                         });
                                                                     } else {
@@ -821,7 +825,8 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                                 });
 
                                 dataCache.clearCache();
-                                switchFragment(new ThisProfileFragment());
+                                AppUtils.switchFragment(ThisProfileFragment.this, new ThisProfileFragment());
+
                                 // Close the dialog
                                 dialog.dismiss();
                             }
@@ -907,7 +912,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                                             // Document successfully deleted from activeTours
                                             Log.d("DATABASE", "Active tour successfully deleted!");
                                             dataCache.clearCache();
-                                            switchFragment(new ThisProfileFragment());
+                                            AppUtils.switchFragment(ThisProfileFragment.this, new ThisProfileFragment());
                                         })
                                         .addOnFailureListener(e -> {
                                             // Handle errors
@@ -965,7 +970,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                                             tourDocRef.update("bookedTouristsAmount", FieldValue.increment(-1))
                                                     .addOnFailureListener(e -> Log.e("DATABASE", "Error decreasing bookedTouristsAmount", e));
                                             dataCache.clearCache();
-                                            switchFragment(new ThisProfileFragment());
+                                            AppUtils.switchFragment(ThisProfileFragment.this, new ThisProfileFragment());
                                         })
                                         .addOnFailureListener(e -> {
                                             // Handle errors
@@ -1127,14 +1132,14 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                                                 .load(uri)
                                                 .apply(RequestOptions.circleCropTransform())
                                                 .into(profilePic);
-                                        showLoading(false);
+                                        userDataLoadingOverlay.setVisibility(View.GONE);
                                         saveDataToCache(uri); // Save profile picture URL);
                                     }
                                 }).addOnFailureListener(new OnFailureListener() {
                                     @Override
                                     public void onFailure(@NonNull Exception exception) {
                                         // Handle failure to load image
-                                        showLoading(false);
+                                        userDataLoadingOverlay.setVisibility(View.GONE);
                                         saveDataToCache(null); // Save profile picture URL);
                                     }
                                 });
@@ -1156,7 +1161,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                                 public void onFailure(@NonNull Exception e) {
                                     Log.e("DATABASE", "Error getting tourPackages collection", e);
                                 }
-                            }).addOnCompleteListener(task -> showLoading(false));
+                            }).addOnCompleteListener(task -> calendarLoadingOverlay.setVisibility(View.GONE));
 
                             activeTours = new ArrayList<>();
                             db.collection("users")
@@ -1201,9 +1206,14 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                                             activeTours.add(activeTour);
                                         }
 
+                                        int index = 0; // Initialize an index counter before the loop
+                                        int totalTours = activeTours.size(); // Get the total number of tours
+                                        if(totalTours == 0)
+                                            calendarLoadingOverlay.setVisibility(View.GONE);
 
                                         // Set up event decorators
                                         for (ActiveTour tour : activeTours) {
+                                            final int currentIndex = index++; // Use a final variable to use inside the lambda expression
                                             if (tour.getTourPackageRef() != null) {
                                                 // Handle failure to fetch color from Firestore
                                                 tour.getTourPackageRef().get().addOnSuccessListener(tourPackageDocumentSnapshot -> {
@@ -1213,12 +1223,18 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                                                         if (tourPackageDocumentSnapshot.contains("packageColor")) {
                                                             packageColor = tourPackageDocumentSnapshot.getLong("packageColor").intValue();
                                                             setEventDecorator(tour.getStartDate(), tour.getEndDate(), packageColor);
+                                                            if (currentIndex == totalTours - 1)
+                                                                calendarLoadingOverlay.setVisibility(View.GONE);
 
                                                         }
                                                         else {
                                                             if (isAdded()){
                                                                 packageColor = requireContext().getResources().getColor(R.color.orange_primary);
                                                                 setEventDecorator(tour.getStartDate(), tour.getEndDate(), packageColor);
+                                                                // Check if this is the last tour and remove loading overlay
+                                                                if (currentIndex == totalTours - 1)
+                                                                    calendarLoadingOverlay.setVisibility(View.GONE);
+
                                                             }
                                                         }
                                                         tour.setColor(packageColor);
@@ -1247,7 +1263,15 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                                             bookedToursRefs.add(tourRef);
                                         }
                                         // Set up event decorators
+                                        int index = 0; // Initialize an index counter before the loop
+                                        int totalTours = bookedToursRefs.size(); // Get the total number of tours
+                                        if(totalTours == 0)
+                                            calendarLoadingOverlay.setVisibility(View.GONE);
+
+
                                         for (DocumentReference tourRef : bookedToursRefs) {
+                                            final int currentIndex = index++; // Use a final variable to use inside the lambda expression
+
                                             // Handle failure to fetch color from Firestore
                                             tourRef.get().addOnSuccessListener(tourDocumentSnapshot -> {
                                                 if (isAdded() && tourDocumentSnapshot.exists()) {
@@ -1270,13 +1294,18 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                                                                         endDate = "";
 
                                                                     if(Objects.equals(endDate, "")) {
-                                                                        if (!getLocalDate(startDate).isBefore(min))
+                                                                        if (!getLocalDate(startDate).isBefore(min)) {
                                                                             setEventDecorator(startDate, endDate, packageColor);
+                                                                            // Check if this is the last tour and remove loading overlay
+                                                                            if (currentIndex == totalTours - 1)
+                                                                                calendarLoadingOverlay.setVisibility(View.GONE);
+
+                                                                        }
                                                                         else {
                                                                             if (isAdded()){
                                                                                 tourRef.delete().addOnSuccessListener(aVoid -> {
                                                                                             // Refresh the fragment after deleting the tour reference
-                                                                                            switchFragment(new ThisProfileFragment());
+                                                                                            AppUtils.switchFragment(ThisProfileFragment.this, new ThisProfileFragment());
                                                                                         })
                                                                                         .addOnFailureListener(e -> {
                                                                                             Log.e("DATABASE", "Error deleting tourRef document", e);
@@ -1297,14 +1326,19 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                                                                         }
                                                                     }
                                                                     else{
-                                                                        if(!getLocalDate(endDate).isBefore(min))
+                                                                        if(!getLocalDate(endDate).isBefore(min)) {
                                                                             setEventDecorator(startDate, endDate, packageColor);
+                                                                            // Check if this is the last tour and remove loading overlay
+                                                                            if (currentIndex == totalTours - 1)
+                                                                                calendarLoadingOverlay.setVisibility(View.GONE);
+
+                                                                        }
                                                                         else {
                                                                             if(isAdded()) {
 
                                                                                 tourRef.delete().addOnSuccessListener(aVoid -> {
                                                                                             // Refresh the fragment after deleting the tour reference
-                                                                                            switchFragment(new ThisProfileFragment());
+                                                                                            AppUtils.switchFragment(ThisProfileFragment.this, new ThisProfileFragment());
                                                                                         })
                                                                                         .addOnFailureListener(e -> {
                                                                                             Log.e("DATABASE", "Error deleting tourRef document", e);
@@ -1338,7 +1372,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
 
                                                         tourRef.delete().addOnSuccessListener(aVoid -> {
                                                                     // Refresh the fragment after deleting the tour reference
-                                                                    switchFragment(new ThisProfileFragment());
+                                                                    AppUtils.switchFragment(ThisProfileFragment.this, new ThisProfileFragment());
                                                                 })
                                                                 .addOnFailureListener(e -> {
                                                                     Log.e("DATABASE", "Error deleting tourRef document", e);
@@ -1387,7 +1421,9 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
     private boolean loadDataFromCache(View view) {
         if(isAdded()) {
             // Check if data exists in memory cache
-            showLoading(true);
+            calendarLoadingOverlay.setVisibility(View.VISIBLE);
+            userDataLoadingOverlay.setVisibility(View.VISIBLE);
+
             if (dataCache.get("username") != null && dataCache.get("bio") != null
                     && dataCache.get("birthDate") != null && dataCache.get("gender") != null
                     && dataCache.get("type") != null && dataCache.get("userTypeStr") != null) {
@@ -1415,6 +1451,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                                 .into(profilePic);
                     }
                 }
+                userDataLoadingOverlay.setVisibility(View.GONE);
 
                 if (Objects.equals(userType, "Tour Guide")) {
                     // Load the list of tour package IDs and set up the RecyclerView
@@ -1429,11 +1466,14 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                     // Load the active tours to the calendar
                     if (dataCache.get("activeTours") != null) {
                         activeTours = (List<ActiveTour>) dataCache.get("activeTours");
+
                         for (ActiveTour tour : activeTours)
                             setEventDecorator(tour.getStartDate(), tour.getEndDate(), tour.getColor());
+                        calendarLoadingOverlay.setVisibility(View.GONE);
+
                     } else
                         return false;
-                    showLoading(false);
+
 
                 } else {
                     if (isAdded()) {
@@ -1441,8 +1481,13 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                         // Load the active tours to the calendar
                         if (dataCache.get("bookedTours") != null) {
                             bookedToursRefs = (List<DocumentReference>) dataCache.get("bookedTours");
+                            int index = 0; // Initialize an index counter before the loop
+                            int totalTours = bookedToursRefs.size(); // Get the total number of tours
+                            if(totalTours == 0)
+                                calendarLoadingOverlay.setVisibility(View.GONE);
                             // Set up event decorators
                             for (DocumentReference tourRef : bookedToursRefs) {
+                                final int currentIndex = index++; // Use a final variable to use inside the lambda expression
                                 // Handle failure to fetch color from Firestore
                                 tourRef.get().addOnSuccessListener(tourDocumentSnapshot -> {
                                     if (tourDocumentSnapshot.exists()) {
@@ -1465,30 +1510,32 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                                                             endDate = "";
                                                         setEventDecorator(startDate, endDate, packageColor);
                                                     }
+
+                                                    // New block to check if this is the last tour
+                                                    if (currentIndex == totalTours - 1)
+                                                        // This is the last tour, so remove the loading overlay
+                                                        calendarLoadingOverlay.setVisibility(View.GONE);
+
                                                 }
                                             }).addOnFailureListener(e -> {
                                                 // Handle failure to fetch tourPackageRef document
                                                 Log.e("DATABASE", "Error getting tourPackageRef document", e);
-                                            }).addOnCompleteListener(task -> showLoading(false));
+                                            });
                                         } else
                                             Log.e("DATABASE", "tourPackageRef is null");
                                     }
                                 }).addOnFailureListener(e -> {
-
                                     // Handle failure to fetch tourRef document
                                     Log.e("DATABASE", "Error getting tourRef document", e);
                                 });
                             }
-
                         }
-                        showLoading(false);
                     }
                 }
 
                 return true; // Data loaded from memory cache
             }
         }
-        showLoading(false);
         return false; // Data not found in memory cache
     }
 
@@ -1510,27 +1557,6 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
             if(Objects.equals(userType, "Tour Guide"))
                 dataCache.put("tourPackagesIdList", tourPackagesIdList);
         }
-    }
-
-    /**
-     * Show/hide the loading screen.
-     */
-    private void showLoading(boolean show) {
-        if (isAdded()) {
-            loadingOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
-            progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
-    }
-
-    /**
-     * Switch fragment function.
-     */
-    private void switchFragment(Fragment fragment) {
-        if (isAdded())
-            // Replace the current fragment with the new one
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.frameLayout, fragment)
-                    .commit();
     }
 
     @Override

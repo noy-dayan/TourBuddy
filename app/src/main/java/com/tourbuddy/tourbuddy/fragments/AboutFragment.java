@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import androidx.fragment.app.Fragment;
 import com.tourbuddy.tourbuddy.R;
+import com.tourbuddy.tourbuddy.utils.AppUtils;
 
 /**
  * Fragment for learning about the app and it's developers.
@@ -30,23 +31,12 @@ public class AboutFragment extends Fragment {
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switchFragment(new SettingsFragment());
+                AppUtils.switchFragment(AboutFragment.this, new SettingsFragment());
             }
         });
 
 
         return view;
-    }
-
-    /**
-     * Switch fragment function.
-     */
-    private void switchFragment(Fragment fragment) {
-        if (isAdded())
-            // Replace the current fragment with the new one
-            requireActivity().getSupportFragmentManager().beginTransaction()
-                    .replace(R.id.frameLayout, fragment)
-                    .commit();
     }
 
 }

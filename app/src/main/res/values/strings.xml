@@ -15,7 +15,7 @@
     <string name="confirmPasswordError">Passwords do not match</string>
     <string name="emailError2">Email already in use</string>
     <string name="emailOrPasswordError">Invalid email and/or password</string>
-    <string name="user_setup">USER SETUP</string>
+    <string name="user_setup">User Setup</string>
     <string name="username">Username</string>
     <string name="verify_your_email_address">Verify your email address</string>
     <string name="verification_instructions">We have sent a verification link to your email.\n\nClick on the link to complete the registration process.\nYou might need to check your spam folder.</string>
@@ -141,6 +141,13 @@
     <string name="edit_review">Edit Review</string>
     <string name="delete_review">Delete Review</string>
     <string name="delete_review_message">Are you sure you want to delete review?</string>
+    <string name="default_web_client_id" translatable="false">851793428696-v5v6hrrjmq9hasohed3q94fgocnnkcgu.apps.googleusercontent.com</string>
+    <string name="reset_password">Reset Password</string>
+    <string name="forgot_password_no_qm">Forgot Password</string>
+    <string name="user_verification">User Verification</string>
+    <string name="please_provide_your_account_email_address_for_which_you_want_to_reset_your_password">Please provide your account\'s email address for which you want to reset your password</string>
+    <string name="password_reset_email_sent_please_check_your_email">Password reset email sent. Please check your email.</string>
+    <string name="failed_to_send_password_reset_email_please_try_again">Failed to send password reset email. Please try again.</string>
 
 
 </resources>

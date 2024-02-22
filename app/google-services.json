@@ -1,29 +1,11 @@
 {
   "project_info": {
     "project_number": "851793428696",
+    "firebase_url": "https://tourbuddy-7743a-default-rtdb.europe-west1.firebasedatabase.app",
     "project_id": "tourbuddy-7743a",
     "storage_bucket": "tourbuddy-7743a.appspot.com"
   },
   "client": [
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:851793428696:android:40f9f870f6ae75cbdf17ad",
-        "android_client_info": {
-          "package_name": "com.example.tourbuddy"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyArI0caY1eRbtfQEqZBXwsUtM9W4kMWeNo"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
     {
       "client_info": {
         "mobilesdk_app_id": "1:851793428696:android:bad0ba53ca671c3ddf17ad",
@@ -31,7 +13,20 @@
           "package_name": "com.tourbuddy.tourbuddy"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "851793428696-uh2047ghh33qbvpj14curp8osvffdku9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tourbuddy.tourbuddy",
+            "certificate_hash": "3836b9431e000463e5efd8923e871f81934df472"
+          }
+        },
+        {
+          "client_id": "851793428696-v5v6hrrjmq9hasohed3q94fgocnnkcgu.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyArI0caY1eRbtfQEqZBXwsUtM9W4kMWeNo"
@@ -39,7 +34,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "851793428696-v5v6hrrjmq9hasohed3q94fgocnnkcgu.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

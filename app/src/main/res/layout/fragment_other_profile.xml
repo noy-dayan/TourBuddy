@@ -132,7 +132,26 @@
                         app:layout_constraintStart_toEndOf="@+id/birthDate"
                         app:layout_constraintTop_toBottomOf="@+id/username" />
 
+                    <RelativeLayout
+                        android:id="@+id/userDataLoadingOverlay"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@color/dark_primary"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent">
+
+
+                        <ProgressBar
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:indeterminateTint="@color/orange_primary"
+                            android:layout_centerInParent="true" />
+                    </RelativeLayout>
+
                 </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 
                 <androidx.constraintlayout.widget.ConstraintLayout
@@ -223,6 +242,22 @@
                         app:mcv_selectionMode="single"
                         app:mcv_weekDayTextAppearance="@style/WeekDayTextAppearance" />
 
+                    <RelativeLayout
+                        android:id="@+id/calendarLoadingOverlay"
+                        android:layout_width="0dp"
+                        android:layout_height="0dp"
+                        android:background="@color/dark_primary"
+                        app:layout_constraintBottom_toTopOf="@+id/reviewsHeadline"
+                        app:layout_constraintEnd_toEndOf="@+id/calendarView"
+                        app:layout_constraintStart_toStartOf="@+id/calendarView"
+                        app:layout_constraintTop_toBottomOf="@id/recyclerViewTours"
+                        >
+                        <ProgressBar
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:indeterminateTint="@color/orange_primary"
+                            android:layout_centerInParent="true" />
+                    </RelativeLayout>
 
                     <TextView
                         android:id="@+id/reviewsHeadline"
@@ -380,28 +415,6 @@
 
 
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-    <!-- Loading overlay -->
-    <RelativeLayout
-        android:id="@+id/loadingOverlay"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/background_dark"
-        android:visibility="gone"
-        android:backgroundTint="@color/dark_primary"
-        android:paddingTop="50dp"
-        >
-
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:indeterminateTint="@color/orange_primary"
-            android:visibility="gone" />
-
-    </RelativeLayout>
-
 
     <RelativeLayout
         android:layout_width="match_parent"
