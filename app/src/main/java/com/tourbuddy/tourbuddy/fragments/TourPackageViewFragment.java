@@ -63,6 +63,7 @@ public class TourPackageViewFragment extends Fragment {
 
     // User ID received from arguments
     String userId, userType;
+    ArrayList<String> includedCountriesFullNames;
     Uri packageCoverImageUri;
 
     @Override
@@ -149,7 +150,7 @@ public class TourPackageViewFragment extends Fragment {
                 args.putString("userId", userId);
                 args.putString("packageName", packageName.getText().toString());
                 args.putString("packageCoverImageUri", packageCoverImageUri.toString());
-                args.putString("includedCountries", includedCountries.getText().toString());
+                args.putStringArrayList("includedCountries", includedCountriesFullNames);
                 args.putString("tourDesc", tourDesc.getText().toString());
                 args.putString("itinerary", itinerary.getText().toString());
                 args.putString("duration", duration.getText().toString());
@@ -330,11 +331,11 @@ public class TourPackageViewFragment extends Fragment {
                     if (isAdded() && documentSnapshot.exists()) {
                         // Check if the user fields exist in the Firestore document
                         if (documentSnapshot.contains("includedCountries")) {
-                            ArrayList<String> includedCountriesString = (ArrayList<String>) documentSnapshot.get("includedCountries");
+                            ArrayList<String> includedCountriesStringCode = (ArrayList<String>) documentSnapshot.get("includedCountries");
 
                             // Convert country codes to full names
-                            List<String> includedCountriesFullNames = new ArrayList<>();
-                            for (String countryCode : includedCountriesString) {
+                            includedCountriesFullNames = new ArrayList<>();
+                            for (String countryCode : includedCountriesStringCode) {
                                 String fullName = getCountryFullName(requireContext(), countryCode);
                                 includedCountriesFullNames.add(fullName);
                             }

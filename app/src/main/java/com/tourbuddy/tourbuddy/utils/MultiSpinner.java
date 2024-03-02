@@ -11,6 +11,7 @@ import android.widget.Spinner;
 
 import com.tourbuddy.tourbuddy.R;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -150,4 +151,23 @@ public class MultiSpinner extends androidx.appcompat.widget.AppCompatSpinner imp
     public interface MultiSpinnerListener {
         void onItemsSelected(boolean[] selected);
     }
+
+    /**
+     * Selects the items from ArrayList of substrings.
+     */
+    public void setSelectedItemsByStartSubstring(ArrayList<String> substrings) {
+        Arrays.fill(selected, false); // Clear previously selected items
+
+        for (int i = 0; i < items.size(); i++) {
+            for (String substring : substrings) {
+                if (items.get(i).startsWith(substring)) {
+                    selected[i] = true; // Set the corresponding item as selected
+                    break; // Move to the next item in the spinner
+                }
+            }
+        }
+
+        updateSpinner(); // Update the spinner to reflect the changes
+    }
+
 }

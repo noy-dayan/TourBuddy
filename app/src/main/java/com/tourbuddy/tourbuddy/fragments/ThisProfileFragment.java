@@ -179,9 +179,6 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
             calendarView.setShowOtherDates(MaterialCalendarView.SHOW_ALL);
             calendarView.state().edit().setMinimumDate(min).setMaximumDate(max).commit();
 
-            // Set the locale for the calendar view title formatter
-            calendarView.setTitleFormatter(new DateFormatTitleFormatter());
-
             // Attempt to load data from cache
             if (!loadDataFromCache(view)) {
                 calendarLoadingOverlay.setVisibility(View.VISIBLE);
@@ -204,12 +201,16 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                             if (Objects.equals(userType, "Tour Guide")) {
                                 tourGuide_tourBookingManager();
                                 tourGuide_reviewsManager();
+                                if (thisUserdocumentSnapshot.contains("language"))
+                                     AppUtils.setAppLocale(requireContext(), thisUserdocumentSnapshot.getString("language"));
                             } else {
                                 calendarView.setSelectionMode(MaterialCalendarView.SELECTION_MODE_SINGLE);
                                 tourist_tourBookingManager();
                                 tourist_reviewsManager();
 
                             }
+                            // Set the locale for the calendar view title formatter
+                            calendarView.setTitleFormatter(new DateFormatTitleFormatter());
                         }
                     }
                 }
@@ -601,6 +602,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                     }
                 }
             });
+
 
             calendarView.setOnDateChangedListener(new OnDateSelectedListener() {
                 @Override

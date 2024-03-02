@@ -76,8 +76,6 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
             includedServicesInput, excludedServicesInput, priceInput,
             cancellationPolicyInput, specialRequirementsInput, additionalInfoInput;
     int packageColor;
-
-    List<String> selectedCountries;
     String packageName, userId;
 
     // Firebase
@@ -91,8 +89,9 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
     ActivityResultLauncher<Intent> imagePickLauncher;
     Uri selectedImageUri;
 
-    //
+    // Multi spinner
     MultiSpinner countryMultiSpinner;
+    List<String> selectedCountries;
 
     // Loading overlay
     View loadingOverlay;
@@ -101,6 +100,8 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
     // Color picker
     ConstraintLayout colorPicker;
     View colorView;
+
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -162,6 +163,7 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
                         .setOnColorSelectedListener(new OnColorSelectedListener() {
                             @Override
                             public void onColorSelected(int selectedColor) {
+                                btnSaveChanges.setEnabled(true);
                             }
                         })
                         .setPositiveButton(R.string.confirm, new ColorPickerClickListener() {
@@ -223,6 +225,9 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
                     .into(packageCoverImage);
 
             packageName = getArguments().getString("packageName");
+            ArrayList<String> includedCountriesStringCode = getArguments().getStringArrayList("includedCountries");
+            countryMultiSpinner.setSelectedItemsByStartSubstring(includedCountriesStringCode);
+            btnSaveChanges.setEnabled(false);
             tourDescInput.setText(getArguments().getString("tourDesc"));
             itineraryInput.setText(getArguments().getString("itinerary"));
             durationInput.setText(getArguments().getString("duration"));
@@ -233,8 +238,10 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
             cancellationPolicyInput.setText(getArguments().getString("cancellationPolicy"));
             specialRequirementsInput.setText(getArguments().getString("specialRequirements"));
             additionalInfoInput.setText(getArguments().getString("additionalInfo"));
+            packageColor = getArguments().getInt("packageColor");
             colorView.setBackgroundTintList(null);
-            colorView.setBackgroundTintList(ColorStateList.valueOf(getArguments().getInt("packageColor")));
+            colorView.setBackgroundTintList(ColorStateList.valueOf(packageColor));
+
 
         }
     }
@@ -484,6 +491,8 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
                 saveUserDataToFirebase();
                 btnSaveChanges.setEnabled(false);
                 dataCache.clearCache();
+                AppUtils.switchFragment(TourPackageEditFragment.this, new ThisProfileFragment());
+
             }
         });
 

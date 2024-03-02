@@ -108,6 +108,9 @@ public class UserVerificationActivity extends AppCompatActivity {
 
         // SwipeRefreshLayout refresh listener
         if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setProgressBackgroundColor(R.color.dark_primary);
+            swipeRefreshLayout.setColorScheme(R.color.orange_primary);
+
             swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
                 @Override
                 public void onRefresh() {

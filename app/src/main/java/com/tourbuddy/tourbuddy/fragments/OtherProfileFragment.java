@@ -381,6 +381,9 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
 
         // Set up pull-to-refresh functionality
         if (swipeRefreshLayout != null) {
+            swipeRefreshLayout.setProgressBackgroundColor(R.color.dark_primary);
+            swipeRefreshLayout.setColorScheme(R.color.orange_primary);
+
             swipeRefreshLayout.setOnRefreshListener(() -> {
                 tourPackagesIdList = new ArrayList<>();
 
