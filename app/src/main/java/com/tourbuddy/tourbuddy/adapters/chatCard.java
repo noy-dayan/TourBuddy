@@ -15,6 +15,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.tourbuddy.tourbuddy.R;
 
+import java.util.concurrent.CountDownLatch;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +30,7 @@ public class chatCard {
     private String user1Id,user2Id;
     private String chatName, lastMassage,
             timeStamp;
+    private CountDownLatch latch;
     private DocumentReference chatDocumentRef;
     static {
         mUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -37,12 +39,18 @@ public class chatCard {
     }
 
     public chatCard(String chatId) {
-        this.chatDocumentRef = db.collection("chats").document(chatId);
-        setUsers();
+        this.chatId = chatId;
+        this.db = FirebaseFirestore.getInstance();
+        fetchChatDetails();
         this.chatName = "chatName";
         this.lastMassage = "lastMassage";
         this.timeStamp = "00:00";
         this.chatId = chatId;
+    }
+
+    public chatCard copy()
+    {
+        return new chatCard(new String(this.chatId));
     }
 
 
@@ -89,7 +97,8 @@ public class chatCard {
         this.user1Id = user1Id;
     }
 
-    public String getUser2IdName() {
+    public String getUser2Id() {
+
         return user2Id;
     }
 
@@ -97,44 +106,36 @@ public class chatCard {
         this.user2Id = user2Id;
     }
 
-    private void setUsers(){
-        List<String> members  = new ArrayList<String>();
-        chatDocumentRef.get().addOnSuccessListener(
-                new OnSuccessListener<DocumentSnapshot>(){
-                    List<String> memberList = new ArrayList<String>();
-                    @Override
-                    public void onSuccess(DocumentSnapshot documentSnapshot) {
-                        memberList = (List<String>) documentSnapshot.get("members");
-                        if (memberList.get(0).equals(user1Id))
-                        {
-                            setUser2Id(memberList.get(1));
-                        }
-                        else
-                        {
-                            setUser1Id(memberList.get(0));
-                        }
-                    }
+    private void fetchChatDetails() {
+        DocumentReference chatRef = db.collection("chats").document(chatId);
+        chatRef.get().addOnSuccessListener(documentSnapshot -> {
+            List<String> members = (List<String>) documentSnapshot.get("members");
+            if (members != null && members.size() == 2) {
+                String memberId1 = members.get(0);
+                String memberId2 = members.get(1);
+                if (mUser.getUid().equals(memberId1)) {
+                    user1Id = memberId1;
+                    user2Id = memberId2;
+                } else {
+                    user1Id = memberId2;
+                    user2Id = memberId1;
                 }
-        );
+                fetchUsername(user1Id);
+            }
+        }).addOnFailureListener(e -> {
+            // Handle failure
+        });
     }
 
-    private void getUserName(String userid)
-    {
-        String chatName="";
-        DocumentReference userDocumentRef = db.collection("users").document(userid);
-        userDocumentRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                                                       @Override
-                                                       public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                                           String name="";
-                                                           if (documentSnapshot.contains("username"))
-                                                               setChatName(documentSnapshot.getString("username"));
-                                                       }
-                                                   }
-        ).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-
+    private void fetchUsername(String userId) {
+        DocumentReference userRef = db.collection("users").document(userId);
+        userRef.get().addOnSuccessListener(documentSnapshot -> {
+            if (documentSnapshot.contains("username")) {
+                chatName = documentSnapshot.getString("username");
+                // Update UI or notify listeners here
             }
+        }).addOnFailureListener(e -> {
+            // Handle failure
         });
     }
 

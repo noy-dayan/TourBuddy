@@ -30,7 +30,7 @@
 
 
         <TextView
-            android:id="@+id/titleMassage"
+            android:id="@+id/textViewChatTitle"
             android:layout_width="101dp"
             android:layout_height="16dp"
             android:gravity="left"
@@ -46,7 +46,7 @@
 
 
         <TextView
-            android:id="@+id/lastMassage"
+            android:id="@+id/textViewLastMessage"
             android:layout_width="101dp"
             android:layout_height="16dp"
             android:gravity="left"
@@ -57,11 +57,11 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.067"
             app:layout_constraintStart_toEndOf="@+id/imageView"
-            app:layout_constraintTop_toBottomOf="@+id/titleMassage"
+            app:layout_constraintTop_toBottomOf="@+id/textViewChatTitle"
             app:layout_constraintVertical_bias="0.0" />
 
         <TextView
-            android:id="@+id/timeStamp"
+            android:id="@+id/textViewTimeStamp"
             android:layout_width="101dp"
             android:layout_height="16dp"
             android:gravity="right"
@@ -72,7 +72,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="1.0"
             app:layout_constraintStart_toEndOf="@+id/imageView"
-            app:layout_constraintTop_toBottomOf="@+id/lastMassage"
+            app:layout_constraintTop_toBottomOf="@+id/textViewLastMessage"
             app:layout_constraintVertical_bias="0.0" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

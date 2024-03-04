@@ -19,6 +19,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.tourbuddy.tourbuddy.R;
 import com.tourbuddy.tourbuddy.databinding.ActivityUserHomeBinding;
 import com.tourbuddy.tourbuddy.fragments.ChatFragment;
+import com.tourbuddy.tourbuddy.fragments.ChatListFragment;
 import com.tourbuddy.tourbuddy.fragments.ThisProfileFragment;
 import com.tourbuddy.tourbuddy.fragments.SearchFragment;
 import com.tourbuddy.tourbuddy.fragments.SettingsFragment;
@@ -113,8 +114,8 @@ public class UserHomeActivity extends AppCompatActivity {
             // Check if the selected item is already the one corresponding to the current fragment
             if (item.getItemId() == R.id.search && !(getSupportFragmentManager().findFragmentById(R.id.frameLayout) instanceof SearchFragment))
                 replaceFragment(new SearchFragment());
-            else if (item.getItemId() == R.id.chat && !(getSupportFragmentManager().findFragmentById(R.id.frameLayout) instanceof ChatFragment))
-                replaceFragment(new ChatFragment());
+            else if (item.getItemId() == R.id.chat && !(getSupportFragmentManager().findFragmentById(R.id.frameLayout) instanceof ChatListFragment))
+                replaceFragment(new ChatListFragment());
             else if (item.getItemId() == R.id.profile && !(getSupportFragmentManager().findFragmentById(R.id.frameLayout) instanceof ThisProfileFragment))
                 replaceFragment(new ThisProfileFragment());
             else if (item.getItemId() == R.id.settings && !(getSupportFragmentManager().findFragmentById(R.id.frameLayout) instanceof SettingsFragment))
