@@ -9,6 +9,7 @@ import com.google.firebase.firestore.DocumentId;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
@@ -50,13 +51,13 @@ public class Chat {
         this.lastMessage = lastMessageId;
     }
 
-    public Chat(Chat chat)
-    {
-        this.chatId = new String(chat.getChatId());
-        this.TimeStamp = new Timestamp(chat.getTimeStamp().toDate());
-        setParticipants(chat.getParticipants());
-        this.lastMessage = new String(chat.getLastMessage());
-    }
+//    public Chat(Chat chat)
+//    {
+//        this.chatId = new String(chat.getChatId());
+//        this.TimeStamp = new Timestamp(chat.getTimeStamp().toDate());
+//        setParticipants(chat.getParticipants());
+//        this.lastMessage = new String(chat.getLastMessage());
+//    }
 
 
     public String getLastMessageId() {
@@ -122,8 +123,13 @@ public class Chat {
         return otherUserName;
     }
 
-    public Timestamp getTimeStamp() {
 
+//    public void setTimeStamp(Date timeStamp) {
+//        this.timeStamp = timeStamp;
+//    }
+
+    public Timestamp getTimeStamp()
+    {
         return TimeStamp;
     }
 

@@ -1,4 +1,5 @@
 package com.tourbuddy.tourbuddy.adapters;
+
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,12 +9,16 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.tourbuddy.tourbuddy.R;
-//import com.tourbuddy.tourbuddy.managers.NamesManager;
 import com.tourbuddy.tourbuddy.utils.Chat;
 
+import java.text.SimpleDateFormat;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatListViewHolder> {
     private List<Chat> chatList;
@@ -31,6 +36,14 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         userId = mAuth.getCurrentUser().getUid();
 //        preprocessChatData();
+        sortChatListByTimestamp();
+    }
+
+    private void sortChatListByTimestamp() {
+        Collections.sort(chatList, (chat1, chat2) -> {
+            // Sort in descending order
+            return chat2.getTimeStamp().compareTo(chat1.getTimeStamp());
+        });
     }
 
     //private void preprocessChatData() {
@@ -76,14 +89,20 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         // Bind chat data to views in ViewHolder
         Chat chat = chatList.get(position);
         holder.textViewChatTitle.setText(chat.getOtherUserName());
-        holder.textViewTimeStamp.setText(chat.getTimeStamp().toString());
+
+        // Format the timestamp
+        Timestamp timestamp = chat.getTimeStamp();
+        Date date = new Date(timestamp.getSeconds() * 1000); // Convert seconds to milliseconds
+        SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm dd MMMM yyyy", Locale.getDefault()); // Corrected the time format to hh:mm
+        String formattedDate = dateFormat.format(date);
+
+        holder.textViewTimeStamp.setText(formattedDate);
         holder.textViewLastMessage.setText(chat.getLastMessage());
 
         // Set click listener for the chat item
         holder.itemView.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onChatItemClick(chat);
-
             }
         });
     }
