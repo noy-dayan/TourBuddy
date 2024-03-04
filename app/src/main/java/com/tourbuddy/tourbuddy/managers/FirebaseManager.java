@@ -6,6 +6,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.tourbuddy.tourbuddy.utils.Chat;
 
 import java.util.ArrayList;
@@ -73,7 +74,7 @@ public class FirebaseManager {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         List<Chat> chats = processChats(task.getResult().getDocuments());
-                        listener.onChatsFetched(chats);
+                        fetchLastMessages(chats, listener); // Fetch last messages for each chat
                     } else {
                         listener.onChatsFetchFailed(task.getException());
                         Log.e(TAG, "Error fetching chats: ", task.getException());
@@ -104,6 +105,35 @@ public class FirebaseManager {
             }
         }
         return userIds;
+    }
+
+    private void fetchLastMessages(List<Chat> chats, OnChatsFetchListener listener) {
+        for (Chat chat : chats) {
+            mFirestore.collection("chats")
+                    .document(chat.getChatId())
+                    .collection("messages")
+                    .orderBy("timestamp", Query.Direction.DESCENDING)
+                    .limit(1)
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful() && !task.getResult().isEmpty()) {
+                            // Retrieve the last message document
+                            DocumentSnapshot lastMessageDoc = task.getResult().getDocuments().get(0);
+                            // Get the message content
+                            String lastMessage = lastMessageDoc.getString("content");
+                            // Update the chat object with the last message
+                            chat.setLastMessage(lastMessage);
+                            // Notify the listener when all last messages are fetched
+                            if (chats.indexOf(chat) == chats.size() - 1) {
+                                listener.onChatsFetched(chats);
+                            }
+                        } else {
+                            // Handle failure to fetch last message
+                            Log.e(TAG, "Error fetching last message for chat: " + chat.getChatId());
+                            listener.onChatsFetchFailed(task.getException());
+                        }
+                    });
+        }
     }
 
 
