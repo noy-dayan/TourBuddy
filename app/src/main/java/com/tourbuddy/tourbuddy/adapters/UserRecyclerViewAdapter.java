@@ -9,7 +9,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -19,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
+import com.facebook.shimmer.ShimmerFrameLayout;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
@@ -29,6 +29,7 @@ import com.google.firebase.storage.StorageReference;
 import com.tourbuddy.tourbuddy.R;
 import com.tourbuddy.tourbuddy.fragments.OtherProfileFragment;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -40,22 +41,14 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
     FirebaseFirestore db = FirebaseFirestore.getInstance();
     FirebaseStorage storage = FirebaseStorage.getInstance();
     StorageReference storageReference = storage.getReference();
-    String countryFilter, typeFilter, usernameFilter, genderFilter;
-    View loadingOverlay;
-    ProgressBar progressBar;
     int loadedItemCount = 0; // Counter for loaded items
+    List<ViewHolder> viewHolderList = new ArrayList<>(); // Initialize viewHolderList
 
-    public UserRecyclerViewAdapter(Activity activity, Context context, View loadingOverlay, ProgressBar progressBar,
-                                   List<String> userIdList, String countryFilter, String typeFilter, String usernameFilter, String genderFilter) {
+    public UserRecyclerViewAdapter(Activity activity, Context context,
+                                   List<String> userIdList) {
         this.activity = activity;
         this.context = context;
         this.userIdList = userIdList;
-        this.countryFilter = countryFilter;
-        this.genderFilter = genderFilter;
-        this.typeFilter = typeFilter;
-        this.usernameFilter = usernameFilter;
-        this.loadingOverlay = loadingOverlay;
-        this.progressBar = progressBar;
     }
 
     @NonNull
@@ -68,6 +61,7 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String userId = userIdList.get(position);
+        viewHolderList.add(holder);
         loadDataFromFirebase(userId, holder);
     }
 
@@ -80,6 +74,7 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
         ImageView profilePic;
         TextView username, type;
         UserRecyclerViewAdapter userRecyclerViewAdapter;
+        //ShimmerFrameLayout shimmerLayout;
 
         public ViewHolder(@NonNull View itemView, UserRecyclerViewAdapter userRecyclerViewAdapter) {
             super(itemView);
@@ -87,6 +82,10 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
             profilePic = itemView.findViewById(R.id.userProfilePic);
             username = itemView.findViewById(R.id.username);
             type = itemView.findViewById(R.id.type);
+            //shimmerLayout = itemView.findViewById(R.id.shimmer_layout);
+
+            // Start the shimmer effect
+            //shimmerLayout.startShimmer();
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -118,16 +117,6 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
         }
     }
 
-    /**
-     * Show/hide the loading screen.
-     */
-    private void showLoading(boolean show) {
-        if (activity instanceof AppCompatActivity) {
-            loadingOverlay.setVisibility(show ? View.VISIBLE : View.GONE);
-            progressBar.setVisibility(show ? View.VISIBLE : View.GONE);
-        }
-    }
-
     private void loadDataFromFirebase(String userId, @NonNull ViewHolder holder) {
         if (userId != null) {
             DocumentReference userDocumentRef = db.collection("users").document(userId);
@@ -147,7 +136,20 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
                         }
 
                         storageReference.child("images/" + userId + "/profilePic").getDownloadUrl()
-                                .addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                .addOnFailureListener(new OnFailureListener() {
+                                    @Override
+                                    public void onFailure(@NonNull Exception exception) {
+                                        Glide.with(holder.itemView.getContext())
+                                                .load(R.drawable.profilepic_default)
+                                                .into(holder.profilePic);
+                                        Log.e("Glide", "Error loading image", exception);
+                                        // Increment the loadedItemCount
+                                        loadedItemCount++;
+                                        // Check if all items have finished loading
+                                        //holder.shimmerLayout.stopShimmer();
+
+                                    }
+                                }).addOnSuccessListener(new OnSuccessListener<Uri>() {
                                     @Override
                                     public void onSuccess(Uri uri) {
                                         Glide.with(holder.itemView.getContext())
@@ -157,22 +159,8 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
                                         // Increment the loadedItemCount
                                         loadedItemCount++;
                                         // Check if all items have finished loading
-                                        if (loadedItemCount == getItemCount()) {
-                                            // All items have finished loading, hide loading screen
-                                            showLoading(false);
-                                        }
-                                    }
-                                }).addOnFailureListener(new OnFailureListener() {
-                                    @Override
-                                    public void onFailure(@NonNull Exception exception) {
-                                        Log.e("Glide", "Error loading image", exception);
-                                        // Increment the loadedItemCount
-                                        loadedItemCount++;
-                                        // Check if all items have finished loading
-                                        if (loadedItemCount == getItemCount()) {
-                                            // All items have finished loading, hide loading screen
-                                            showLoading(false);
-                                        }
+                                        //holder.shimmerLayout.stopShimmer();
+
                                     }
                                 });
                     }
@@ -186,10 +174,9 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
                     loadedItemCount++;
 
                     // Check if all items have finished loading
-                    if (loadedItemCount == getItemCount()) {
-                        // All items have finished loading, hide loading screen
-                        showLoading(false);
-                    }
+                    //holder.shimmerLayout.stopShimmer();
+                    //holder.shimmerLayout.setVisibility(View.GONE);
+
                 }
             });
         }

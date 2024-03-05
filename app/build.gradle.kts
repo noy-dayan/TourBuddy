@@ -80,6 +80,7 @@ dependencies {
     implementation("com.github.Inconnu08:android-ratingreviews:1.2.0") {
 
     }
+    implementation("com.facebook.shimmer:shimmer:0.5.0")
 
 }
 

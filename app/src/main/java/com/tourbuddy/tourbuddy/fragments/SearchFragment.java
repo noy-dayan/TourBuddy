@@ -1,6 +1,9 @@
 package com.tourbuddy.tourbuddy.fragments;
 
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,28 +13,41 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageButton;
 import android.widget.ProgressBar;
+
+import com.chaek.android.RatingBar;
+
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.appcompat.widget.SearchView;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldPath;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.tourbuddy.tourbuddy.R;
 import com.tourbuddy.tourbuddy.adapters.UserRecyclerViewAdapter;
+import com.tourbuddy.tourbuddy.utils.AppUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Fragment for learning about the app and it's developers.
@@ -58,13 +74,17 @@ public class SearchFragment extends Fragment {
     ImageButton btnFilter;
     View filterLayout, onlyTourGuideFilterLayout;
 
-
     // Search Filters
     String countryFilter, typeFilter, usernameFilter, genderFilter;
+    int rateFilterStart, rateFilterEnd;
 
     // Spinner Filters
     Spinner spinnerType, spinnerGender, spinnerCountry;
 
+    RatingBar ratingBarStart, ratingBarEnd;
+
+    SearchView userNameSearchView;
+    boolean isInit = true;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -82,75 +102,52 @@ public class SearchFragment extends Fragment {
         filterLayout = view.findViewById(R.id.filterLayout);
         onlyTourGuideFilterLayout = view.findViewById(R.id.onlyTourGuideFilterLayout);
 
+        userNameSearchView = view.findViewById(R.id.searchView);
         spinnerType = view.findViewById(R.id.spinnerType);
         spinnerGender = view.findViewById(R.id.spinnerGender);
         spinnerCountry = view.findViewById(R.id.spinnerCountry);
+        ratingBarStart = view.findViewById(R.id.ratingBarStart);
+        ratingBarEnd = view.findViewById(R.id.ratingBarEnd);
 
-        genderInputManager(spinnerGender);
-        typeInputManager(spinnerType);
-        countryInputManager(spinnerCountry);
+        usernameFilter = "";
+        typeFilter = "All";
+        genderFilter = "All";
 
-        // Initialize loading overlay elements
-        loadingOverlay = view.findViewById(R.id.loadingOverlay);
-        progressBar = view.findViewById(R.id.progressBar);
+        countryFilter = "All";
+        rateFilterStart = 0;
+        rateFilterEnd = 10;
+
+        recyclerView = view.findViewById(R.id.recyclerView);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        userRecyclerViewAdapter = new UserRecyclerViewAdapter(getActivity(), getContext(), userIdList);
+        recyclerView.setAdapter(userRecyclerViewAdapter);
+
+        userNameInputManager();
+        genderInputManager();
+        typeInputManager();
+        countryInputManager();
+        rateInputManager();
 
         btnFilter.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (filterLayout.getVisibility() == View.VISIBLE) {
+                if (filterLayout.getVisibility() == View.VISIBLE)
                     filterLayout.setVisibility(View.GONE);
-                    setRecyclerViewTopMargin(70);
-                } else {
+                else
                     filterLayout.setVisibility(View.VISIBLE);
-                    setRecyclerViewTopMargin(0);
-
-
-                    spinnerType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                        @Override
-                        public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-                            // Get the selected type
-                            String selectedType = parentView.getItemAtPosition(position).toString();
-
-                            // Enable or disable the country spinner based on the selected type
-                            onlyTourGuideFilterLayout.setVisibility(getContext().getResources().getString(R.string.tour_guide).equals(selectedType)? View.VISIBLE : View.GONE);
-                        }
-
-                        @Override
-                        public void onNothingSelected(AdapterView<?> parentView) {
-                            // Do nothing
-                        }
-                    });
-                }
             }
         });
 
-        loadDataFromFirebase(view);
-
-        // Other initialization code...
+        loadDataFromFirebase();
+        isInit = false;
 
         return view;
     }
 
-    // Function to set the top margin of the RecyclerView
-    private void setRecyclerViewTopMargin(int topMarginInDp) {
-        // Convert dp to pixels
-        float density = getResources().getDisplayMetrics().density;
-        int topMarginInPixels = (int) (topMarginInDp * density);
-
-        // Get the current layout parameters of the RecyclerView
-        ViewGroup.MarginLayoutParams layoutParams = (ViewGroup.MarginLayoutParams) recyclerView.getLayoutParams();
-
-        // Set the top margin
-        layoutParams.topMargin = topMarginInPixels;
-
-        // Apply the updated layout parameters to the RecyclerView
-        recyclerView.setLayoutParams(layoutParams);
-    }
-
-    private void genderInputManager(Spinner spinnerGender) {
+    private void genderInputManager() {
         // Gender spinner setup
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                getContext(),
+                requireContext(),
                 R.array.genders_filter,
                 R.layout.spinner_custom_layout
         );
@@ -162,20 +159,60 @@ public class SearchFragment extends Fragment {
         spinnerGender.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                // Update the gender filter
+                if(position == 1)
+                    genderFilter = "Male";
+                else if(position == 2)
+                    genderFilter = "Female";
+                else if(position == 3)
+                    genderFilter = "Other";
+                else
+                    genderFilter = "All";
 
+                // Reload search results with the new filter
+                if(!isInit)
+                    loadDataFromFirebase();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
+                // do nothing
             }
         });
     }
 
-    private void countryInputManager(Spinner spinnerCountry) {
+    private void rateInputManager() {
+        ratingBarStart.setRatingBarListener(new RatingBar.RatingBarListener() {
+            @Override
+            public void setRatingBar(int i) {
+                // Apply filter based on the selected rating
+                rateFilterStart = i;
+                userIdList.clear();
+                if(!isInit)
+                    loadDataFromFirebase();
+            }
+        });
+
+        ratingBarEnd.setRatingBarListener(new RatingBar.RatingBarListener() {
+            @Override
+            public void setRatingBar(int i) {
+                // Apply filter based on the selected rating
+                rateFilterEnd = i;
+                userIdList.clear();
+                if(!isInit)
+                    loadDataFromFirebase();
+            }
+        });
+
+        if(!isInit)
+            loadDataFromFirebase();
+    }
+
+    private void countryInputManager() {
         // Gender spinner setup
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                getContext(),
-                R.array.countries_filter,
+                requireContext(),
+                R.array.countries_filter_for_searching,
                 R.layout.spinner_custom_layout
         );
 
@@ -186,20 +223,29 @@ public class SearchFragment extends Fragment {
         spinnerCountry.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                // Update the country filter
+                if(position > 0)
+                    countryFilter = AppUtils.getSubstringFromCountry(parentView.getItemAtPosition(position).toString());
+                else
+                    countryFilter = "All";
 
-            }
+
+                // Reload search results with the new filter
+                if(!isInit)
+                    loadDataFromFirebase();            }
 
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
+                // do nothing
             }
         });
     }
 
-    private void typeInputManager(Spinner spinnerType) {
+    private void typeInputManager() {
 
         // Gender spinner setup
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(
-                getContext(),
+                requireContext(),
                 R.array.types_filter,
                 R.layout.spinner_custom_layout
         );
@@ -211,11 +257,42 @@ public class SearchFragment extends Fragment {
         spinnerType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
+                // Get the selected type
+                onlyTourGuideFilterLayout.setVisibility(position == 2 ? View.VISIBLE : View.GONE);
 
+                // Update the type filter
+                if(position == 1)
+                    typeFilter = "Tourist";
+                else if(position == 2)
+                    typeFilter = "Tour Guide";
+                else
+                    typeFilter = "All";
+
+                if(!isInit)
+                    loadDataFromFirebase();
             }
 
             @Override
             public void onNothingSelected(AdapterView<?> parentView) {
+                // Do nothing
+            }
+        });
+
+    }
+
+    private void userNameInputManager() {
+        userNameSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                // Filter the data based on the new text input
+                usernameFilter = newText.trim();
+                loadDataFromFirebase();
+                return true;
             }
         });
     }
@@ -223,49 +300,151 @@ public class SearchFragment extends Fragment {
     /**
      * Fetch user data from Firebase Firestore.
      */
-    private void loadDataFromFirebase(View view) {
-        countryFilter = "All";
-        typeFilter = "All";
-        usernameFilter = "All";
-        genderFilter = "All";
 
-        recyclerView = view.findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-        userRecyclerViewAdapter = new UserRecyclerViewAdapter(getActivity() ,getContext(), loadingOverlay, progressBar, userIdList, countryFilter, typeFilter, usernameFilter, genderFilter);
-        recyclerView.setAdapter(userRecyclerViewAdapter);
+    private void loadDataFromFirebase() {
         mUser = mAuth.getCurrentUser();
-        if (mUser != null) {
+        if (isAdded() && mUser != null) {
             String currUserId = mUser.getUid();
+            // Build the base query
+            CollectionReference usersRef = db.collection("users");
+            Query query = usersRef;
 
-            // Reference to the Firestore collection "users"
-            CollectionReference userCollectionRef = db.collection("users");
+            // Apply username filter if not empty
+            if (!usernameFilter.isEmpty()) {
+                // Construct a prefix search query
+                String endPrefix = usernameFilter + '\uf8ff'; // \uf8ff is Unicode character for highest UTF-16 code unit
+                query = query.whereGreaterThanOrEqualTo("username", usernameFilter)
+                        .whereLessThan("username", endPrefix);
+            }
 
-            // Query the first 30 documents (user IDs)
-            userCollectionRef.limit(30).get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            // Apply type filter if not "All"
+            if (!typeFilter.equals("All"))
+                query = query.whereEqualTo("type", typeFilter);
+
+            // Apply gender filter if not "All"
+            if (!genderFilter.equals("All"))
+                query = query.whereEqualTo("gender", genderFilter);
+
+
+
+
+
+
+            final int[] limit = {50};
+            // Execute the query
+            query.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                 @Override
                 public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                    if (isAdded() && !queryDocumentSnapshots.isEmpty()) {
+                    userIdList.clear(); // Clear the list before adding filtered users
+                    if (!queryDocumentSnapshots.isEmpty()) {
                         // Process the user IDs
-                        List<DocumentSnapshot> documents = queryDocumentSnapshots.getDocuments();
-                        for (DocumentSnapshot document : documents) {
-                            if(userIdList != null)
-                                if(!currUserId.equals(document.getId())) {
-                                    // Add userId to your list or update UI as needed
-                                    userIdList.add(document.getId());
+                        for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
+                            if(limit[0] > 0){
+                                String userId = document.getId();
+                                if(!countryFilter.equals("All") && Objects.equals(typeFilter, "Tour Guide")) {
+                                    document.getReference().collection("tourPackages").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+                                        @Override
+                                        public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                                            for (DocumentSnapshot tourPackageDocument : queryDocumentSnapshots.getDocuments()) {
+                                                if (tourPackageDocument.exists()){
+                                                    ArrayList<String> includedCountries = (ArrayList<String>) tourPackageDocument.get("includedCountries");
+                                                    if (includedCountries.contains(countryFilter)) {
+                                                        if((rateFilterStart != 0 || rateFilterEnd != 10 )&& Objects.equals(typeFilter, "Tour Guide")) {
+                                                            ratingQuery(document, userId, limit);
+                                                        }
+                                                        else {
+                                                            // Add userId to userIdList
+                                                            if(!userIdList.contains(userId)){
+                                                                // Add userId to userIdList
+                                                                userIdList.add(userId);
+                                                                limit[0]--;
+                                                            }
+                                                        }
+                                                        userRecyclerViewAdapter.notifyDataSetChanged();
+
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    });
+                                }else {
+                                    if((rateFilterStart != 0 || rateFilterEnd != 10 )&& Objects.equals(typeFilter, "Tour Guide")) {
+                                        ratingQuery(document, userId, limit);
+                                    }
+                                    else {
+                                        if(!userIdList.contains(userId)){
+                                            // Add userId to userIdList
+                                            userIdList.add(userId);
+                                            limit[0]--;
+                                        }
+
+
+                                    }
+                                    userRecyclerViewAdapter.notifyDataSetChanged();
+
                                 }
+
+
+
+
+                            }
+                            else
+                                break;
                         }
-                        // Notify the adapter that the data has changed
-                        userRecyclerViewAdapter.notifyDataSetChanged();
-                        //userRecyclerViewAdapter = new UserRecyclerViewAdapter(getContext(), userIdList);
-                        //recyclerView.setAdapter(userRecyclerViewAdapter);
                     }
+                    // Notify adapter that data set has changed
+                    userRecyclerViewAdapter.notifyDataSetChanged();
                 }
             }).addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    Log.e("DATABASE", "Error getting documents", e);
+                    // Handle failure
+                    Log.e("loadDataFromFirebase", "Error getting documents: " + e.getMessage());
                 }
             });
         }
+
     }
+
+    private void ratingQuery(DocumentSnapshot document, String userId, final int[] limit){
+        document.getReference().collection("reviews").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
+            @Override
+            public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
+                int reviewsCount = queryDocumentSnapshots.size();
+                if (reviewsCount == 0)
+                    if (userIdList.contains(userId)) {
+                        userIdList.remove(userId);
+                        limit[0]++;
+                        userRecyclerViewAdapter.notifyDataSetChanged();
+
+                        return;
+                    }
+                Long totalRating = document.getLong("totalRating");
+                if (totalRating != null) {
+                    long rating = totalRating / reviewsCount;
+                    if (rateFilterStart <= rating && rating <= rateFilterEnd) {
+                        // Add userId to userIdList
+                        if (!userIdList.contains(userId)) {
+                            userIdList.add(userId);
+                            limit[0]--;
+                            userRecyclerViewAdapter.notifyDataSetChanged();
+
+                        }
+                    }
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                if (userIdList.contains(userId)) {
+                    userIdList.remove(userId);
+                    limit[0]++;
+                    userRecyclerViewAdapter.notifyDataSetChanged();
+
+
+                }
+            }
+        });
+    }
+
 }

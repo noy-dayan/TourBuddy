@@ -10,48 +10,27 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layout_marginTop="75dp">
 
         <ScrollView
             android:id="@+id/mainOverlay"
             android:layout_width="match_parent"
             android:layout_height="0dp"
+            android:layout_marginBottom="60dp"
             android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/filterLayout"
-            android:paddingTop="70dp"
-            android:paddingBottom="60dp"
-            >
+            app:layout_constraintTop_toTopOf="parent">
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:visibility="visible"
-
-
-                />
+                android:visibility="visible" />
 
         </ScrollView>
-
-        <!-- Loading overlay -->
-        <RelativeLayout
-            android:id="@+id/loadingOverlay"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@android:color/background_dark"
-            android:visibility="gone"
-            android:backgroundTint="@color/dark_primary">
-
-            <ProgressBar
-                android:id="@+id/progressBar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
-                android:visibility="gone"
-                android:indeterminateTint="@color/orange_primary" />
-
-        </RelativeLayout>
 
         <!-- Filter box -->
         <LinearLayout
@@ -60,8 +39,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
-            android:layout_marginTop="70dp"
-            android:background="@drawable/round_back_bg"
+            android:background="@drawable/serach_filter_bg"
+            android:layoutDirection="locale"
             android:orientation="vertical"
             android:padding="16dp"
             android:visibility="gone"
@@ -91,7 +70,7 @@
 
                 <Spinner
                     android:id="@+id/spinnerType"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:background="@drawable/round_back_bg"
                     android:layout_marginStart="10dp"
@@ -142,8 +121,8 @@
 
                 <!-- Country Spinner -->
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_gravity="start"
 
@@ -162,7 +141,7 @@
 
                     <Spinner
                         android:id="@+id/spinnerCountry"
-                        android:layout_width="wrap_content"
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:background="@drawable/round_back_bg"
 
@@ -174,18 +153,17 @@
 
                 </LinearLayout>
 
-                <!-- Rating Spinner -->
+                <!-- Rating -->
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="horizontal"
-                    android:layout_gravity="start"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
                     android:layout_marginTop="5dp"
-
-
                     >
 
                     <TextView
+                        android:layout_gravity="start"
+
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/rating"
@@ -195,16 +173,58 @@
 
                         />
 
-
-                    <Spinner
-                        android:id="@+id/spinnerRating"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:background="@drawable/round_back_bg"
+                        android:orientation="horizontal"
+                        android:layout_gravity="center"
+                        android:layout_marginTop="5dp"
 
-                        android:layout_marginStart="10dp"
-                        android:orientation="vertical"
-                        android:padding="5dp"/>
+                        >
+
+                        <com.chaek.android.RatingBar
+                            android:id="@+id/ratingBarStart"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            app:rating_flag="TEN"
+                            app:rating_star_color="@color/orange_primary"
+                            app:rating_star_empty_color="@color/grey"
+                            app:rating_star_height="23dp"
+                            app:rating_star_margin="5dp"
+                            app:rating_star_width="23dp"
+                            app:rating_start_count="0" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/to"
+                            android:layout_gravity="center"
+                            android:textSize="20sp"
+                            android:layout_marginStart="8dp"
+
+                            android:textColor="@color/white"
+                            android:fontFamily="@font/lexend"
+
+                            />
+
+
+
+                        <com.chaek.android.RatingBar
+                            android:id="@+id/ratingBarEnd"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            app:rating_flag="TEN"
+                            android:layout_marginStart="8dp"
+
+                            app:rating_star_color="@color/orange_primary"
+                            app:rating_star_empty_color="@color/grey"
+                            app:rating_star_height="23dp"
+                            app:rating_star_margin="5dp"
+                            app:rating_star_width="23dp"
+                            app:rating_start_count="10" />
+                    </LinearLayout>
 
 
 
@@ -270,8 +290,10 @@
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
-
-
+        <View
+            android:layout_width="wrap_content"
+            android:layout_height="2dp"
+            android:background="@color/orange_primary"/>
 
     </LinearLayout>
 

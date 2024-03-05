@@ -516,24 +516,11 @@ public class TourPackageEditFragment extends Fragment implements MultiSpinner.Mu
         List<String> selectedItems = new ArrayList<>();
         for (int i = 0; i < selected.length; i++) {
             if (selected[i]) {
-                String transformedItem = getSubstringFromCountry(items.get(i));
+                String transformedItem = AppUtils.getSubstringFromCountry(items.get(i));
                 selectedItems.add(transformedItem);
             }
         }
         return selectedItems;
     }
 
-    private String getSubstringFromCountry(String country) {
-        // Assuming the country has the format: "Country (AB)"
-        int startIndex = country.lastIndexOf('(');
-        int endIndex = country.lastIndexOf(')');
-
-        if (startIndex != -1 && endIndex != -1 && startIndex < endIndex) {
-            // Extract the substring between '(' and ')'
-            return country.substring(startIndex + 1, endIndex);
-        } else {
-            // Return the original country if the format is not as expected
-            return country;
-        }
-    }
 }

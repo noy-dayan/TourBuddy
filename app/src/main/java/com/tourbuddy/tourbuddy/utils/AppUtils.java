@@ -118,4 +118,18 @@ public class AppUtils {
                     .commit();
         }
     }
+
+    public static String getSubstringFromCountry(String country) {
+        // Assuming the country has the format: "Country (AB)"
+        int startIndex = country.lastIndexOf('(');
+        int endIndex = country.lastIndexOf(')');
+
+        if (startIndex != -1 && endIndex != -1 && startIndex < endIndex) {
+            // Extract the substring between '(' and ')'
+            return country.substring(startIndex + 1, endIndex);
+        } else {
+            // Return the original country if the format is not as expected
+            return country;
+        }
+    }
 }
