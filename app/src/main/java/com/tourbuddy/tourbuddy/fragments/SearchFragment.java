@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -120,6 +121,7 @@ public class SearchFragment extends Fragment {
         recyclerView = view.findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         userRecyclerViewAdapter = new UserRecyclerViewAdapter(getActivity(), getContext(), userIdList);
+        recyclerView.setItemViewCacheSize(50);
         recyclerView.setAdapter(userRecyclerViewAdapter);
 
         userNameInputManager();
@@ -138,6 +140,7 @@ public class SearchFragment extends Fragment {
             }
         });
 
+        filterLayout.setOnClickListener(v -> {}); //
         loadDataFromFirebase();
         isInit = false;
 
@@ -295,6 +298,8 @@ public class SearchFragment extends Fragment {
                 return true;
             }
         });
+
+
     }
 
     /**
@@ -305,17 +310,12 @@ public class SearchFragment extends Fragment {
         mUser = mAuth.getCurrentUser();
         if (isAdded() && mUser != null) {
             String currUserId = mUser.getUid();
+            userIdList.clear(); // Clear the list before adding filtered users
+
             // Build the base query
             CollectionReference usersRef = db.collection("users");
             Query query = usersRef;
-
-            // Apply username filter if not empty
-            if (!usernameFilter.isEmpty()) {
-                // Construct a prefix search query
-                String endPrefix = usernameFilter + '\uf8ff'; // \uf8ff is Unicode character for highest UTF-16 code unit
-                query = query.whereGreaterThanOrEqualTo("username", usernameFilter)
-                        .whereLessThan("username", endPrefix);
-            }
+            query = query.whereNotEqualTo(FieldPath.documentId(), currUserId);
 
             // Apply type filter if not "All"
             if (!typeFilter.equals("All"))
@@ -325,17 +325,11 @@ public class SearchFragment extends Fragment {
             if (!genderFilter.equals("All"))
                 query = query.whereEqualTo("gender", genderFilter);
 
-
-
-
-
-
             final int[] limit = {50};
             // Execute the query
             query.get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
                 @Override
                 public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
-                    userIdList.clear(); // Clear the list before adding filtered users
                     if (!queryDocumentSnapshots.isEmpty()) {
                         // Process the user IDs
                         for (DocumentSnapshot document : queryDocumentSnapshots.getDocuments()) {
@@ -346,19 +340,21 @@ public class SearchFragment extends Fragment {
                                         @Override
                                         public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
                                             for (DocumentSnapshot tourPackageDocument : queryDocumentSnapshots.getDocuments()) {
-                                                if (tourPackageDocument.exists()){
+                                                if (tourPackageDocument.exists()) {
                                                     ArrayList<String> includedCountries = (ArrayList<String>) tourPackageDocument.get("includedCountries");
                                                     if (includedCountries.contains(countryFilter)) {
-                                                        if((rateFilterStart != 0 || rateFilterEnd != 10 )&& Objects.equals(typeFilter, "Tour Guide")) {
-                                                            ratingQuery(document, userId, limit);
-                                                        }
+                                                        if((0 < rateFilterStart || rateFilterEnd < 10) && Objects.equals(typeFilter, "Tour Guide"))
+                                                            ratingQuery(document, limit);
                                                         else {
-                                                            // Add userId to userIdList
-                                                            if(!userIdList.contains(userId)){
+                                                            if (!usernameFilter.isEmpty())
+                                                                usernameQuery(document, limit);
+                                                            else
                                                                 // Add userId to userIdList
-                                                                userIdList.add(userId);
-                                                                limit[0]--;
-                                                            }
+                                                                if (!userIdList.contains(userId)) {
+                                                                    // Add userId to userIdList
+                                                                    userIdList.add(userId);
+                                                                    limit[0]--;
+                                                                }
                                                         }
                                                         userRecyclerViewAdapter.notifyDataSetChanged();
 
@@ -367,26 +363,23 @@ public class SearchFragment extends Fragment {
                                             }
                                         }
                                     });
-                                }else {
-                                    if((rateFilterStart != 0 || rateFilterEnd != 10 )&& Objects.equals(typeFilter, "Tour Guide")) {
-                                        ratingQuery(document, userId, limit);
-                                    }
+                                } else {
+                                    if((0 < rateFilterStart || rateFilterEnd < 10)&& Objects.equals(typeFilter, "Tour Guide"))
+                                        ratingQuery(document, limit);
+
                                     else {
-                                        if(!userIdList.contains(userId)){
+                                        if (!usernameFilter.isEmpty())
+                                            usernameQuery(document, limit);
+                                        else
                                             // Add userId to userIdList
-                                            userIdList.add(userId);
-                                            limit[0]--;
-                                        }
-
-
+                                            if (!userIdList.contains(userId)) {
+                                                // Add userId to userIdList
+                                                userIdList.add(userId);
+                                                limit[0]--;
+                                            }
                                     }
                                     userRecyclerViewAdapter.notifyDataSetChanged();
-
                                 }
-
-
-
-
                             }
                             else
                                 break;
@@ -399,14 +392,36 @@ public class SearchFragment extends Fragment {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     // Handle failure
-                    Log.e("loadDataFromFirebase", "Error getting documents: " + e.getMessage());
+                    Log.e("DATABASE", "Error getting documents: " + e.getMessage());
                 }
             });
+            userRecyclerViewAdapter.notifyDataSetChanged();
+
         }
 
     }
 
-    private void ratingQuery(DocumentSnapshot document, String userId, final int[] limit){
+    private void usernameQuery(DocumentSnapshot document, final int[] limit){
+        String username = document.getString("username");
+        if (username != null && username.toLowerCase().startsWith(usernameFilter.toLowerCase())) {
+            // Add userId to userIdList
+            String userId = document.getId();
+            if (!userIdList.contains(userId)) {
+                userIdList.add(userId);
+                limit[0]--;
+            }
+        }
+        else if(username != null && !username.toLowerCase().startsWith(usernameFilter.toLowerCase())) {
+            String userId = document.getId();
+            if (!userIdList.contains(userId)) {
+                userIdList.remove(userId);
+                limit[0]++;
+            }
+        }
+    }
+
+    private void ratingQuery(DocumentSnapshot document, final int[] limit){
+        String userId = document.getId();
         document.getReference().collection("reviews").get().addOnSuccessListener(new OnSuccessListener<QuerySnapshot>() {
             @Override
             public void onSuccess(QuerySnapshot queryDocumentSnapshots) {
@@ -416,22 +431,25 @@ public class SearchFragment extends Fragment {
                         userIdList.remove(userId);
                         limit[0]++;
                         userRecyclerViewAdapter.notifyDataSetChanged();
-
                         return;
                     }
+
                 Long totalRating = document.getLong("totalRating");
                 if (totalRating != null) {
                     long rating = totalRating / reviewsCount;
                     if (rateFilterStart <= rating && rating <= rateFilterEnd) {
                         // Add userId to userIdList
-                        if (!userIdList.contains(userId)) {
+                        if (!usernameFilter.isEmpty())
+                            usernameQuery(document, limit);
+                        else if (!userIdList.contains(userId)) {
                             userIdList.add(userId);
                             limit[0]--;
-                            userRecyclerViewAdapter.notifyDataSetChanged();
 
                         }
                     }
                 }
+                userRecyclerViewAdapter.notifyDataSetChanged();
+
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -440,8 +458,6 @@ public class SearchFragment extends Fragment {
                     userIdList.remove(userId);
                     limit[0]++;
                     userRecyclerViewAdapter.notifyDataSetChanged();
-
-
                 }
             }
         });

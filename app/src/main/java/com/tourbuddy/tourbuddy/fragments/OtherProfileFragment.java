@@ -225,8 +225,11 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                         }).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
                             @Override
                             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                                if(Objects.equals(thisUserType, "Tour Guide"))
+                                    btnAddReview.setVisibility(View.GONE);
+
                                 if(Objects.equals(thisUserType, "Tourist"))
-                                    if(Objects.equals(otherUserType, "Tour Guide")){
+                                    if(Objects.equals(otherUserType, "Tour Guide"))
                                         btnAddReview.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(View v) {
@@ -362,12 +365,9 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                                                 }
                                             }
                                         });
-                                    }
+
                                     else
                                         btnAddReview.setVisibility(View.GONE);
-
-                                else
-                                    btnAddReview.setVisibility(View.GONE);
 
                             }
                         }).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {

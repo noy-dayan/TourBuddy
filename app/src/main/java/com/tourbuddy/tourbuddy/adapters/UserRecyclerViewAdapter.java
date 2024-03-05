@@ -19,8 +19,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.facebook.shimmer.ShimmerFrameLayout;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -43,7 +45,6 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
     StorageReference storageReference = storage.getReference();
     int loadedItemCount = 0; // Counter for loaded items
     List<ViewHolder> viewHolderList = new ArrayList<>(); // Initialize viewHolderList
-
     public UserRecyclerViewAdapter(Activity activity, Context context,
                                    List<String> userIdList) {
         this.activity = activity;
@@ -60,6 +61,7 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        holder.shimmerLayout.showShimmer(true);
         String userId = userIdList.get(position);
         viewHolderList.add(holder);
         loadDataFromFirebase(userId, holder);
@@ -74,7 +76,7 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
         ImageView profilePic;
         TextView username, type;
         UserRecyclerViewAdapter userRecyclerViewAdapter;
-        //ShimmerFrameLayout shimmerLayout;
+        ShimmerFrameLayout shimmerLayout;
 
         public ViewHolder(@NonNull View itemView, UserRecyclerViewAdapter userRecyclerViewAdapter) {
             super(itemView);
@@ -82,10 +84,7 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
             profilePic = itemView.findViewById(R.id.userProfilePic);
             username = itemView.findViewById(R.id.username);
             type = itemView.findViewById(R.id.type);
-            //shimmerLayout = itemView.findViewById(R.id.shimmer_layout);
-
-            // Start the shimmer effect
-            //shimmerLayout.startShimmer();
+            shimmerLayout = itemView.findViewById(R.id.shimmer_layout);
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -119,22 +118,18 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
 
     private void loadDataFromFirebase(String userId, @NonNull ViewHolder holder) {
         if (userId != null) {
-            DocumentReference userDocumentRef = db.collection("users").document(userId);
+            holder.shimmerLayout.showShimmer(true);
+            // Reset profile pic, username, and type to default or clear
+            holder.profilePic.setImageResource(R.drawable.profilepic_default);
+            holder.username.setText("▅▅▅▅▅▅▅▅▅▅▅▅");
+            holder.type.setText("▅▅▅▅▅▅▅▅▅▅▅▅");
 
+            DocumentReference userDocumentRef = db.collection("users").document(userId);
             userDocumentRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                 @Override
                 public void onSuccess(DocumentSnapshot documentSnapshot) {
                     if (context != null && documentSnapshot.exists()) {
-                        if (documentSnapshot.contains("username"))
-                            holder.username.setText(documentSnapshot.getString("username"));
-
-                        if (documentSnapshot.contains("type")) {
-                            if (Objects.equals(documentSnapshot.getString("type"), "Tourist"))
-                                holder.type.setText(context.getResources().getString(R.string.tourist));
-                            else
-                                holder.type.setText(context.getResources().getString(R.string.tour_guide));
-                        }
-
+                        holder.shimmerLayout.startShimmer();
                         storageReference.child("images/" + userId + "/profilePic").getDownloadUrl()
                                 .addOnFailureListener(new OnFailureListener() {
                                     @Override
@@ -142,12 +137,7 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
                                         Glide.with(holder.itemView.getContext())
                                                 .load(R.drawable.profilepic_default)
                                                 .into(holder.profilePic);
-                                        Log.e("Glide", "Error loading image", exception);
-                                        // Increment the loadedItemCount
-                                        loadedItemCount++;
-                                        // Check if all items have finished loading
-                                        //holder.shimmerLayout.stopShimmer();
-
+                                        Log.e("Glide", "Error loading profileImage", exception);
                                     }
                                 }).addOnSuccessListener(new OnSuccessListener<Uri>() {
                                     @Override
@@ -156,11 +146,27 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
                                                 .load(uri)
                                                 .apply(RequestOptions.circleCropTransform())
                                                 .into(holder.profilePic);
+                                        Log.d("Glide", "Success loading profileImage");
+
+                                    }
+                                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Uri> task) {
+                                        if (documentSnapshot.contains("username"))
+                                            holder.username.setText(documentSnapshot.getString("username"));
+
+                                        if (documentSnapshot.contains("type")) {
+                                            if (Objects.equals(documentSnapshot.getString("type"), "Tourist"))
+                                                holder.type.setText(context.getResources().getString(R.string.tourist));
+                                            else
+                                                holder.type.setText(context.getResources().getString(R.string.tour_guide));
+                                        }
+
+                                        // Check if all items have finished loading
+                                        holder.shimmerLayout.hideShimmer();
+
                                         // Increment the loadedItemCount
                                         loadedItemCount++;
-                                        // Check if all items have finished loading
-                                        //holder.shimmerLayout.stopShimmer();
-
                                     }
                                 });
                     }
@@ -172,10 +178,7 @@ public class UserRecyclerViewAdapter extends RecyclerView.Adapter<UserRecyclerVi
 
                     // Increment the loadedItemCount
                     loadedItemCount++;
-
-                    // Check if all items have finished loading
-                    //holder.shimmerLayout.stopShimmer();
-                    //holder.shimmerLayout.setVisibility(View.GONE);
+                    holder.shimmerLayout.startShimmer();
 
                 }
             });
