@@ -2,14 +2,17 @@ package com.tourbuddy.tourbuddy.managers;
 
 import android.util.Log;
 
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.tourbuddy.tourbuddy.utils.Chat;
+import com.tourbuddy.tourbuddy.utils.Message;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -166,6 +169,55 @@ public class FirebaseManager {
                         }
                     });
         }
+    }
+
+    public void listenForNewMessages(String chatId, OnNewMessageListener listener) {
+        mFirestore.collection("chats")
+                .document(chatId)
+                .collection("messages")
+                .orderBy("timestamp", Query.Direction.DESCENDING) // Listen for new messages from most recent
+                .limit(1)
+                .addSnapshotListener((queryDocumentSnapshots, e) -> {
+                    if (e != null) {
+                        Log.e(TAG, "Error listening for new messages: ", e);
+                        listener.onNewMessageFailed(e);
+                        return;
+                    }
+
+                    if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty()) {
+                        DocumentSnapshot documentSnapshot = queryDocumentSnapshots.getDocuments().get(0);
+                        String messageId = documentSnapshot.getId();
+                        String content = documentSnapshot.getString("content");
+                        Timestamp timestamp = documentSnapshot.getTimestamp("timestamp");
+                        String senderId = documentSnapshot.getString("senderId");
+                        Date date = timestamp.toDate(); // Convert Timestamp to Date
+                        Message message = new Message(messageId, content,
+                                senderId,date);
+                        listener.onNewMessageReceived(message);
+                    }
+                });
+    }
+
+    private void listenForNewMessages(String chatId) {
+        FirebaseManager firebaseManager = new FirebaseManager();
+        firebaseManager.listenForNewMessages(chatId, new FirebaseManager.OnNewMessageListener() {
+            @Override
+            public void onNewMessageReceived(Message message) {
+                // Handle new message received
+                // Update UI accordingly
+            }
+
+            @Override
+            public void onNewMessageFailed(Exception e) {
+                // Handle failure to listen for new messages
+                Log.e(TAG, "Failed to listen for new messages: ", e);
+            }
+        });
+    }
+
+    public interface OnNewMessageListener {
+        void onNewMessageReceived(Message message);
+        void onNewMessageFailed(Exception e);
     }
 
 
