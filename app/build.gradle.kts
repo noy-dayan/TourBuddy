@@ -21,8 +21,8 @@ android {
         release {
             isMinifyEnabled = false
             proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                    getDefaultProguardFile("proguard-android-optimize.txt"),
+                    "proguard-rules.pro"
             )
         }
     }
@@ -41,7 +41,7 @@ android {
 }
 
 dependencies {
-
+    implementation("androidx.room:room-runtime:2.4.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
     implementation("androidx.constraintlayout:constraintlayout:2.1.4")
@@ -49,6 +49,7 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
+    annotationProcessor("androidx.room:room-compiler:2.4.0")
     // Spinner
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
 
@@ -78,7 +79,6 @@ dependencies {
 
     // Average Rating System
     implementation("com.github.Inconnu08:android-ratingreviews:1.2.0") {
-
     }
     implementation("com.facebook.shimmer:shimmer:0.5.0")
 

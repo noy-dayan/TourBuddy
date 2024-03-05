@@ -1,14 +1,68 @@
-<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/dark_primary"
     tools:context=".fragments.ChatFragment">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:layout_height="match_parent">
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+
+            <!-- Title TextView -->
+            <TextView
+                android:id="@+id/title_messanger_textview"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/orange_primary"
+                android:gravity="center"
+                android:text="Messages"
+                android:textColor="@color/cardview_light_background"
+                android:textSize="24sp"
+                android:textStyle="bold" />
+
+            <!-- RecyclerView -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/recycler_view_messages"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <!-- LinearLayout for input -->
+            <LinearLayout
+                android:id="@+id/layout_input"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal">
+
+                <!-- EditText for typing messages -->
+                <EditText
+                    android:id="@+id/edittext_chat_message"
+                    android:layout_width="0dp"
+                    android:layout_height="37dp"
+                    android:layout_marginLeft="5dp"
+                    android:layout_weight="1"
+                    android:background="@color/cardview_light_background"
+                    android:hint="Type Here"
+                    android:textColor="@color/black"
+                    android:visibility="visible" />
+
+                <!-- Button to send messages -->
+                <Button
+                    android:id="@+id/sendBTN"
+                    android:layout_width="100dp"
+                    android:layout_height="match_parent"
+                    android:backgroundTint="@color/orange_primary"
+                    android:text="Send"
+                    android:textColor="@color/cardview_light_background"
+                    android:visibility="visible" />
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </FrameLayout>
