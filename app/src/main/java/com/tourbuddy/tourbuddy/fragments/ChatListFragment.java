@@ -49,11 +49,11 @@ public class ChatListFragment extends Fragment implements ChatFirebaseManager.On
             // Fragment is not attached to an activity, return
             return;
 
-        if (chats.size() == 0) {
+        if (chats.size() == 0)
             noActiveChats.setVisibility(View.VISIBLE);
-        } else {
+        else
             noActiveChats.setVisibility(View.GONE);
-        }
+
 
         // Extract unique user IDs from fetched chats
         chatListAdapter = new ChatListAdapter(requireActivity(), chats, new ChatListAdapter.OnChatItemClickListener() {

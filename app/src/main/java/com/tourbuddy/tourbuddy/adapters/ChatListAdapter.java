@@ -104,7 +104,10 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         String formattedDate = dateFormat.format(date);
 
         holder.textViewTimeStamp.setText(formattedDate);
-        holder.textViewLastMessage.setText(chat.getLastMessage());
+        if (Objects.equals(chat.getLastMessage(), "null"))
+            holder.textViewLastMessage.setText("");
+        else
+            holder.textViewLastMessage.setText(chat.getLastMessage());
 
         String otherUserId = "";
         List<String> participants = chat.getParticipants();
