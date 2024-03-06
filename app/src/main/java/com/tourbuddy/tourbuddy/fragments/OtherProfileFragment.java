@@ -261,15 +261,29 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                             @Override
                             public void onSuccess(DocumentSnapshot thisUserdocumentSnapshot) {
                                 if (isAdded() && thisUserdocumentSnapshot.exists()) {
-                                    // Check if the user type exists in the Firestore document
-                                    if (thisUserdocumentSnapshot.contains("type")) {
-                                        thisUserType = thisUserdocumentSnapshot.getString("type");
-                                        if (Objects.equals(thisUserType, "Tourist"))
-                                            btnAddReview.setVisibility(View.VISIBLE);
-                                        else
-                                            btnAddReview.setVisibility(View.GONE);
 
-                                    }
+                                    thisUserDocumentRef.collection("reviews").document(otherUserId).get()
+                                            .addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                        @Override
+                                        public void onSuccess(DocumentSnapshot reviewsDocumentSnapshot) {
+                                            if(reviewsDocumentSnapshot.exists())
+                                                btnAddReview.setVisibility(View.GONE);
+                                            else {
+                                                // Check if the user type exists in the Firestore document
+                                                if (thisUserdocumentSnapshot.contains("type")) {
+                                                    thisUserType = thisUserdocumentSnapshot.getString("type");
+                                                    if (Objects.equals(thisUserType, "Tourist"))
+                                                        btnAddReview.setVisibility(View.VISIBLE);
+                                                    else
+                                                        btnAddReview.setVisibility(View.GONE);
+                                                }
+                                                else
+                                                    btnAddReview.setVisibility(View.GONE);
+
+                                            }
+                                        }
+                                    });
+
                                 }
                             }
                         }).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
