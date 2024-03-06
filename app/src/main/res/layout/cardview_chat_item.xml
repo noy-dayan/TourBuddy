@@ -9,11 +9,8 @@
     android:layout_marginEnd="16dp"
     android:layout_marginBottom="6dp"
     android:layout_marginTop="6dp"
-
-
-
-
-    android:background="@drawable/round_back_bg">
+    android:background="@drawable/round_back_bg"
+    android:layoutDirection="ltr">
 
     <LinearLayout
         android:layout_width="match_parent"

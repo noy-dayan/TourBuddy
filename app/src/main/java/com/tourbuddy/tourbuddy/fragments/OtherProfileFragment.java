@@ -107,8 +107,8 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
     RecyclerView recyclerViewTours, recyclerViewReviews;
     TourPackageRecyclerViewAdapter tourPackageRecyclerViewAdapter;
     ReviewRecyclerViewAdapter reviewsRecyclerViewAdapter;
-    List<String> tourPackagesIdList = new ArrayList<>();
-    List<String> reviewsIdList = new ArrayList<>();
+    List<String> tourPackagesIdList;
+    List<String> reviewsIdList;
 
     String otherUserId, thisUserId, thisUserType = "Tour Guide", otherUserType;
 
@@ -116,7 +116,7 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
     final LocalDate max = min.plusMonths(6);
     final String DATE_FORMAT = "yyyy-MM-dd";
 
-    List<LocalDate> decoratedDatesList = new ArrayList<>(); // Define this globally
+    List<LocalDate> decoratedDatesList;
     List<ActiveTour> activeTours;
     List<DocumentReference> bookedToursRefs;
     MaterialCalendarView calendarView;
@@ -166,6 +166,10 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
 
         swipeRefreshLayout.setProgressBackgroundColor(R.color.dark_primary);
         swipeRefreshLayout.setColorScheme(R.color.orange_primary);
+
+        tourPackagesIdList = new ArrayList<>();
+        reviewsIdList = new ArrayList<>();
+        decoratedDatesList = new ArrayList<>();
 
         // Retrieve user ID from arguments
         if (getArguments() != null)

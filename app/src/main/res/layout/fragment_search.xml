@@ -247,7 +247,8 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/topRelativeLayout">
+            android:id="@+id/topRelativeLayout"
+            android:layoutDirection="ltr">
 
             <androidx.appcompat.widget.SearchView
                 android:id="@+id/searchView"

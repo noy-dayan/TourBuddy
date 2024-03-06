@@ -198,7 +198,8 @@
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
                         android:scrollbars="none"
-                        app:layout_constraintTop_toBottomOf="@id/noAvailableTourPackages" />
+                        app:layout_constraintTop_toBottomOf="@id/noAvailableTourPackages"
+                        android:layoutDirection="ltr"/>
 
 
                     <com.prolificinteractive.materialcalendarview.MaterialCalendarView
@@ -359,7 +360,8 @@
 
                         app:layout_constraintEnd_toEndOf="parent"
                         app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@+id/totalRatingLayout" />
+                        app:layout_constraintTop_toBottomOf="@+id/totalRatingLayout"
+                        android:layoutDirection="ltr"/>
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
 
