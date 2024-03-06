@@ -227,11 +227,11 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
         // Retrieve userType from Firestore, duplicated from loadDataFromFirebase in case there's an asynchronous delay
         otherUserDocumentRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
             @Override
-            public void onSuccess(DocumentSnapshot thisUserdocumentSnapshot) {
-                if (isAdded() && thisUserdocumentSnapshot.exists()) {
+            public void onSuccess(DocumentSnapshot otherUserdocumentSnapshot) {
+                if (isAdded() && otherUserdocumentSnapshot.exists()) {
                     // Check if the user type exists in the Firestore document
-                    if (thisUserdocumentSnapshot.contains("type")) {
-                        otherUserType = thisUserdocumentSnapshot.getString("type");
+                    if (otherUserdocumentSnapshot.contains("type")) {
+                        otherUserType = otherUserdocumentSnapshot.getString("type");
                         if (Objects.equals(otherUserType, "Tour Guide")) {
                             tourGuide_tourBookingManager();
                             tourGuide_reviewsManager();
@@ -261,7 +261,10 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                                     if (thisUserdocumentSnapshot.contains("type")) {
                                         thisUserType = thisUserdocumentSnapshot.getString("type");
                                         if (Objects.equals(thisUserType, "Tourist"))
+                                            btnAddReview.setVisibility(View.VISIBLE);
+                                        else
                                             btnAddReview.setVisibility(View.GONE);
+
                                     }
                                 }
                             }
