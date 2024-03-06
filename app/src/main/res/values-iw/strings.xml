@@ -145,6 +145,11 @@
     <string name="please_provide_your_account_email_address_for_which_you_want_to_reset_your_password">אנא ספק את כתובת הדוא\"ל של חשבונך שעבורה ברצונך לאפס את הסיסמה</string>
     <string name="password_reset_email_sent_please_check_your_email">אימייל איפוס סיסמה נשלח. אנא בדוק את המייל שלך.</string>
     <string name="failed_to_send_password_reset_email_please_try_again">שליחת האימייל לאיפוס סיסמה נכשלה. בבקשה נסה שוב.</string>
+    <string name="gender_colon">מגדר:</string>
+    <string name="messages">הודעות</string>
+    <string name="chats">צ\'אטים</string>
+    <string name="enter_message">הזן הודעה</string>
+    <string name="you_have_no_active_chats">אין לך צ\'אטים פעילים</string>
 
 
 </resources>

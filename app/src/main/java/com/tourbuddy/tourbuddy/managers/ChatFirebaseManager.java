@@ -14,19 +14,16 @@ import com.tourbuddy.tourbuddy.utils.Message;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-public class FirebaseManager {
+public class ChatFirebaseManager {
 
-    private static final String TAG = "FirebaseManager";
-    private FirebaseAuth mAuth;
-    private FirebaseFirestore mFirestore;
-    private String userId;
+    FirebaseAuth mAuth;
+    FirebaseFirestore mFirestore;
+    String userId;
 
-    public FirebaseManager() {
+    public ChatFirebaseManager() {
         mAuth = FirebaseAuth.getInstance();
         mFirestore = FirebaseFirestore.getInstance();
         FirebaseUser currentUser = mAuth.getCurrentUser();
@@ -80,7 +77,7 @@ public class FirebaseManager {
                         fetchLastMessages(chats, listener); // Fetch last messages for each chat
                     } else {
                         listener.onChatsFetchFailed(task.getException());
-                        Log.e(TAG, "Error fetching chats: ", task.getException());
+                        Log.e("DATABASE", "Error fetching chats: ", task.getException());
                     }
                 });
     }
@@ -92,7 +89,7 @@ public class FirebaseManager {
             if (chat != null) {
                 chats.add(chat);
             } else {
-                Log.e(TAG, "Error converting Firestore document to Chat object: " + document.getId());
+                Log.e("DATABASE", "Error converting Firestore document to Chat object: " + document.getId());
             }
         }
         return chats;
@@ -100,18 +97,16 @@ public class FirebaseManager {
 
     private List<String> extractUserIdsFromChats(List<Chat> chats) {
         List<String> userIds = new ArrayList<>();
-        for (Chat chat : chats) {
-            for (String participant : chat.getParticipants()) {
-                if (!userIds.contains(participant)) { // Check if participant is not already in the list
+        for (Chat chat : chats)
+            for (String participant : chat.getParticipants())
+                if (!userIds.contains(participant))  // Check if participant is not already in the list
                     userIds.add(participant);
-                }
-            }
-        }
+
         return userIds;
     }
 
     private void fetchLastMessages(List<Chat> chats, OnChatsFetchListener listener) {
-        for (Chat chat : chats) {
+        for (Chat chat : chats)
             mFirestore.collection("chats")
                     .document(chat.getChatId())
                     .collection("messages")
@@ -127,16 +122,16 @@ public class FirebaseManager {
                             // Update the chat object with the last message
                             chat.setLastMessage(lastMessage);
                             // Notify the listener when all last messages are fetched
-                            if (chats.indexOf(chat) == chats.size() - 1) {
+                            if (chats.indexOf(chat) == chats.size() - 1)
                                 listener.onChatsFetched(chats);
-                            }
+
                         } else {
                             // Handle failure to fetch last message
-                            Log.e(TAG, "Error fetching last message for chat: " + chat.getChatId());
+                            Log.e("DATABASE", "Error fetching last message for chat: " + chat.getChatId());
                             listener.onChatsFetchFailed(task.getException());
                         }
                     });
-        }
+
     }
 
 
@@ -164,7 +159,7 @@ public class FirebaseManager {
                                 listener.onUsernamesFetched(userIdToUsernameMap); // Pass userIdToUsernameMap to the listener
                             }
                         } else {
-                            Log.e(TAG, "Error fetching username for userId: " + userId);
+                            Log.e("DATABASE", "Error fetching username for userId: " + userId);
                             listener.onUsernamesFetchFailed(task.getException());
                         }
                     });
@@ -179,7 +174,7 @@ public class FirebaseManager {
                 .limit(1)
                 .addSnapshotListener((queryDocumentSnapshots, e) -> {
                     if (e != null) {
-                        Log.e(TAG, "Error listening for new messages: ", e);
+                        Log.e("DATABASE", "Error listening for new messages: ", e);
                         listener.onNewMessageFailed(e);
                         return;
                     }
@@ -199,8 +194,8 @@ public class FirebaseManager {
     }
 
     private void listenForNewMessages(String chatId) {
-        FirebaseManager firebaseManager = new FirebaseManager();
-        firebaseManager.listenForNewMessages(chatId, new FirebaseManager.OnNewMessageListener() {
+        ChatFirebaseManager chatFirebaseManager = new ChatFirebaseManager();
+        chatFirebaseManager.listenForNewMessages(chatId, new ChatFirebaseManager.OnNewMessageListener() {
             @Override
             public void onNewMessageReceived(Message message) {
                 // Handle new message received
@@ -210,7 +205,7 @@ public class FirebaseManager {
             @Override
             public void onNewMessageFailed(Exception e) {
                 // Handle failure to listen for new messages
-                Log.e(TAG, "Failed to listen for new messages: ", e);
+                Log.e("DATABASE", "Failed to listen for new messages: ", e);
             }
         });
     }

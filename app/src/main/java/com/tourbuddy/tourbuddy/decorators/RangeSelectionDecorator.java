@@ -31,13 +31,11 @@ public class RangeSelectionDecorator implements DayViewDecorator {
             if (dates.size() >= 2) {
                 this.startDate = dates.get(0).getDate();
                 this.endDate = dates.get(dates.size() - 1).getDate();
-                Log.d("TAG", "setSelectedDates: 1");
 
             }
             else if (dates.size() == 1){
                 this.startDate = dates.get(0).getDate();
                 this.endDate = startDate;
-                Log.d("TAG", "setSelectedDates: 2");
 
             }
         }

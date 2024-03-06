@@ -1,55 +1,69 @@
 package com.tourbuddy.tourbuddy.fragments;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.tourbuddy.tourbuddy.R;
 import com.tourbuddy.tourbuddy.adapters.ChatListAdapter;
-import com.tourbuddy.tourbuddy.managers.FirebaseManager;
+import com.tourbuddy.tourbuddy.managers.ChatFirebaseManager;
 import com.tourbuddy.tourbuddy.utils.Chat;
 
 import java.util.List;
 import java.util.Map;
 
-public class ChatListFragment extends Fragment implements FirebaseManager.OnChatsAndUsernamesFetchListener {
-    private RecyclerView recyclerView;
-    private ChatListAdapter adapter;
-    private FirebaseManager firebaseManager;
+public class ChatListFragment extends Fragment implements ChatFirebaseManager.OnChatsAndUsernamesFetchListener {
+    RecyclerView recyclerView;
+    ChatListAdapter chatListAdapter;
+    ChatFirebaseManager chatFirebaseManager;
+    TextView noActiveChats;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_chat_list, container, false);
-        recyclerView = view.findViewById(R.id.recyclerView);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
-        firebaseManager = new FirebaseManager();
-        fetchChatsAndUsernames();
+        if(isAdded()) {
+            recyclerView = view.findViewById(R.id.recyclerView);
+            noActiveChats = view.findViewById(R.id.noAvailableChats);
+            recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
+            chatFirebaseManager = new ChatFirebaseManager();
+            fetchChatsAndUsernames();
+        }
         return view;
     }
 
     private void fetchChatsAndUsernames() {
-        firebaseManager.fetchChatsAndUsernames(this);
+        chatFirebaseManager.fetchChatsAndUsernames(this);
     }
 
     @Override
     public void onChatsAndUsernamesFetched(List<Chat> chats, Map<String, String> userIdToUsernameMap) {
+        if (!isAdded())
+            // Fragment is not attached to an activity, return
+            return;
+
+        if (chats.size() == 0) {
+            noActiveChats.setVisibility(View.VISIBLE);
+        } else {
+            noActiveChats.setVisibility(View.GONE);
+        }
+
         // Extract unique user IDs from fetched chats
-        adapter = new ChatListAdapter(chats, new ChatListAdapter.OnChatItemClickListener() {
+        chatListAdapter = new ChatListAdapter(requireActivity(), chats, new ChatListAdapter.OnChatItemClickListener() {
             @Override
             public void onChatItemClick(Chat chat) {
-                changeFragment(chat);
+                switchFragment(chat);
             }
         });
-        recyclerView.setAdapter(adapter);
-        String curId = firebaseManager.getUserId();
+        recyclerView.setAdapter(chatListAdapter);
+        String curId = chatFirebaseManager.getUserId();
         // Assign usernames to chat participants
         for (Chat chat : chats) {
             for (String participant : chat.getParticipants()) {
@@ -60,10 +74,10 @@ public class ChatListFragment extends Fragment implements FirebaseManager.OnChat
                 }
             }
         }
-        adapter.notifyDataSetChanged(); // Notify adapter of changes
+        chatListAdapter.notifyDataSetChanged(); // Notify adapter of changes
     }
 
-    private void changeFragment(Chat chat) {
+    private void switchFragment(Chat chat) {
         if (getActivity() != null) {
             FragmentActivity activity = getActivity();
             if (activity.getSupportFragmentManager() != null) {

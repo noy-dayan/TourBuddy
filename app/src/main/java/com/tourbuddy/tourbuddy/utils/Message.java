@@ -15,7 +15,6 @@ public class Message {
     private Date timestamp;
     private String senderName;
 
-    //private static NamesManager namesManager = NamesManager.getInstance();
     private boolean sentByCurrentUser;
 
     // Empty constructor needed for Firestore

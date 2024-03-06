@@ -1,15 +1,19 @@
 package com.tourbuddy.tourbuddy.fragments;
 
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -24,7 +28,9 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.tourbuddy.tourbuddy.R;
-import com.tourbuddy.tourbuddy.adapters.MessageListAdapter;
+import com.tourbuddy.tourbuddy.activities.MainActivity;
+import com.tourbuddy.tourbuddy.adapters.ChatMessageListAdapter;
+import com.tourbuddy.tourbuddy.utils.AppUtils;
 import com.tourbuddy.tourbuddy.utils.Chat;
 import com.tourbuddy.tourbuddy.utils.Message;
 
@@ -35,17 +41,15 @@ import java.util.Date;
 import java.util.List;
 
 public class ChatFragment extends Fragment {
-    private RecyclerView recyclerView;
-    private MessageListAdapter adapter;
-    private List<Message> messageList;
-    private String userId;
-    private FirebaseFirestore db;
-    private Chat chat;
-    private EditText editTextMessage;
-    private Button sendButton;
-    private static final String TAG = "ChatFragment";
-
-    private String chatId;
+    RecyclerView recyclerView;
+    ChatMessageListAdapter adapter;
+    List<Message> messageList;
+    String userId;
+    FirebaseFirestore db;
+    Chat chat;
+    EditText editTextMessage;
+    String chatId;
+    ImageView btnBack, btnSend;
 
     public ChatFragment(Chat chat) {
         this.chat = chat;
@@ -67,24 +71,65 @@ public class ChatFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_chat, container, false);
-        recyclerView = rootView.findViewById(R.id.recycler_view_messages);
+        View view = inflater.inflate(R.layout.fragment_chat, container, false);
+
+        if (!isAdded())
+            return view;
+
+        recyclerView = view.findViewById(R.id.recycler_view_messages);
+        editTextMessage = view.findViewById(R.id.edittext_chat_message);
+        btnSend = view.findViewById(R.id.btnSend);
+        btnBack = view.findViewById(R.id.btnBack);
+
+
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         messageList = new ArrayList<>();
-        adapter = new MessageListAdapter(messageList);
+        adapter = new ChatMessageListAdapter(requireActivity(), messageList);
         recyclerView.setAdapter(adapter);
+
         FirebaseAuth mAuth = FirebaseAuth.getInstance();
         userId = mAuth.getCurrentUser().getUid();
-        editTextMessage = rootView.findViewById(R.id.edittext_chat_message);
-        sendButton = rootView.findViewById(R.id.sendBTN);
-        sendButton.setOnClickListener(new View.OnClickListener() {
+
+        // Add OnClickListener to btnBack
+        btnBack.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Navigate back to previous fragment
+                getActivity().getSupportFragmentManager().popBackStack();
+            }
+        });
+        editTextMessage.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.toString().trim().isEmpty())
+                    // Text is empty
+                    btnSend.setColorFilter(ContextCompat.getColor(requireContext(), R.color.grey)); // Change color back to default
+                else
+                    // Text is not empty
+                    btnSend.setColorFilter(ContextCompat.getColor(requireContext(), R.color.orange_primary)); // Change color to active color
+
+            }
+        });
+
+        btnSend.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 sendMessage();
             }
         });
+        messageList.clear();
         fetchMessages(); // Fetch initial messages and set up real-time listener
-        return rootView;
+        return view;
     }
 
     private void fetchMessages() {
@@ -98,10 +143,16 @@ public class ChatFragment extends Fragment {
                     message.setSenderName(chat.getParticipantName(message.getSenderId()));
                     messageList.add(message);
                 }
-                Collections.sort(messageList, new Comparator<Message>() {
+                messageList.sort(new Comparator<Message>() {
                     @Override
                     public int compare(Message message1, Message message2) {
-                        return message1.getTimestamp().compareTo(message2.getTimestamp());
+                        int minuteComparison = message1.getTimestamp().compareTo(message2.getTimestamp());
+                        if (minuteComparison != 0) {
+                            return minuteComparison;
+                        } else {
+                            // If timestamps have the same minute, compare by seconds
+                            return message1.getTimestamp().getSeconds() - message2.getTimestamp().getSeconds();
+                        }
                     }
                 });
                 adapter.notifyDataSetChanged();
@@ -110,23 +161,33 @@ public class ChatFragment extends Fragment {
         }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-                Log.e(TAG, "Error fetching messages", e);
+                Log.e("DATABASE", "Error fetching messages", e);
             }
         });
 
         messagesRef.orderBy("timestamp").addSnapshotListener((queryDocumentSnapshots, e) -> {
             if (e != null) {
-                Log.e(TAG, "Listen failed", e);
+                Log.e("DATABASE", "Listen failed", e);
                 return;
             }
             for (DocumentChange dc : queryDocumentSnapshots.getDocumentChanges()) {
                 switch (dc.getType()) {
                     case ADDED:
-                        Message message = dc.getDocument().toObject(Message.class);
-                        message.setSenderName(chat.getParticipantName(message.getSenderId()));
-                        messageList.add(message);
-                        adapter.notifyItemInserted(messageList.size() - 1);
-                        recyclerView.scrollToPosition(messageList.size() - 1);
+                        // Only add the message if it's not already in the messageList
+                        Message newMessage = dc.getDocument().toObject(Message.class);
+                        boolean messageExists = false;
+                        for (Message existingMessage : messageList) {
+                            if (existingMessage.getMessageId().equals(newMessage.getMessageId())) {
+                                messageExists = true;
+                                break;
+                            }
+                        }
+                        if (!messageExists) {
+                            newMessage.setSenderName(chat.getParticipantName(newMessage.getSenderId()));
+                            messageList.add(newMessage);
+                            adapter.notifyItemInserted(messageList.size() - 1);
+                            recyclerView.scrollToPosition(messageList.size() - 1);
+                        }
                         break;
                     case MODIFIED:
                         // Handle modified message
@@ -138,6 +199,7 @@ public class ChatFragment extends Fragment {
             }
         });
     }
+
 
     private void sendMessage() {
         String messageText = editTextMessage.getText().toString().trim();
@@ -167,4 +229,5 @@ public class ChatFragment extends Fragment {
             }
         });
     }
+
 }

@@ -1,17 +1,34 @@
 package com.tourbuddy.tourbuddy.adapters;
 
-import android.content.Context;
+import android.app.Activity;
+import android.net.Uri;
+import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.tourbuddy.tourbuddy.R;
+import com.tourbuddy.tourbuddy.fragments.ChatFragment;
+import com.tourbuddy.tourbuddy.fragments.OtherProfileFragment;
+import com.tourbuddy.tourbuddy.utils.AppUtils;
 import com.tourbuddy.tourbuddy.utils.Chat;
 
 import java.text.SimpleDateFormat;
@@ -19,23 +36,23 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
 public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatListViewHolder> {
-    private List<Chat> chatList;
-//    private Context context;
-    private OnChatItemClickListener listener;
-
-    //private NamesManager namesManagerInstance;
-    private String userId;
+    List<Chat> chatList;
+    OnChatItemClickListener listener;
+    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    FirebaseStorage storage = FirebaseStorage.getInstance();
+    StorageReference storageReference = storage.getReference();
+    String userId;
+    Activity activity;
 
     // Constructor to initialize the adapter with a list of chats
-    public ChatListAdapter(List<Chat> chatList, OnChatItemClickListener listener) {
+    public ChatListAdapter(Activity activity, List<Chat> chatList, OnChatItemClickListener listener) {
         this.chatList = chatList;
         this.listener = listener;
-        //namesManagerInstance = NamesManager.getInstance();
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        this.activity = activity;
         userId = mAuth.getCurrentUser().getUid();
-//        preprocessChatData();
         sortChatListByTimestamp();
     }
 
@@ -45,34 +62,24 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
             return chat2.getTimeStamp().compareTo(chat1.getTimeStamp());
         });
     }
-
-    //private void preprocessChatData() {
-//        // Pre-process chat data here
-//        for (Chat chat : chatList) {
-//            for (String participant : chat.getParticipants()) {
-//                String userName = namesManagerInstance.addUser(participant);
-//                if (!userId.equals(participant)) {
-//                    chat.setOtherUserName(userName);
-//                }
-//            }
-//        }
-//    }
-
     public List<Chat> getChats() {
         return chatList;
     }
 
     // ViewHolder class to hold references to views in chat item layout
     public static class ChatListViewHolder extends RecyclerView.ViewHolder {
-        public TextView textViewChatTitle;
-        public TextView textViewTimeStamp;
-        public TextView textViewLastMessage;
+        public TextView textViewChatTitle, textViewTimeStamp, textViewLastMessage;
+        ImageView profilePic;
+
 
         public ChatListViewHolder(@NonNull View itemView) {
             super(itemView);
             textViewChatTitle = itemView.findViewById(R.id.textViewChatTitle);
             textViewTimeStamp = itemView.findViewById(R.id.textViewTimeStamp);
-            textViewLastMessage = itemView.findViewById(R.id.textViewLastMessage);
+            textViewLastMessage = itemView.findViewById(R.id.lastMessage);
+            profilePic = itemView.findViewById(R.id.profilePic);
+
+
         }
     }
 
@@ -80,7 +87,7 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
     @Override
     public ChatListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         // Inflate the chat item layout and create ViewHolder
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_item, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.cardview_chat_item, parent, false);
         return new ChatListViewHolder(view);
     }
 
@@ -99,12 +106,58 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         holder.textViewTimeStamp.setText(formattedDate);
         holder.textViewLastMessage.setText(chat.getLastMessage());
 
-        // Set click listener for the chat item
-        holder.itemView.setOnClickListener(v -> {
-            if (listener != null) {
-                listener.onChatItemClick(chat);
+        String otherUserId = "";
+        List<String> participants = chat.getParticipants();
+        for(String participantId : participants)
+            if(!Objects.equals(participantId, userId))
+                otherUserId = participantId;
+
+        String finalOtherUserId = otherUserId;
+        holder.profilePic.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                    OtherProfileFragment otherProfileFragment = new OtherProfileFragment();
+                    Bundle args = new Bundle();
+                    args.putString("userId", finalOtherUserId);
+                    otherProfileFragment.setArguments(args);
+
+                    // Call the non-static switchFragment method on the UserRecyclerViewAdapter instance
+                    switchFragment(otherProfileFragment);
+
             }
         });
+
+
+        storageReference.child("images/" + otherUserId + "/profilePic").getDownloadUrl()
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        Glide.with(holder.itemView.getContext())
+                                .load(R.drawable.profilepic_default)
+                                .into(holder.profilePic);
+                        Log.e("Glide", "Error loading profileImage", exception);
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        Glide.with(holder.itemView.getContext())
+                                .load(uri)
+                                .apply(RequestOptions.circleCropTransform())
+                                .into(holder.profilePic);
+                        Log.d("Glide", "Success loading profileImage");
+
+                    }
+                }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Uri> task) {
+                        // Set click listener for the chat item
+                        holder.itemView.setOnClickListener(v -> {
+                            if (listener != null) {
+                                listener.onChatItemClick(chat);
+                            }
+                        });
+                    }
+                });
     }
 
 
@@ -113,6 +166,14 @@ public class ChatListAdapter extends RecyclerView.Adapter<ChatListAdapter.ChatLi
         return chatList.size();
     }
 
+    private void switchFragment(Fragment fragment) {
+        if (activity instanceof AppCompatActivity) {
+            ((AppCompatActivity) activity).getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.frameLayout, fragment)
+                    .addToBackStack(null)
+                    .commit();
+        }
+    }
     // Interface for handling click events on chat items
     public interface OnChatItemClickListener {
         void onChatItemClick(Chat chat);

@@ -148,6 +148,11 @@
     <string name="please_provide_your_account_email_address_for_which_you_want_to_reset_your_password">Please provide your account\'s email address for which you want to reset your password</string>
     <string name="password_reset_email_sent_please_check_your_email">Password reset email sent. Please check your email.</string>
     <string name="failed_to_send_password_reset_email_please_try_again">Failed to send password reset email. Please try again.</string>
+    <string name="gender_colon">Gender:</string>
+    <string name="messages">Messages</string>
+    <string name="chats">Chats</string>
+    <string name="enter_message">Enter Message</string>
+    <string name="you_have_no_active_chats">You have no active chats</string>
 
 
 </resources>

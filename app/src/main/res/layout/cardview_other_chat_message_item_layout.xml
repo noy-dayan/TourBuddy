@@ -4,74 +4,83 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="8dp"
-    android:layout_marginTop="16dp">
+    android:layout_marginTop="8dp"
+    android:layout_marginEnd="8dp"
+    >
 
     <!-- ImageView for user profile -->
     <ImageView
-        android:id="@+id/image_gchat_profile_other"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:contentDescription="User Icon"
+        android:id="@+id/profilePicOther"
+        android:layout_width="35dp"
+        android:layout_height="35dp"
+        android:layout_marginTop="4dp"
+        android:src="@drawable/profilepic_default"
+        app:layout_constraintBottom_toBottomOf="@+id/cardMessageOther"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="@+id/cardMessageOther"
+        app:layout_constraintVertical_bias="0.0" />
 
     <!-- TextView for user name -->
     <TextView
-        android:id="@+id/text_gchat_user_other"
+        android:id="@+id/usernameOther"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="John Grady Cole"
-        android:textSize="16sp"
-        app:layout_constraintStart_toEndOf="@+id/image_gchat_profile_other"
-        app:layout_constraintTop_toTopOf="@+id/image_gchat_profile_other" />
+        android:fontFamily="@font/lexend"
+        android:text="@string/username"
+        android:textColor="@color/greyV3"
+        android:textSize="12sp"
+        app:layout_constraintStart_toStartOf="@+id/cardMessageOther"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <!-- CardView for message -->
     <androidx.cardview.widget.CardView
-        android:id="@+id/card_gchat_message_other"
+        android:id="@+id/cardMessageOther"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:cardBackgroundColor="#eef1f6"
+        android:layout_marginStart="4dp"
+        app:cardBackgroundColor="@color/grey"
         app:cardCornerRadius="12dp"
         app:cardElevation="0dp"
         app:cardPreventCornerOverlap="false"
         app:cardUseCompatPadding="true"
-        app:layout_constraintStart_toEndOf="@+id/image_gchat_profile_other"
-        app:layout_constraintTop_toBottomOf="@+id/text_gchat_user_other">
+        app:layout_constraintStart_toEndOf="@+id/profilePicOther"
+        app:layout_constraintTop_toBottomOf="@+id/usernameOther">
 
         <!-- LinearLayout for message content -->
         <LinearLayout
-            android:id="@+id/layout_gchat_container_other"
+            android:id="@+id/containerOther"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
             <!-- TextView for message text -->
             <TextView
-                android:id="@+id/text_gchat_message_other"
+                android:id="@+id/messageOther"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="8dp"
+                android:fontFamily="@font/lexend"
                 android:maxWidth="260dp"
                 android:paddingLeft="12dp"
                 android:paddingTop="8dp"
                 android:paddingRight="12dp"
                 android:text="Message"
-                android:textColor="#000000"
+                android:textColor="@color/white"
                 android:textSize="16sp" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
     <!-- TextView for message timestamp -->
     <TextView
-        android:id="@+id/text_gchat_timestamp_other"
+        android:id="@+id/timestampOther"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="8:00"
-        android:textColor="#C0C0C0"
-        android:textSize="10sp"
-        app:layout_constraintBottom_toBottomOf="@+id/card_gchat_message_other"
-        app:layout_constraintStart_toEndOf="@+id/card_gchat_message_other" />
+        android:textColor="@color/greyV3"
+        android:textSize="11sp"
+        android:fontFamily="@font/lexend"
+        app:layout_constraintBottom_toBottomOf="@+id/cardMessageOther"
+        app:layout_constraintStart_toEndOf="@+id/cardMessageOther" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

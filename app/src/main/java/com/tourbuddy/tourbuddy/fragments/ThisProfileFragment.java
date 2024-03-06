@@ -477,7 +477,7 @@ public class ThisProfileFragment extends Fragment implements TourPackageRecycler
                                                         userDocument.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
                                                             @Override
                                                             public void onSuccess(DocumentSnapshot documentSnapshot) {
-                                                                Log.d("TAG", documentSnapshot.getString("username"));
+                                                                Log.d("DATABASE", documentSnapshot.getString("username"));
                                                                 // Show the dialog
                                                                 dialog.show();
 

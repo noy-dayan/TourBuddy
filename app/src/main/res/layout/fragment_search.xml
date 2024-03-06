@@ -17,7 +17,6 @@
             android:id="@+id/mainOverlay"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginBottom="60dp"
             android:visibility="visible"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -89,7 +88,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:text="@string/gender"
+                    android:text="@string/gender_colon"
                     android:orientation="horizontal"
                     android:textSize="20sp"
                     android:textColor="@color/white"

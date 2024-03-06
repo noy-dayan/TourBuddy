@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -16,16 +17,32 @@
             android:orientation="vertical">
 
             <!-- Title TextView -->
-            <TextView
-                android:id="@+id/title_messanger_textview"
+            <RelativeLayout
+                android:id="@+id/topRelativeLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/orange_primary"
-                android:gravity="center"
-                android:text="Messages"
-                android:textColor="@color/cardview_light_background"
-                android:textSize="24sp"
-                android:textStyle="bold" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <ImageView
+                    android:id="@+id/btnBack"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:padding="14dp"
+                    android:src="@drawable/arrow_back_icon" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerInParent="true"
+                    android:fontFamily="@font/lexend"
+                    android:text="@string/messages"
+                    android:textColor="@color/white"
+                    android:textSize="22sp" />
+
+
+            </RelativeLayout>
 
             <!-- RecyclerView -->
             <androidx.recyclerview.widget.RecyclerView
@@ -38,29 +55,41 @@
             <LinearLayout
                 android:id="@+id/layout_input"
                 android:layout_width="match_parent"
-                android:layout_height="50dp"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_marginBottom="4dp"
+                android:layoutDirection="ltr"
                 android:orientation="horizontal">
 
                 <!-- EditText for typing messages -->
                 <EditText
+                    android:textDirection="locale"
                     android:id="@+id/edittext_chat_message"
                     android:layout_width="0dp"
-                    android:layout_height="37dp"
-                    android:layout_marginLeft="5dp"
+                    android:layout_height="wrap_content"
+                    android:padding="10dp"
+                    android:layout_marginStart="5dp"
                     android:layout_weight="1"
-                    android:background="@color/cardview_light_background"
-                    android:hint="Type Here"
-                    android:textColor="@color/black"
-                    android:visibility="visible" />
+                    android:background="@drawable/round_back_bg"
+                    android:layout_gravity="center_vertical"
+                    android:hint="@string/enter_message"
+                    android:fontFamily="@font/lexend"
+                    android:paddingStart="16dp"
+                    android:textColorHint="@color/grey"
+                    android:textColor="@color/white"
+                    android:visibility="visible"
+                    android:imeOptions="actionSend" />
 
                 <!-- Button to send messages -->
-                <Button
-                    android:id="@+id/sendBTN"
-                    android:layout_width="100dp"
-                    android:layout_height="match_parent"
-                    android:backgroundTint="@color/orange_primary"
-                    android:text="Send"
-                    android:textColor="@color/cardview_light_background"
+                <ImageView
+                    android:id="@+id/btnSend"
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+
+                    android:padding="8dp"
+                    app:tint="@color/grey"
+                    android:layout_gravity="center_vertical|center_horizontal"
+                    android:src="@drawable/send_icon"
                     android:visibility="visible" />
             </LinearLayout>
         </LinearLayout>

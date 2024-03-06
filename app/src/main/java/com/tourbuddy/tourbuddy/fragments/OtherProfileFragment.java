@@ -32,6 +32,7 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.CollectionReference;
@@ -39,6 +40,7 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
@@ -56,6 +58,7 @@ import com.tourbuddy.tourbuddy.adapters.TourPackageRecyclerViewAdapter;
 import com.tourbuddy.tourbuddy.decorators.EventDecorator;
 import com.tourbuddy.tourbuddy.utils.ActiveTour;
 import com.tourbuddy.tourbuddy.utils.AppUtils;
+import com.tourbuddy.tourbuddy.utils.Chat;
 import com.tourbuddy.tourbuddy.utils.DataCache;
 
 import org.threeten.bp.LocalDate;
@@ -119,6 +122,7 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
     MaterialCalendarView calendarView;
     ConstraintLayout totalRatingLayout;
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -181,6 +185,42 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
         userDataLoadingOverlay.setVisibility(View.VISIBLE);
         calendarLoadingOverlay.setVisibility(View.VISIBLE);
 
+        btnDM.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Code to be executed when the button is clicked
+                // For example, you can call the function to create a new chat here
+                enterChat(thisUserId, otherUserId, new OnChatCreatedListener() {
+                    @Override
+                    public void onChatCreated(Chat chat) {
+                        // Chat created successfully, perform actions with chatId
+                        Log.d("DATABASE", "Chat created successfully with ID: " + chat.getChatId());
+                        // Replace fragment with ChatFragment
+                        if (getActivity() != null) {
+                            AppUtils.switchFragment(OtherProfileFragment.this, ChatFragment.newInstance(chat));
+                        }
+                    }
+
+                    @Override
+                    public void onChatExists(Chat chat) {
+                        // Error occurred while creating chat, handle failure
+                        if (getActivity() != null) {
+                            getActivity().getSupportFragmentManager().beginTransaction()
+                                    .replace(R.id.frameLayout, ChatFragment.newInstance(chat))
+                                    .addToBackStack(null)
+                                    .commit();
+                        }
+                    }
+
+                    @Override
+                    public void onChatCreateFailed(Exception e) {
+                        // Error occurred while creating chat, handle failure
+                        Log.e("DATABASE", "Error creating chat", e);
+                    }
+                });
+            }
+        });
+
 
         DocumentReference otherUserDocumentRef = db.collection("users").document(otherUserId);
 
@@ -218,8 +258,11 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                             public void onSuccess(DocumentSnapshot thisUserdocumentSnapshot) {
                                 if (isAdded() && thisUserdocumentSnapshot.exists()) {
                                     // Check if the user type exists in the Firestore document
-                                    if (thisUserdocumentSnapshot.contains("type"))
+                                    if (thisUserdocumentSnapshot.contains("type")) {
                                         thisUserType = thisUserdocumentSnapshot.getString("type");
+                                        if (Objects.equals(thisUserType, "Tourist"))
+                                            btnAddReview.setVisibility(View.GONE);
+                                    }
                                 }
                             }
                         }).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -328,10 +371,9 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
                                                                                                         if(otherUserDocumentSnapshot.contains("totalRating"))
                                                                                                             currentTotalRating = otherUserDocumentSnapshot.getLong("totalRating");
 
-                                                                                                        if(oldRating[0] != -1) {
-                                                                                                            Log.d("TAG", String.valueOf(oldRating[0]));
+                                                                                                        if(oldRating[0] != -1)
                                                                                                             currentTotalRating -= oldRating[0];
-                                                                                                        }
+
                                                                                                         currentTotalRating+= rating[0];
 
                                                                                                         Map<String, Object> totalRating = new HashMap<>();
@@ -401,6 +443,7 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
 
         return view;
     }
+
 
     private void tourGuide_reviewsManager() {
         CollectionReference collectionReference = db.collection("users").document(otherUserId).collection("reviews");
@@ -1292,4 +1335,109 @@ public class OtherProfileFragment extends Fragment implements TourPackageRecycle
     public void onLoadComplete() {
 
     }
+
+    public void enterChat(String userId1, String userId2, final OnChatCreatedListener listener) {
+        // Check if userId1 is in any chat
+        db.collection("chats")
+                .whereArrayContains("participants", userId1)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots1 -> {
+                    // Check if userId2 is in any chat
+                    db.collection("chats")
+                            .whereArrayContains("participants", userId2)
+                            .get()
+                            .addOnSuccessListener(queryDocumentSnapshots2 -> {
+                                // Check if userId1 and userId2 are both in the same chat
+                                for (DocumentSnapshot doc1 : queryDocumentSnapshots1.getDocuments()) {
+                                    String chatId1 = doc1.getId();
+                                    for (DocumentSnapshot doc2 : queryDocumentSnapshots2.getDocuments()) {
+                                        String chatId2 = doc2.getId();
+                                        if (chatId1.equals(chatId2)) {
+                                            // Chat already exists, retrieve the existing chat and notify listener
+                                            Chat existingChat = doc1.toObject(Chat.class);
+                                            db.collection("users").document(thisUserId).get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                                                @Override
+                                                public void onSuccess(DocumentSnapshot documentSnapshot) {
+                                                    if(documentSnapshot.contains("username")){
+                                                        existingChat.addParticipantName(thisUserId, documentSnapshot.getString("username"));
+                                                        existingChat.addParticipantName(otherUserId, username.getText().toString());
+
+                                                        listener.onChatExists(existingChat);
+                                                    }
+                                                }
+                                            });
+
+                                            return; // Exit method
+                                        }
+                                    }
+                                }
+                                // If userId1 and userId2 are not in the same chat, create a new chat
+                                createNewChatDocument(userId1, userId2, listener);
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e("DATABASE", "Error checking chat existence for userId2", e);
+                                listener.onChatCreateFailed(e);
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DATABASE", "Error checking chat existence for userId1", e);
+                    listener.onChatCreateFailed(e);
+                });
+    }
+
+    private void createNewChatDocument(String userId1, String userId2, final OnChatCreatedListener listener) {
+        // Create a new chat document in Firestore
+        Map<String, Object> chatData = new HashMap<>();
+        List<String> participants = new ArrayList<>();
+        participants.add(userId1);
+        participants.add(userId2);
+        Timestamp timeStamp = Timestamp.now();
+        String lastMessage = "null";
+        String lastMessageId = "null";
+
+        chatData.put("participants", participants);
+        chatData.put("timeStamp", timeStamp);
+        chatData.put("lastMessage", lastMessage);
+        chatData.put("lastMessageId", lastMessageId);
+
+        db.collection("chats")
+                .add(chatData)
+                .addOnSuccessListener(documentReference -> {
+                    String chatId = documentReference.getId();
+
+                    // Retrieve the newly created chat document from Firestore
+                    db.collection("chats").document(chatId)
+                            .get()
+                            .addOnSuccessListener(documentSnapshot -> {
+                                // Get the data from the Firestore document
+                                Chat chat = documentSnapshot.toObject(Chat.class);
+
+                                // Notify listener about chat creation
+                                listener.onChatCreated(chat);
+
+
+                            })
+                            .addOnFailureListener(e -> {
+                                Log.e("DATABASE", "Error fetching chat document", e);
+                                listener.onChatCreateFailed(e);
+                            });
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("DATABASE", "Error creating chat", e);
+                    listener.onChatCreateFailed(e);
+                });
+    }
+
+
+
+
+    public interface OnChatCreatedListener {
+        void onChatCreated(Chat chat);
+        void onChatExists(Chat chat);
+        void onChatCreateFailed(Exception e);
+
+
+
+    }
+
 }
